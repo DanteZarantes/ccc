@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        nav {
+            display: flex;
+            justify-content: space-between; /* Элементы слева и справа */
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+        nav a {
+            text-decoration: none;
+            color: white;
+            margin-left: 15px; /* Добавляет отступ между кнопками */
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+        .nav-right {
+            display: flex;
+            margin-left: auto; /* Перемещает элементы вправо */
+            align-items: center;
+        }
+        button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <!-- Левая часть: кнопка "Home" -->
+        <div class="nav-left">
+            <a href="{% url 'task_list' %}">Home</a>
+        </div>
+        <!-- Правая часть: кнопки -->
+        <div class="nav-right">
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Log In</a>
+                <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+</body>
+</html>

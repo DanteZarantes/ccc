@@ -1,0 +1,7 @@
+{% include 'header.html' %}
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="hidden" name="next" value="{% url 'task_list' %}">
+    <button type="submit">Log In</button>
+</form>
