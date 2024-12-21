@@ -1,10 +1,14 @@
 from django import forms
 from .models import CustomUser, Task
 
+from django import forms
+from .models import Task
+
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'completed']  # Поля формы
+        fields = ['title', 'completed', 'parent']
+
 
 
 class CustomUserCreationForm(forms.ModelForm):

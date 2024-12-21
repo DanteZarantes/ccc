@@ -8,7 +8,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
-
+from django.shortcuts import render, redirect
 from .models import Task
 from .tokens import account_activation_token
 from django.contrib.auth.decorators import login_required
@@ -76,21 +76,23 @@ def logout_view(request):
     return redirect('login')
 
 
+
+
 @login_required
 def task_list(request):
-    tasks = Task.objects.filter(user=request.user)  # Фильтрация задач для текущего пользователя
-
-    if request.method == 'POST':
+    if request.method == "POST":
         form = TaskForm(request.POST)
         if form.is_valid():
-            task = form.save(commit=False)
-            task.user = request.user  # Привязка задачи к пользователю
-            task.save()
+            task = form.save(commit=False)  # Не сохраняем сразу
+            task.user = request.user        # Устанавливаем текущего пользователя
+            task.save()                     # Сохраняем задачу
             return redirect('task_list')
     else:
         form = TaskForm()
 
+    tasks = Task.objects.filter(user=request.user, parent=None)  # Загружаем задачи только текущего пользователя
     return render(request, 'task_list.html', {'tasks': tasks, 'form': form})
+
 
 def delete_task(request, task_id):
     task = Task.objects.get(id=task_id, user=request.user)  # Убедимся, что задача принадлежит пользователю
@@ -100,4 +102,34 @@ def logout_view(request):
     logout(request)
     return redirect('task_list')
 
+from django.shortcuts import get_object_or_404, redirect
 
+from django.shortcuts import get_object_or_404, redirect
+from .models import Task
+
+
+def toggle_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    if request.method == "POST":
+        # Изменяем статус текущей задачи
+        task.completed = not task.completed
+        task.save()
+
+        # Проверяем статус всех родительских задач
+        if task.parent:
+            task.parent.check_completion()
+    return redirect('task_list')
+
+
+
+def add_subtask(request, parent_id):
+    parent_task = get_object_or_404(Task, id=parent_id, user=request.user)
+    if request.method == "POST":
+        title = request.POST.get("title")
+        if title:
+            Task.objects.create(
+                title=title,
+                parent=parent_task,
+                user=request.user,
+            )
+    return redirect('task_list')

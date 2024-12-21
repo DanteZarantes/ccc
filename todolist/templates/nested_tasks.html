@@ -1,0 +1,26 @@
+{% for task in tasks %}
+    <li class="task-container {% if task.completed %}completed{% endif %}">
+        <div class="task-content">
+            <form method="POST" action="{% url 'toggle_task' task.id %}" style="margin: 0;">
+                {% csrf_token %}
+                <input type="checkbox" name="completed" {% if task.completed %}checked{% endif %} onchange="this.form.submit()">
+            </form>
+            <span>{{ task.get_numbering }} - {{ task.title }}</span>
+        </div>
+        <a href="{% url 'delete_task' task.id %}">
+            <button>Delete</button>
+        </a>
+
+        <!-- Кнопка для добавления подзадачи -->
+        <form method="POST" action="{% url 'add_subtask' task.id %}">
+            {% csrf_token %}
+            <input type="text" name="title" placeholder="Add Subtask">
+            <button type="submit">Add</button>
+        </form>
+
+        <!-- Вложенные подзадачи -->
+        <ul>
+            {% include 'nested_tasks.html' with tasks=task.subtasks.all %}
+        </ul>
+    </li>
+{% endfor %}

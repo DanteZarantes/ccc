@@ -1,5 +1,3 @@
-{% include 'header.html' %}  <!-- Подключаем хэдер -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,23 +7,33 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
             background-color: #f4f4f4;
             color: #333;
         }
         h1 {
             text-align: center;
-            color: #333;
         }
-        form {
-            margin-bottom: 20px;
-            text-align: center;
+        ul {
+            list-style: none;
+            padding: 0;
         }
-        form input, form button {
-            padding: 10px;
-            margin: 5px;
-            font-size: 16px;
+        li {
+            padding: 5px 10px;
+        }
+        li.completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+        .task-container {
+            display: flex;
+            align-items: center; /* Выравниваем текст и кнопку по вертикали */
+            gap: 10px; /* Расстояние между текстом и кнопкой */
+            padding: 5px 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .task-content {
+            display: flex;
+            align-items: center; /* Текст задачи и кнопка выровнены по вертикали */
         }
         button {
             background-color: red;
@@ -37,24 +45,8 @@
         button:hover {
             background-color: darkred;
         }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        li.completed {
-            text-decoration: line-through;
-            color: #888;
-        }
-        a {
-            text-decoration: none;
-            color: white;
+        .nested {
+            margin-left: 20px;
         }
     </style>
 </head>
@@ -64,21 +56,33 @@
     <!-- Форма для добавления задачи -->
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}  <!-- Отображение формы в виде полей -->
+        <input type="text" name="title" placeholder="Task Title"> <!-- Поле для названия задачи -->
         <button type="submit">Add Task</button>
     </form>
 
     <!-- Список задач -->
     <ul>
         {% for task in tasks %}
-            <li class="{% if task.completed %}completed{% endif %}">
-                <span>{{ task.title }} {% if task.completed %}✔{% endif %}</span>
-                <a href="{% url 'delete_task' task.id %}">
-                    <button>Delete</button>
-                </a>
+            <li class="task-container">
+                <div class="task-content">
+                    <span>{{ task.get_numbering }} - {{ task.title }}</span>
+                    <a href="{% url 'delete_task' task.id %}">
+                        <button>Delete</button>
+                    </a>
+                </div>
+
+                <!-- Кнопка для добавления подзадачи -->
+                <form method="POST" action="{% url 'add_subtask' task.id %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="text" name="title" placeholder="Add Subtask">
+                    <button type="submit">Add</button>
+                </form>
+
+                <!-- Вложенные подзадачи -->
+                <ul>
+                    {% include 'nested_tasks.html' with tasks=task.subtasks.all %}
+                </ul>
             </li>
-        {% empty %}
-            <li>No tasks yet. Add one above!</li>
         {% endfor %}
     </ul>
 </body>
