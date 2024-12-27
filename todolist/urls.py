@@ -12,4 +12,7 @@ urlpatterns = [
     path('', views.task_list, name='task_list'),
     path('toggle/<int:task_id>/', views.toggle_task, name='toggle_task'),
     path('add_subtask/<int:parent_id>/', views.add_subtask, name='add_subtask'),
+    path('register/', views.register, name='register'),
+    path('login/', views.login_view, name='login'),  # Предположительно, уже существует
+    path('', views.home, name='home'),  # Домашняя страница
 ]

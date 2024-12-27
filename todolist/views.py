@@ -22,27 +22,42 @@ def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
+            # Check if the username or email already exists
+            email = form.cleaned_data.get('email')
+            username = form.cleaned_data.get('username')
+
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'Этот email уже используется. Попробуйте другой.')
+                return render(request, 'register.html', {'form': form})
+
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'Этот логин уже используется. Попробуйте другой.')
+                return render(request, 'register.html', {'form': form})
+
+            # Save the user
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
-            user.is_active = False  # Аккаунт будет активирован после подтверждения по почте
             user.save()
 
-            # Отправка email для подтверждения
-            current_site = get_current_site(request)
-            subject = 'Activate your account'
-            message = render_to_string('activation_email.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': account_activation_token.make_token(user),
-            })
-            email = EmailMessage(subject, message, to=[user.email])
-            email.send()
+            # Automatically log the user in after registration
+            login(request, user)
 
-            return HttpResponse('Please confirm your email to complete registration.')
+            messages.success(request, 'Регистрация прошла успешно! Добро пожаловать!')
+            return redirect('home')
+        else:
+            # If form is invalid, return errors
+            messages.error(request, 'Пожалуйста, исправьте ошибки в форме.')
+
     else:
         form = CustomUserCreationForm()
+
     return render(request, 'register.html', {'form': form})
+
+from django.shortcuts import render
+
+def home(request):
+    return render(request, 'home.html', {'message': 'Добро пожаловать на домашнюю страницу!'})
+
 
 def activate(request, uidb64, token):
     try:
