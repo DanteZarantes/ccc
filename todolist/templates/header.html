@@ -5,57 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         nav {
-            display: flex;
-            justify-content: space-between; /* Элементы слева и справа */
-            align-items: center;
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #007bff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         nav a {
             text-decoration: none;
             color: white;
-            margin-left: 15px; /* Добавляет отступ между кнопками */
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
         }
         nav a:hover {
-            text-decoration: underline;
-        }
-        .nav-left {
-            display: flex;
-            align-items: center;
-        }
-        .nav-right {
-            display: flex;
-            margin-left: auto; /* Перемещает элементы вправо */
-            align-items: center;
-        }
-        button {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: darkred;
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <nav>
-        <!-- Левая часть: кнопка "Home" -->
-        <div class="nav-left">
-            <a href="{% url 'task_list' %}">Home</a>
-        </div>
-        <!-- Правая часть: кнопки -->
-        <div class="nav-right">
-            {% if user.is_authenticated %}
-                <a href="{% url 'logout' %}">Logout</a>
-            {% else %}
-                <a href="{% url 'login' %}">Log In</a>
-                <a href="{% url 'register' %}">Register</a>
-            {% endif %}
-        </div>
+        <!-- Убедитесь, что "homepage" используется как имя URL -->
+        <a href="{% url 'homepage' %}">Home</a>
     </nav>
 </body>
 </html>

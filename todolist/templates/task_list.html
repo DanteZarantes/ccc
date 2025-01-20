@@ -9,6 +9,8 @@
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
         h1 {
             text-align: center;
@@ -26,14 +28,14 @@
         }
         .task-container {
             display: flex;
-            align-items: center; /* Выравниваем текст и кнопку по вертикали */
-            gap: 10px; /* Расстояние между текстом и кнопкой */
+            align-items: center;
+            gap: 10px;
             padding: 5px 10px;
             border-bottom: 1px solid #ddd;
         }
         .task-content {
             display: flex;
-            align-items: center; /* Текст задачи и кнопка выровнены по вертикали */
+            align-items: center;
         }
         button {
             background-color: red;
@@ -48,15 +50,35 @@
         .nested {
             margin-left: 20px;
         }
+        .home-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+        .home-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
+    <!-- Кнопка Home -->
+    <a href="{% url 'homepage' %}" class="home-button">Home</a>
+
     <h1>To-Do List</h1>
 
     <!-- Форма для добавления задачи -->
     <form method="POST">
         {% csrf_token %}
-        <input type="text" name="title" placeholder="Task Title"> <!-- Поле для названия задачи -->
+        <input type="text" name="title" placeholder="Task Title">
         <button type="submit">Add Task</button>
     </form>
 

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 
+
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)  # Уникальный email для всех пользователей
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # Дополнительное поле
@@ -10,9 +11,6 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
-
-from django.db import models
-from django.conf import settings
 
 class Task(models.Model):
     title = models.CharField(max_length=200)
@@ -27,7 +25,7 @@ class Task(models.Model):
         return self.title
 
     def get_numbering(self):
-        """Генерация иерархической нумерации задачи"""
+        """Генерация иерархической нумерации задачи."""
         numbering = []
         task = self
         while task:
@@ -41,7 +39,7 @@ class Task(models.Model):
         return '.'.join(map(str, numbering[::-1]))
 
     def check_completion(self):
-        """Проверяет, выполнены ли все подзадачи (на всех уровнях), и обновляет статус задачи"""
+        """Проверяет, выполнены ли все подзадачи (на всех уровнях), и обновляет статус задачи."""
         if self.subtasks.exists():
             # Если у задачи есть подзадачи, проверяем, все ли они выполнены
             self.completed = all(subtask.completed for subtask in self.subtasks.all())
@@ -49,5 +47,3 @@ class Task(models.Model):
         # Если у текущей задачи есть родительская задача, проверяем её статус
         if self.parent:
             self.parent.check_completion()
-
-
