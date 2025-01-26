@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to To-Do List App</title>
     <style>
-        /* Основные стили */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -17,6 +16,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow-x: hidden; /* Убирает горизонтальный скроллинг */
         }
 
         h1 {
@@ -29,53 +29,33 @@
             margin-bottom: 2rem;
         }
 
-        .button-container {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        a {
+        .start-button {
             text-decoration: none;
-            padding: 15px 30px;
-            font-size: 1rem;
+            padding: 15px 40px;
+            font-size: 1.2rem;
             color: white;
             background-color: #4CAF50;
             border-radius: 25px;
             transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        a:hover {
+        .start-button:hover {
             background-color: #45a049;
             transform: scale(1.1);
-        }
-
-        a:nth-child(2) {
-            background-color: #ff5722;
-        }
-
-        a:nth-child(2):hover {
-            background-color: #e64a19;
-        }
-
-        a:nth-child(3) {
-            background-color: #2196F3;
-        }
-
-        a:nth-child(3):hover {
-            background-color: #1976D2;
         }
     </style>
 </head>
 <body>
+    {% include 'header.html' %}
+
     <div>
         <h1>Welcome to the To-Do List App</h1>
         <p>Manage your tasks efficiently and stay organized!</p>
-        <div class="button-container">
-            <a href="{% url 'login' %}">Log In</a>
-            <a href="{% url 'register' %}">Register</a>
-            <a href="{% url 'task_list' %}">View To-Do List</a>
-        </div>
+        <!-- Кнопка Start -->
+        <a href="{% if user.is_authenticated %}{% url 'task_list' %}{% else %}{% url 'register' %}{% endif %}" class="start-button">
+            Start
+        </a>
     </div>
 </body>
 </html>

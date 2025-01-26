@@ -7,13 +7,15 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
             margin: 0;
             padding: 0;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            text-align: center;
         }
         h1 {
             text-align: center;
+            margin-top: 20px;
         }
         ul {
             list-style: none;
@@ -32,6 +34,11 @@
             gap: 10px;
             padding: 5px 10px;
             border-bottom: 1px solid #ddd;
+            background-color: #fff;
+            color: #333;
+            border-radius: 8px;
+            margin: 5px 10px;
+            justify-content: space-between;
         }
         .task-content {
             display: flex;
@@ -42,7 +49,9 @@
             color: white;
             border: none;
             padding: 5px 10px;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: darkred;
@@ -50,28 +59,21 @@
         .nested {
             margin-left: 20px;
         }
-        .home-button {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            font-size: 16px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s ease, transform 0.2s;
+        form {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
         }
-        .home-button:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
+        form input {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <!-- Кнопка Home -->
-    <a href="{% url 'homepage' %}" class="home-button">Home</a>
+    {% include 'header.html' %}
 
     <h1>To-Do List</h1>
 
@@ -83,29 +85,33 @@
     </form>
 
     <!-- Список задач -->
-    <ul>
-        {% for task in tasks %}
-            <li class="task-container">
-                <div class="task-content">
-                    <span>{{ task.get_numbering }} - {{ task.title }}</span>
-                    <a href="{% url 'delete_task' task.id %}">
-                        <button>Delete</button>
-                    </a>
-                </div>
+    {% if tasks.exists %}
+        <ul>
+            {% for task in tasks %}
+                <li class="task-container">
+                    <div class="task-content">
+                        <span>{{ task.get_numbering }} - {{ task.title }}</span>
+                        <a href="{% url 'delete_task' task.id %}">
+                            <button>Delete</button>
+                        </a>
+                    </div>
 
-                <!-- Кнопка для добавления подзадачи -->
-                <form method="POST" action="{% url 'add_subtask' task.id %}" style="margin: 0;">
-                    {% csrf_token %}
-                    <input type="text" name="title" placeholder="Add Subtask">
-                    <button type="submit">Add</button>
-                </form>
+                    <!-- Кнопка для добавления подзадачи -->
+                    <form method="POST" action="{% url 'add_subtask' task.id %}">
+                        {% csrf_token %}
+                        <input type="text" name="title" placeholder="Add Subtask">
+                        <button type="submit">Add</button>
+                    </form>
 
-                <!-- Вложенные подзадачи -->
-                <ul>
-                    {% include 'nested_tasks.html' with tasks=task.subtasks.all %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
+                    <!-- Вложенные подзадачи -->
+                    <ul>
+                        {% include 'nested_tasks.html' with tasks=task.subtasks.all %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No tasks available. Add a new task to get started!</p>
+    {% endif %}
 </body>
 </html>

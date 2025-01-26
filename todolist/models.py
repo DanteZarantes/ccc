@@ -7,6 +7,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)  # Уникальный email для всех пользователей
     phone_number = models.CharField(max_length=15, blank=True, null=True)  # Дополнительное поле
     date_of_birth = models.DateField(blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png', blank=True)  # Поле для аватара
 
     def __str__(self):
         return self.username
@@ -41,9 +42,7 @@ class Task(models.Model):
     def check_completion(self):
         """Проверяет, выполнены ли все подзадачи (на всех уровнях), и обновляет статус задачи."""
         if self.subtasks.exists():
-            # Если у задачи есть подзадачи, проверяем, все ли они выполнены
             self.completed = all(subtask.completed for subtask in self.subtasks.all())
             self.save()
-        # Если у текущей задачи есть родительская задача, проверяем её статус
         if self.parent:
             self.parent.check_completion()

@@ -8,7 +8,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.http import HttpResponse
 from .models import Task
 from .tokens import account_activation_token
-from .forms import CustomUserCreationForm, TaskForm
+from .forms import CustomUserCreationForm, TaskForm, ProfileForm
 
 
 # Главная страница
@@ -136,3 +136,17 @@ def add_subtask(request, parent_id):
                 user=request.user,
             )
     return redirect('task_list')
+
+
+@login_required
+def profile_edit(request):
+    """Редактирование профиля пользователя."""
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Профиль успешно обновлен.')
+            return redirect('task_list')
+    else:
+        form = ProfileForm(instance=request.user)
+    return render(request, 'profile_edit.html', {'form': form})

@@ -1,14 +1,11 @@
 from django import forms
 from .models import CustomUser, Task
 
-from django import forms
-from .models import Task
 
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['title', 'completed', 'parent']
-
 
 
 class CustomUserCreationForm(forms.ModelForm):
@@ -28,3 +25,8 @@ class CustomUserCreationForm(forms.ModelForm):
             raise forms.ValidationError("Passwords do not match")
 
 
+class ProfileForm(forms.ModelForm):
+    """Форма редактирования профиля пользователя."""
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'avatar']
