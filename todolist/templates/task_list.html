@@ -22,23 +22,41 @@
             padding: 0;
         }
         li {
-            padding: 5px 10px;
+            padding: 10px;
+            margin-left: 20px;
+            background-color: #f9f9f9;
+            margin-top: 10px;
+            position: relative;
+            transition: all 0.3s ease;
         }
+        /* Выполненные задачи */
         li.completed {
-            text-decoration: line-through;
-            color: gray;
+            background-color: #64dd17; /* Зеленый фон для выполненных задач */
+            text-decoration: line-through; /* Зачеркивание текста */
+
         }
         .task-container {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 5px 10px;
-            border-bottom: 1px solid #ddd;
+            padding: 10px;
             background-color: #fff;
             color: #333;
             border-radius: 8px;
-            margin: 5px 10px;
+            margin-bottom: 10px;
             justify-content: space-between;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .task-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -10px;
+            width: 10px;
+            height: 100%;
+            background: #2575fc;
+            display: block;
         }
         .task-content {
             display: flex;
@@ -57,7 +75,17 @@
             background-color: darkred;
         }
         .nested {
+            margin-left: 30px;
+            margin-top: 10px;
+        }
+        .nested .task-container {
+            background-color: #e6f0ff;
             margin-left: 20px;
+            border-left: 3px solid #42aaff;
+            padding-left: 10px;
+        }
+        .nested .task-container::before {
+            display: none;
         }
         form {
             display: flex;
@@ -70,6 +98,14 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+        .subtask-form {
+            display: flex;
+            margin-top: 10px;
+            justify-content: space-between;
+        }
+        .subtask-form input {
+            width: 80%;
+        }
     </style>
 </head>
 <body>
@@ -77,10 +113,10 @@
 
     <h1>To-Do List</h1>
 
-    <!-- Форма для добавления задачи -->
+    <!-- Форма для добавления новой задачи -->
     <form method="POST">
         {% csrf_token %}
-        <input type="text" name="title" placeholder="Task Title">
+        <input type="text" name="title" placeholder="Task Title" required>
         <button type="submit">Add Task</button>
     </form>
 
@@ -88,23 +124,23 @@
     {% if tasks.exists %}
         <ul>
             {% for task in tasks %}
-                <li class="task-container">
+                <li class="task-container {% if task.completed %}completed{% endif %}">
                     <div class="task-content">
-                        <span>{{ task.get_numbering }} - {{ task.title }}</span>
+                        <span>{{ task.title }}</span>
                         <a href="{% url 'delete_task' task.id %}">
                             <button>Delete</button>
                         </a>
                     </div>
 
-                    <!-- Кнопка для добавления подзадачи -->
+                    <!-- Форма для добавления подзадачи -->
                     <form method="POST" action="{% url 'add_subtask' task.id %}">
                         {% csrf_token %}
-                        <input type="text" name="title" placeholder="Add Subtask">
+                        <input type="text" name="title" placeholder="Add Subtask" required>
                         <button type="submit">Add</button>
                     </form>
 
-                    <!-- Вложенные подзадачи -->
-                    <ul>
+                    <!-- Рекурсивное отображение подзадач -->
+                    <ul class="nested">
                         {% include 'nested_tasks.html' with tasks=task.subtasks.all %}
                     </ul>
                 </li>

@@ -101,12 +101,15 @@ def task_list(request):
     else:
         form = TaskForm()
 
-    tasks = Task.objects.filter(user=request.user, parent=None)
+    # Сортировка задач по статусу: сначала невыполненные, потом выполненные
+    tasks = Task.objects.filter(user=request.user, parent=None).order_by('completed', 'created_at')
+
     return render(request, 'task_list.html', {'tasks': tasks, 'form': form})
 
-
+# Функция для удаления задачи
+@login_required
 def delete_task(request, task_id):
-    task = get_object_or_404(Task, id=task_id, user=request.user)  # Используем get_object_or_404
+    task = Task.objects.get(id=task_id, user=request.user)
     task.delete()
     return redirect('task_list')
 

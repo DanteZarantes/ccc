@@ -11,16 +11,18 @@
             <button>Delete</button>
         </a>
 
-        <!-- Кнопка для добавления подзадачи -->
-        <form method="POST" action="{% url 'add_subtask' task.id %}">
+        <!-- Add Subtask Form -->
+        <form method="POST" action="{% url 'add_subtask' task.id %}" class="subtask-form">
             {% csrf_token %}
-            <input type="text" name="title" placeholder="Add Subtask">
+            <input type="text" name="title" placeholder="Add Subtask" required>
             <button type="submit">Add</button>
         </form>
 
-        <!-- Вложенные подзадачи -->
-        <ul>
-            {% include 'nested_tasks.html' with tasks=task.subtasks.all %}
-        </ul>
+        <!-- Recursive rendering of subtasks -->
+        {% if task.subtasks.exists %}
+            <ul class="nested">
+                {% include 'nested_tasks.html' with tasks=task.subtasks.all %}
+            </ul>
+        {% endif %}
     </li>
 {% endfor %}

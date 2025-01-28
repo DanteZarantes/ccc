@@ -1,16 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-
-
-class CustomUser(AbstractUser):
-    email = models.EmailField(unique=True)  # Уникальный email для всех пользователей
-    phone_number = models.CharField(max_length=15, blank=True, null=True)  # Дополнительное поле
-    date_of_birth = models.DateField(blank=True, null=True)
-    avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png', blank=True)  # Поле для аватара
-
-    def __str__(self):
-        return self.username
+from django.utils import timezone
+from django.contrib.auth.models import AbstractUser
 
 
 class Task(models.Model):
@@ -26,7 +17,7 @@ class Task(models.Model):
         return self.title
 
     def get_numbering(self):
-        """Генерация иерархической нумерации задачи."""
+        """Generates hierarchical numbering for tasks."""
         numbering = []
         task = self
         while task:
@@ -37,12 +28,21 @@ class Task(models.Model):
             position = list(siblings).index(task) + 1
             numbering.append(position)
             task = task.parent
-        return '.'.join(map(str, numbering[::-1]))
+        return '.'.join(map(str, numbering[::-1]))  # Reverses numbering
 
     def check_completion(self):
-        """Проверяет, выполнены ли все подзадачи (на всех уровнях), и обновляет статус задачи."""
+        """Checks if all subtasks are completed and updates the task status."""
         if self.subtasks.exists():
             self.completed = all(subtask.completed for subtask in self.subtasks.all())
             self.save()
         if self.parent:
             self.parent.check_completion()
+
+class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png', blank=True)
+
+    def __str__(self):
+        return self.username
