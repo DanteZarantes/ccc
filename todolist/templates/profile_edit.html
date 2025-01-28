@@ -9,48 +9,44 @@
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #6a11cb, #2575fc); /* Gradient background */
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
             color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
         }
-
         .profile-edit-container {
             background-color: #fff;
             color: #333;
-            width: 450px; /* Уменьшенная ширина для компактности */
+            width: 450px;
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             text-align: center;
         }
-
         .profile-edit-container h1 {
             font-size: 2rem;
             margin-bottom: 20px;
             color: #6a11cb;
         }
-
         .profile-edit-container img {
-            width: 90px; /* Уменьшенный аватар */
+            width: 90px;
             height: 90px;
             border-radius: 50%;
             border: 3px solid #6a11cb;
             margin-bottom: 20px;
             object-fit: cover;
         }
-
         .profile-edit-container label {
             display: block;
             margin: 10px 0 5px;
             font-weight: bold;
             text-align: left;
         }
-
         .profile-edit-container input[type="text"],
-        .profile-edit-container input[type="email"] {
+        .profile-edit-container input[type="email"],
+        .profile-edit-container input[type="password"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -59,30 +55,25 @@
             font-size: 1rem;
             transition: all 0.3s ease;
         }
-
         .profile-edit-container input:focus {
             border-color: #6a11cb;
             box-shadow: 0 0 8px rgba(106, 17, 203, 0.5);
         }
-
         .custom-file-upload {
+            text-align: left;
             margin-bottom: 15px;
-            text-align: center;
         }
-
         .file-label {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
         .file-label input[type="file"] {
-            display: none; /* Hide default file input */
+            display: none;
         }
-
         .file-label button {
-            padding: 8px 20px; /* Уменьшенный размер */
-            font-size: 0.9rem; /* Уменьшенный текст */
+            padding: 10px 20px;
+            font-size: 0.9rem;
             font-weight: bold;
             color: white;
             background: linear-gradient(135deg, #6a11cb, #2575fc);
@@ -92,23 +83,20 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
-
         .file-label button:hover {
             background: linear-gradient(135deg, #2575fc, #6a11cb);
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
-
         .buttons-container {
             display: flex;
             flex-direction: column;
-            gap: 10px; /* Промежуток между кнопками */
+            gap: 10px;
             margin-top: 15px;
         }
-
         .buttons-container button,
         .buttons-container a {
-            padding: 12px 30px; /* Универсальный размер кнопок */
+            padding: 12px 30px;
             font-size: 0.95rem;
             font-weight: bold;
             text-decoration: none;
@@ -120,7 +108,6 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
-
         .buttons-container button:hover,
         .buttons-container a:hover {
             background: linear-gradient(135deg, #2575fc, #6a11cb);
@@ -132,9 +119,7 @@
 <body>
     <div class="profile-edit-container">
         <h1>Edit Profile</h1>
-        <!-- Preview Avatar -->
         <img id="avatar-preview" src="{{ user.avatar.url }}" alt="Current Avatar">
-
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <label for="username">Username</label>
@@ -143,14 +128,19 @@
             <label for="email">Email</label>
             <input type="email" id="email" name="email" value="{{ user.email }}" required>
 
-            <!-- Custom file upload -->
+            <label for="avatar">Avatar</label>
             <div class="custom-file-upload">
-                <label for="avatar">Avatar</label>
                 <label class="file-label">
                     <input type="file" id="avatar" name="avatar" onchange="updateFileName(this)">
                     <button type="button" onclick="document.getElementById('avatar').click()">Choose File</button>
                 </label>
             </div>
+
+            <label for="new_password">New Password</label>
+            <input type="password" id="new_password" name="new_password" placeholder="Enter new password">
+
+            <label for="confirm_password">Confirm New Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
 
             <div class="buttons-container">
                 <button type="submit">Save Changes</button>

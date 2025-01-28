@@ -10,5 +10,6 @@ urlpatterns = [
     path('delete/<int:task_id>/', views.delete_task, name='delete_task'),  # Удаление задачи
     path('toggle/<int:task_id>/', views.toggle_task, name='toggle_task'),  # Переключение статуса задачи
     path('add_subtask/<int:parent_id>/', views.add_subtask, name='add_subtask'),  # Добавление подзадачи
-    path('profile/edit/', views.profile_edit, name='profile_edit'),  # Редактирование профиля (новый маршрут)
+    path('profile/edit/', views.profile_edit, name='profile_edit'),  # Редактирование профиля
+    path('tasks/json/', views.get_tasks_json, name='get_tasks_json'),  # JSON-структура задач для визуализации дерева
 ]
