@@ -14,44 +14,41 @@
             background: linear-gradient(135deg, #6a11cb, #2575fc);
             color: #fff;
             text-align: center;
-            height: 100vh;
-            overflow: auto; /* Включаем прокрутку страницы */
+            overflow: auto;
         }
 
         .tree-container {
             width: 100%;
-            height: calc(100vh - 150px); /* Высота контейнера с деревом */
+            min-height: calc(100vh - 150px);
             background: #fff;
             border-radius: 8px;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow-y: scroll; /* Включаем вертикальную прокрутку */
-            overflow-x: hidden; /* Убираем горизонтальную прокрутку */
-        }
-
-        svg {
-            width: 100%;
-            height: auto;
+            padding: 20px;
+            margin-top: 10px;
         }
 
         .form-container {
-            margin: 20px 0;
             background: #6a11cb;
-            padding: 10px 0;
-            color: #fff;
+            padding: 15px;
             position: sticky;
             top: 0;
             z-index: 10;
+            color: #fff;
         }
 
-        .form-container input, .form-container button {
+        .form-container input {
             padding: 10px;
-            font-size: 1rem;
-            margin: 5px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            border: none;
+            width: 300px;
         }
 
         .form-container button {
-            background-color: #6a11cb;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            margin-left: 10px;
+            background-color: #ff5f5f;
             color: white;
             border: none;
             border-radius: 5px;
@@ -59,20 +56,19 @@
         }
 
         .form-container button:hover {
-            background-color: #2575fc;
+            background-color: #ff4040;
         }
 
         .btn {
             display: inline-block;
             margin: 5px;
-            padding: 8px 12px;
-            font-size: 0.9rem;
+            padding: 10px 20px;
+            font-size: 1rem;
             color: white;
             background: #6a11cb;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
         }
 
         .btn:hover {
@@ -80,11 +76,22 @@
         }
 
         .btn-delete {
-            background: #e74c3c;
+            background: #ff5252;
+            border: 1px solid #ff1744;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
         }
 
         .btn-delete:hover {
-            background: #c0392b;
+            background: #d50000;
+            color: white;
+        }
+
+        .task-text {
+            font-size: 1.5rem;
+            fill: #333;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -92,109 +99,98 @@
     {% include 'header.html' %}
     <h1>To-Do List</h1>
 
-    <!-- Форма для добавления новой главной задачи -->
     <div class="form-container">
         <input type="text" id="task-title" placeholder="Enter a new task" required>
         <button id="add-task-btn" class="btn">Add Task</button>
     </div>
 
-    <!-- Контейнер для визуализации дерева -->
-    <div class="tree-container">
-        <svg></svg>
-    </div>
+    <div class="tree-container" id="trees-container"></div>
 
     <script>
         const apiUrl = "{% url 'get_tasks_json' %}";
         const addTaskUrl = "{% url 'task_list' %}";
         const deleteTaskUrl = "{% url 'delete_task' 0 %}".slice(0, -2);
-        const toggleTaskUrl = "{% url 'toggle_task' 0 %}".slice(0, -2);
         const addSubtaskUrl = "{% url 'add_subtask' 0 %}".slice(0, -2);
 
-        // Загрузка данных и построение дерева
-        function loadTree() {
+        function loadTrees() {
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
-                    renderTree(data);
+                    renderTrees(data);
                 });
         }
 
-        // Функция для рендеринга дерева
-        function renderTree(data) {
-            const container = document.querySelector(".tree-container");
-            d3.select("svg").selectAll("*").remove(); // Очищаем содержимое SVG
-            container.querySelectorAll("div").forEach(div => div.remove()); // Удаляем старые кнопки
+        function renderTrees(data) {
+            const treesContainer = document.getElementById("trees-container");
+            treesContainer.innerHTML = "";
 
-            const width = container.clientWidth;
-            const height = Math.max(data.length * 100, 1000); // Увеличиваем высоту пропорционально количеству задач
+            data.forEach((treeData, index) => {
+                const treeDiv = document.createElement("div");
+                treeDiv.className = "tree";
+                treeDiv.style.marginBottom = "50px";
+                treeDiv.style.position = "relative";
 
-            const svg = d3.select("svg")
-                .attr("width", width)
-                .attr("height", height);
+                const svg = d3.select(treeDiv)
+                    .append("svg")
+                    .attr("width", "100%")
+                    .attr("height", 400);
 
-            const g = svg.append("g")
-                .attr("transform", "translate(50, 50)");
+                const g = svg.append("g").attr("transform", "translate(50,50)");
 
-            const tree = d3.tree()
-                .size([height - 100, width - 200]) // Размеры дерева
-                .separation((a, b) => (a.parent === b.parent ? 1 : 2)); // Расстояние между узлами
+                const treeLayout = d3.tree()
+                    .size([300, 700])
+                    .separation((a, b) => (a.parent === b.parent ? 2 : 3)); // Увеличено расстояние между задачами
 
-            if (data.length === 0) {
-                console.log("No tasks to display");
-                return;
-            }
+                const root = d3.hierarchy(treeData);
+                treeLayout(root);
 
-            const root = d3.hierarchy(data[0]);
-            tree(root);
+                g.selectAll(".link")
+                    .data(root.links())
+                    .enter()
+                    .append("path")
+                    .attr("class", "link")
+                    .attr("fill", "none")
+                    .attr("stroke", "#555")
+                    .attr("stroke-width", 2)
+                    .attr("d", d3.linkHorizontal()
+                        .x(d => d.y)
+                        .y(d => d.x)
+                    );
 
-            // Рисуем линии между узлами
-            g.selectAll(".link")
-                .data(root.links())
-                .enter()
-                .append("path")
-                .attr("class", "link")
-                .attr("fill", "none")
-                .attr("stroke", "#555")
-                .attr("stroke-width", 2)
-                .attr("d", d3.linkHorizontal()
-                    .x(d => d.y)
-                    .y(d => d.x));
+                const nodes = g.selectAll(".node")
+                    .data(root.descendants())
+                    .enter()
+                    .append("g")
+                    .attr("class", "node")
+                    .attr("transform", d => `translate(${d.y},${d.x})`);
 
-            // Рисуем узлы
-            const nodes = g.selectAll(".node")
-                .data(root.descendants())
-                .enter()
-                .append("g")
-                .attr("class", "node")
-                .attr("transform", d => `translate(${d.y},${d.x})`);
+                nodes.append("circle")
+                    .attr("r", 5)
+                    .attr("fill", "#6a11cb");
 
-            nodes.append("circle")
-                .attr("r", 5)
-                .attr("fill", "#6a11cb");
+                nodes.append("text")
+                    .attr("class", "task-text")
+                    .attr("dy", -25) // Поднято над кнопками
+                    .attr("dx", 0)
+                    .style("text-anchor", "middle")
+                    .text(d => d.data.title);
 
-            nodes.append("text")
-                .attr("dx", 10)
-                .attr("dy", 4)
-                .text(d => d.data.title);
+                nodes.each(function (d) {
+                    const btnGroup = document.createElement("div");
+                    btnGroup.style.position = "absolute";
+                    btnGroup.style.left = `${d.y + 75}px`; // Сдвинуто правее от задачи
+                    btnGroup.style.top = `${d.x + 45}px`; // Под кнопкой
+                    btnGroup.innerHTML = `
+                        <button class="btn" onclick="addSubtask(${d.data.id})">Add Subtask</button>
+                        <button class="btn-delete" onclick="deleteTask(${d.data.id})">Delete</button>
+                    `;
+                    treeDiv.appendChild(btnGroup);
+                });
 
-            root.descendants().forEach((node) => {
-                const buttonContainer = document.createElement("div");
-                buttonContainer.style.position = "absolute";
-                buttonContainer.style.left = `${node.y + 50}px`; // Выравнивание по X
-                buttonContainer.style.top = `${node.x + 50}px`; // Выравнивание по Y
-                buttonContainer.style.zIndex = 10; // Поверх других элементов
-
-                buttonContainer.innerHTML = `
-                    <button class="btn" onclick="toggleTask(${node.data.id})">Toggle</button>
-                    <button class="btn-delete" onclick="deleteTask(${node.data.id})">Delete</button>
-                    <button class="btn" onclick="addSubtask(${node.data.id})">Add Subtask</button>
-                `;
-
-                container.appendChild(buttonContainer);
+                treesContainer.appendChild(treeDiv);
             });
         }
 
-        // Функция для добавления главной задачи
         document.getElementById("add-task-btn").addEventListener("click", () => {
             const title = document.getElementById("task-title").value.trim();
             if (title) {
@@ -206,33 +202,12 @@
                     },
                     body: JSON.stringify({ title })
                 }).then(() => {
-                    document.getElementById("task-title").value = ""; // Очищаем поле ввода
-                    loadTree();
-                }).catch(error => console.error("Error:", error));
+                    document.getElementById("task-title").value = "";
+                    loadTrees();
+                }).catch(err => console.error("Error:", err));
             }
         });
 
-        // Функция для удаления задачи
-        function deleteTask(taskId) {
-            fetch(`${deleteTaskUrl}${taskId}/`, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-            }).then(() => loadTree());
-        }
-
-        // Функция для переключения статуса задачи
-        function toggleTask(taskId) {
-            fetch(`${toggleTaskUrl}${taskId}/`, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-            }).then(() => loadTree());
-        }
-
-        // Функция для добавления подзадачи
         function addSubtask(parentId) {
             const title = prompt("Enter subtask title:");
             if (title) {
@@ -243,12 +218,20 @@
                         "X-CSRFToken": "{{ csrf_token }}"
                     },
                     body: JSON.stringify({ title })
-                }).then(() => loadTree());
+                }).then(() => loadTrees());
             }
         }
 
-        loadTree();
+        function deleteTask(taskId) {
+            fetch(`${deleteTaskUrl}${taskId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            }).then(() => loadTrees());
+        }
+
+        loadTrees();
     </script>
 </body>
 </html>
-
