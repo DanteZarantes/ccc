@@ -9,6 +9,8 @@ from django.http import HttpResponse, JsonResponse
 from .models import Task
 from .tokens import account_activation_token
 from .forms import CustomUserCreationForm, TaskForm, ProfileForm
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 def homepage(request):
     return render(request, 'homepage.html')
@@ -74,45 +76,62 @@ def logout_view(request):
     return redirect('login')
 
 @login_required
+@csrf_exempt
 def task_list(request):
     if request.method == "POST":
-        form = TaskForm(request.POST)
-        if form.is_valid():
-            task = form.save(commit=False)
-            task.user = request.user
-            task.save()
-            return redirect('task_list')
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            title = data.get("title")
+            if title:
+                Task.objects.create(title=title, user=request.user)
+                return JsonResponse({"success": True, "message": "Task added successfully."}, status=201)
+            else:
+                return JsonResponse({"success": False, "message": "Title is required."}, status=400)
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
     else:
         form = TaskForm()
-    tasks = Task.objects.filter(user=request.user, parent=None).order_by('completed', 'created_at')
-    return render(request, 'task_list.html', {'tasks': tasks, 'form': form})
+        tasks = Task.objects.filter(user=request.user, parent=None).order_by("completed", "created_at")
+        return render(request, "task_list.html", {"tasks": tasks, "form": form})
 
 @login_required
+@csrf_exempt
 def delete_task(request, task_id):
     task = Task.objects.get(id=task_id, user=request.user)
-    task.delete()
-    return redirect('task_list')
+    if request.method == "POST":
+        task.delete()
+        return JsonResponse({"success": True, "message": "Task deleted successfully."}, status=200)
+    return JsonResponse({"success": False, "message": "Invalid method."}, status=405)
 
+@login_required
+@csrf_exempt
 def toggle_task(request, task_id):
     task = get_object_or_404(Task, id=task_id, user=request.user)
     if request.method == "POST":
-        task.completed = not task.completed
-        task.save()
-        if task.parent:
-            task.parent.check_completion()
-    return redirect('task_list')
+        try:
+            task.completed = not task.completed
+            task.save()
+            return JsonResponse({"success": True, "completed": task.completed}, status=200)
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+    return JsonResponse({"success": False, "message": "Invalid method."}, status=405)
 
+@login_required
+@csrf_exempt
 def add_subtask(request, parent_id):
     parent_task = get_object_or_404(Task, id=parent_id, user=request.user)
     if request.method == "POST":
-        title = request.POST.get("title")
-        if title:
-            Task.objects.create(
-                title=title,
-                parent=parent_task,
-                user=request.user,
-            )
-    return redirect('task_list')
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            title = data.get("title")
+            if title:
+                Task.objects.create(title=title, parent=parent_task, user=request.user)
+                return JsonResponse({"success": True, "message": "Subtask added successfully."}, status=201)
+            else:
+                return JsonResponse({"success": False, "message": "Title is required."}, status=400)
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+    return JsonResponse({"success": False, "message": "Invalid method."}, status=405)
 
 @login_required
 def profile_edit(request):
