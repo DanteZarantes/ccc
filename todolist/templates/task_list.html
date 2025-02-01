@@ -97,7 +97,7 @@
 </head>
 <body>
     {% include 'header.html' %}
-    <h1>To-Do List</h1>
+    <h1>To-Do List: {{ todolist.name }}</h1>
 
     <div class="form-container">
         <input type="text" id="task-title" placeholder="Enter a new task" required>
@@ -107,16 +107,28 @@
     <div class="tree-container" id="trees-container"></div>
 
     <script>
-        const apiUrl = "{% url 'get_tasks_json' %}";
-        const addTaskUrl = "{% url 'task_list' %}";
-        const deleteTaskUrl = "{% url 'delete_task' 0 %}".slice(0, -2);
-        const addSubtaskUrl = "{% url 'add_subtask' 0 %}".slice(0, -2);
+        const todolistId = "{{ todolist.id|default:'' }}";
+        const apiUrl = todolistId ? `{% url 'get_tasks_json' %}?todolist_id=${todolistId}` : null;
+        const addTaskUrl = todolistId ? `{% url 'todolist_tasks' todolist.id %}` : null;
+        const deleteTaskBaseUrl = `{% url 'delete_task' 0 %}`.replace('/0', '');
+        const addSubtaskBaseUrl = `{% url 'add_subtask' 0 %}`.replace('/0', '');
+
+        if (!todolistId) {
+            console.error("Todolist ID is missing!");
+        }
 
         function loadTrees() {
+            if (!apiUrl) {
+                console.error("API URL is missing!");
+                return;
+            }
+
             fetch(apiUrl)
                 .then(response => response.json())
-                .then(data => {
-                    renderTrees(data);
+                .then(data => renderTrees(data))
+                .catch(err => {
+                    console.error("Error loading trees:", err);
+                    alert("Failed to load tasks. Please refresh the page.");
                 });
         }
 
@@ -124,22 +136,22 @@
             const treesContainer = document.getElementById("trees-container");
             treesContainer.innerHTML = "";
 
-            data.forEach((treeData, index) => {
+            data.forEach(treeData => {
                 const treeDiv = document.createElement("div");
                 treeDiv.className = "tree";
-                treeDiv.style.marginBottom = "50px";
                 treeDiv.style.position = "relative";
+                treeDiv.style.marginBottom = "30px";
 
                 const svg = d3.select(treeDiv)
                     .append("svg")
                     .attr("width", "100%")
-                    .attr("height", 400);
+                    .attr("height", 500);
 
                 const g = svg.append("g").attr("transform", "translate(50,50)");
 
                 const treeLayout = d3.tree()
-                    .size([300, 700])
-                    .separation((a, b) => (a.parent === b.parent ? 2 : 3)); // Увеличено расстояние между задачами
+                    .size([400, 700])
+                    .separation((a, b) => (a.parent === b.parent ? 2 : 3));
 
                 const root = d3.hierarchy(treeData);
                 treeLayout(root);
@@ -170,21 +182,21 @@
 
                 nodes.append("text")
                     .attr("class", "task-text")
-                    .attr("dy", -25) // Поднято над кнопками
+                    .attr("dy", -25)
                     .attr("dx", 0)
                     .style("text-anchor", "middle")
                     .text(d => d.data.title);
 
                 nodes.each(function (d) {
-                    const btnGroup = document.createElement("div");
-                    btnGroup.style.position = "absolute";
-                    btnGroup.style.left = `${d.y + 75}px`; // Сдвинуто правее от задачи
-                    btnGroup.style.top = `${d.x + 45}px`; // Под кнопкой
-                    btnGroup.innerHTML = `
+                    const buttonGroup = document.createElement("div");
+                    buttonGroup.style.position = "absolute";
+                    buttonGroup.style.left = `${d.y + 75}px`;
+                    buttonGroup.style.top = `${d.x + 45}px`;
+                    buttonGroup.innerHTML = `
                         <button class="btn" onclick="addSubtask(${d.data.id})">Add Subtask</button>
                         <button class="btn-delete" onclick="deleteTask(${d.data.id})">Delete</button>
                     `;
-                    treeDiv.appendChild(btnGroup);
+                    treeDiv.appendChild(buttonGroup);
                 });
 
                 treesContainer.appendChild(treeDiv);
@@ -204,14 +216,14 @@
                 }).then(() => {
                     document.getElementById("task-title").value = "";
                     loadTrees();
-                }).catch(err => console.error("Error:", err));
+                }).catch(err => console.error("Error adding task:", err));
             }
         });
 
         function addSubtask(parentId) {
             const title = prompt("Enter subtask title:");
             if (title) {
-                fetch(`${addSubtaskUrl}${parentId}/`, {
+                fetch(`${addSubtaskBaseUrl}${parentId}/`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -223,7 +235,7 @@
         }
 
         function deleteTask(taskId) {
-            fetch(`${deleteTaskUrl}${taskId}/`, {
+            fetch(`${deleteTaskBaseUrl}${taskId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": "{{ csrf_token }}"

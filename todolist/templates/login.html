@@ -93,7 +93,7 @@
         <form method="POST">
             {% csrf_token %}
             {{ form.as_p }}
-            <input type="hidden" name="next" value="{% url 'task_list' %}">
+            <input type="hidden" name="next" value="{% url 'create_todo' %}">
             <button type="submit">Log In</button>
         </form>
         <div class="extra-links">

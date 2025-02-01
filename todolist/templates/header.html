@@ -29,13 +29,15 @@
             z-index: 1000;
         }
 
-        nav a {
+        nav a, nav button {
             text-decoration: none;
             font-weight: bold;
             font-size: 16px;
             padding: 10px 20px;
             border-radius: 20px;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            border: none;
+            cursor: pointer;
         }
 
         .home-button {
@@ -45,6 +47,16 @@
 
         .home-button:hover {
             background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .back-button {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .back-button:hover {
+            background-color: #e68900;
             transform: scale(1.05);
         }
 
@@ -114,9 +126,12 @@
 </head>
 <body>
     <nav>
-        <div>
+        <div style="display: flex; gap: 10px;">
             {% if request.resolver_match.url_name != 'homepage' %}
                 <a href="{% url 'homepage' %}" class="home-button">Home</a>
+            {% endif %}
+            {% if request.resolver_match.url_name != 'homepage' %}
+                <button class="back-button" onclick="goBack()">Back</button>
             {% endif %}
         </div>
 
@@ -131,5 +146,11 @@
             {% endif %}
         </div>
     </nav>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 </body>
 </html>

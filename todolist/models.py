@@ -12,6 +12,9 @@ class Task(models.Model):
     parent = models.ForeignKey(
         'self', null=True, blank=True, related_name='subtasks', on_delete=models.CASCADE
     )
+    todolist = models.ForeignKey(  # Связь с блоком To-Do List
+        'ToDoList', null=True, blank=True, related_name='tasks', on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.title
@@ -23,7 +26,7 @@ class Task(models.Model):
         while task:
             siblings = (
                 task.parent.subtasks.order_by('created_at') if task.parent
-                else Task.objects.filter(parent=None).order_by('created_at')
+                else Task.objects.filter(parent=None, todolist=self.todolist).order_by('created_at')
             )
             position = list(siblings).index(task) + 1
             numbering.append(position)
@@ -37,6 +40,17 @@ class Task(models.Model):
             self.save()
         if self.parent:
             self.parent.check_completion()
+
+
+class ToDoList(models.Model):
+    """Модель для блоков To-Do List."""
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
