@@ -93,6 +93,33 @@
             fill: #333;
             font-weight: bold;
         }
+
+        .subtask-form {
+            display: none;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-top: 10px;
+        }
+
+        .subtask-form input {
+            padding: 5px;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .subtask-form button {
+            padding: 5px 10px;
+            font-size: 1rem;
+            background: #6a11cb;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .subtask-form button:hover {
+            background: #2575fc;
+        }
     </style>
 </head>
 <body>
@@ -192,10 +219,16 @@
                     buttonGroup.style.position = "absolute";
                     buttonGroup.style.left = `${d.y + 75}px`;
                     buttonGroup.style.top = `${d.x + 45}px`;
+
                     buttonGroup.innerHTML = `
-                        <button class="btn" onclick="addSubtask(${d.data.id})">Add Subtask</button>
+                        <button class="btn" onclick="toggleSubtaskForm(this)">Add</button>
                         <button class="btn-delete" onclick="deleteTask(${d.data.id})">Delete</button>
+                        <div class="subtask-form">
+                            <input type="text" placeholder="Enter subtask title" class="subtask-title-input">
+                            <button onclick="submitSubtask(this, ${d.data.id})" class="btn-save-subtask">Save</button>
+                        </div>
                     `;
+
                     treeDiv.appendChild(buttonGroup);
                 });
 
@@ -220,8 +253,20 @@
             }
         });
 
-        function addSubtask(parentId) {
-            const title = prompt("Enter subtask title:");
+        function toggleSubtaskForm(buttonElement) {
+            const subtaskForm = buttonElement.nextElementSibling.nextElementSibling; // Получаем форму рядом с кнопкой
+            if (subtaskForm.style.display === "none" || !subtaskForm.style.display) {
+                subtaskForm.style.display = "block";
+            } else {
+                subtaskForm.style.display = "none";
+            }
+        }
+
+        function submitSubtask(buttonElement, parentId) {
+            const subtaskForm = buttonElement.closest(".subtask-form");
+            const subtaskTitleInput = subtaskForm.querySelector(".subtask-title-input");
+            const title = subtaskTitleInput.value.trim();
+
             if (title) {
                 fetch(`${addSubtaskBaseUrl}${parentId}/`, {
                     method: "POST",
@@ -230,7 +275,17 @@
                         "X-CSRFToken": "{{ csrf_token }}"
                     },
                     body: JSON.stringify({ title })
-                }).then(() => loadTrees());
+                })
+                .then(response => {
+                    if (response.ok) {
+                        loadTrees(); // Перезагружаем дерево задач
+                        subtaskForm.style.display = "none"; // Скрываем форму
+                        subtaskTitleInput.value = ""; // Очищаем поле
+                    } else {
+                        console.error("Failed to add subtask.");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
             }
         }
 

@@ -82,12 +82,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.3s;
-        }
-
-        .todolist:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.2);
         }
 
         .todolist h2 {
@@ -166,25 +160,28 @@
 
     <script>
         function deleteTodolist(todolistId) {
-            fetch(`/delete_todolist/${todolistId}/`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Удаляем элемент из DOM
-                    document.getElementById(`todolist-${todolistId}`).remove();
-                } else {
-                    alert('Failed to delete To-Do List.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while trying to delete the To-Do List.');
-            });
+            const todolistElement = document.getElementById(`todolist-${todolistId}`);
+            if (todolistElement) {
+                // Удаляем элемент из DOM
+                todolistElement.remove();
+
+                // Отправляем запрос на сервер для удаления
+                fetch(`/delete_todolist/${todolistId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        console.error('Failed to delete To-Do List on the server.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
         }
     </script>
 </body>
