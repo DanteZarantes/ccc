@@ -18,11 +18,10 @@ def homepage(request):
 
 @login_required
 def task_list_view(request, todolist_id=None):
-    """Main task list view: displays tasks from a selected To-Do list."""
     if todolist_id:
         todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
         return render(request, 'task_list.html', {'todolist': todolist})
-    return redirect('create_todo')  # Redirect to To-Do list creation if no ID is specified
+    return redirect('create_todo')
 
 
 def register(request):
@@ -90,13 +89,13 @@ def logout_view(request):
 @login_required
 @csrf_exempt
 def delete_todolist(request, todolist_id):
-    """Delete a To-Do List."""
-    if request.method == "DELETE":
+    if request.method == "POST":  # Используем POST вместо DELETE
         try:
             todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
             todolist.delete()
             return JsonResponse({"success": True, "message": "To-Do List deleted successfully."}, status=200)
         except Exception as e:
+            print(f"Error deleting ToDoList: {e}")
             return JsonResponse({"success": False, "message": str(e)}, status=500)
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
 
@@ -104,11 +103,14 @@ def delete_todolist(request, todolist_id):
 @login_required
 @csrf_exempt
 def rename_todolist(request, todolist_id):
-    """Rename a To-Do List."""
     if request.method == "POST":
         try:
             todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
-            data = json.loads(request.body.decode("utf-8"))
+            try:
+                data = json.loads(request.body.decode("utf-8"))
+            except json.JSONDecodeError:
+                return JsonResponse({"success": False, "message": "Invalid JSON."}, status=400)
+
             new_name = data.get("name")
             if new_name:
                 todolist.name = new_name
@@ -116,6 +118,7 @@ def rename_todolist(request, todolist_id):
                 return JsonResponse({"success": True, "message": "To-Do List renamed successfully."}, status=200)
             return JsonResponse({"success": False, "message": "New name is required."}, status=400)
         except Exception as e:
+            print(f"Error renaming ToDoList: {e}")
             return JsonResponse({"success": False, "message": str(e)}, status=500)
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
 
@@ -123,7 +126,6 @@ def rename_todolist(request, todolist_id):
 @login_required
 @csrf_exempt
 def task_list(request, todolist_id):
-    """Display tasks in a specific To-Do List."""
     todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
 
     if request.method == "POST":
@@ -141,7 +143,6 @@ def task_list(request, todolist_id):
 @login_required
 @csrf_exempt
 def delete_task(request, task_id):
-    """Delete a task."""
     task = get_object_or_404(Task, id=task_id, user=request.user)
     if request.method == "POST":
         task.delete()
@@ -152,7 +153,6 @@ def delete_task(request, task_id):
 @login_required
 @csrf_exempt
 def toggle_task(request, task_id):
-    """Toggle task completion status."""
     task = get_object_or_404(Task, id=task_id, user=request.user)
     if request.method == "POST":
         task.completed = not task.completed
@@ -164,7 +164,6 @@ def toggle_task(request, task_id):
 @login_required
 @csrf_exempt
 def add_subtask(request, parent_id):
-    """Add a subtask to a task."""
     parent_task = get_object_or_404(Task, id=parent_id, user=request.user)
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
@@ -177,7 +176,6 @@ def add_subtask(request, parent_id):
 
 @login_required
 def profile_edit(request):
-    """Edit user profile."""
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
         new_password = request.POST.get('new_password')
@@ -194,7 +192,6 @@ def profile_edit(request):
 
 @login_required
 def get_tasks_json(request):
-    """Return tasks in JSON format."""
     todolist_id = request.GET.get('todolist_id')
     if not todolist_id:
         return JsonResponse([], safe=False)
@@ -216,7 +213,6 @@ def get_tasks_json(request):
 
 @login_required
 def create_todo(request):
-    """Create a new To-Do List and display all lists."""
     if request.method == "POST":
         name = request.POST.get("todolist_name")
         if name:

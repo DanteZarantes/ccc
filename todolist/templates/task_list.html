@@ -14,17 +14,19 @@
             background: linear-gradient(135deg, #6a11cb, #2575fc);
             color: #fff;
             text-align: center;
-            overflow: auto;
+            overflow: hidden;
         }
 
         .tree-container {
-            width: 100%;
-            min-height: calc(100vh - 150px);
+            width: 100vw;
+            height: calc(100vh - 100px);
             background: #fff;
             border-radius: 8px;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            margin-top: 10px;
+            margin: 0;
+            overflow: auto;
+            position: relative;
         }
 
         .form-container {
@@ -34,6 +36,9 @@
             top: 0;
             z-index: 10;
             color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .form-container input {
@@ -120,6 +125,10 @@
         .subtask-form button:hover {
             background: #2575fc;
         }
+
+        .hidden-buttons {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -167,17 +176,16 @@
                 const treeDiv = document.createElement("div");
                 treeDiv.className = "tree";
                 treeDiv.style.position = "relative";
-                treeDiv.style.marginBottom = "30px";
 
                 const svg = d3.select(treeDiv)
                     .append("svg")
-                    .attr("width", "100%")
-                    .attr("height", 500);
+                    .attr("width", "2000px")
+                    .attr("height", 800);
 
                 const g = svg.append("g").attr("transform", "translate(50,50)");
 
                 const treeLayout = d3.tree()
-                    .size([400, 700])
+                    .size([800, 1900]) // Увеличено вертикальное расстояние
                     .separation((a, b) => (a.parent === b.parent ? 2 : 3));
 
                 const root = d3.hierarchy(treeData);
@@ -205,7 +213,23 @@
 
                 nodes.append("circle")
                     .attr("r", 5)
-                    .attr("fill", "#6a11cb");
+                    .attr("fill", "#6a11cb")
+                    .style("cursor", "pointer")
+                    .on("mouseover", function () {
+                        d3.select(this).attr("fill", "#ffcc00");
+                    })
+                    .on("mouseout", function () {
+                        d3.select(this).attr("fill", "#6a11cb");
+                    })
+                    .on("click", function (event, d) {
+                        const buttonId = `buttons-${d.data.id}`;
+                        const buttonGroup = document.getElementById(buttonId);
+                        if (buttonGroup.style.display === "none" || !buttonGroup.style.display) {
+                            buttonGroup.style.display = "block";
+                        } else {
+                            buttonGroup.style.display = "none";
+                        }
+                    });
 
                 nodes.append("text")
                     .attr("class", "task-text")
@@ -216,9 +240,11 @@
 
                 nodes.each(function (d) {
                     const buttonGroup = document.createElement("div");
+                    buttonGroup.id = `buttons-${d.data.id}`;
                     buttonGroup.style.position = "absolute";
-                    buttonGroup.style.left = `${d.y + 75}px`;
-                    buttonGroup.style.top = `${d.x + 45}px`;
+                    buttonGroup.style.left = `${d.y}px`;
+                    buttonGroup.style.top = `${d.x + 25}px`; // Кнопки под кругом
+                    buttonGroup.className = "hidden-buttons";
 
                     buttonGroup.innerHTML = `
                         <button class="btn" onclick="toggleSubtaskForm(this)">Add</button>
@@ -254,7 +280,7 @@
         });
 
         function toggleSubtaskForm(buttonElement) {
-            const subtaskForm = buttonElement.nextElementSibling.nextElementSibling; // Получаем форму рядом с кнопкой
+            const subtaskForm = buttonElement.nextElementSibling.nextElementSibling;
             if (subtaskForm.style.display === "none" || !subtaskForm.style.display) {
                 subtaskForm.style.display = "block";
             } else {
@@ -278,9 +304,9 @@
                 })
                 .then(response => {
                     if (response.ok) {
-                        loadTrees(); // Перезагружаем дерево задач
-                        subtaskForm.style.display = "none"; // Скрываем форму
-                        subtaskTitleInput.value = ""; // Очищаем поле
+                        loadTrees();
+                        subtaskForm.style.display = "none";
+                        subtaskTitleInput.value = "";
                     } else {
                         console.error("Failed to add subtask.");
                     }

@@ -51,7 +51,7 @@
             color: white;
             background-color: #4CAF50;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s;
         }
@@ -80,9 +80,6 @@
             margin: 10px auto;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             position: relative;
         }
 
@@ -92,6 +89,7 @@
             text-decoration: none;
             color: white;
             padding: 10px;
+            text-align: left;
             transition: background-color 0.3s;
         }
 
@@ -106,25 +104,20 @@
 
         .action-buttons {
             display: flex;
-            gap: 10px;
+            gap: 20px;
+            justify-content: center;
+            margin-top: -10px;
+            padding: 15px 0;
         }
 
-        .delete-button, .rename-button {
-            padding: 8px 15px;
-            font-size: 0.9rem;
+        .rename-button, .delete-button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 15px;
             cursor: pointer;
             transition: all 0.3s;
-        }
-
-        .delete-button {
-            background-color: #ff5252;
-        }
-
-        .delete-button:hover {
-            background-color: #d50000;
         }
 
         .rename-button {
@@ -135,28 +128,44 @@
             background-color: #cc8400;
         }
 
+        .delete-button {
+            background-color: #ff5252;
+        }
+
+        .delete-button:hover {
+            background-color: #d50000;
+        }
+
         .rename-input {
             margin-top: 10px;
             display: none;
         }
 
         .rename-input input {
-            padding: 5px;
+            padding: 10px;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             margin-right: 10px;
+            font-size: 1rem;
+            width: 70%;
         }
 
         .rename-input button {
-            padding: 5px 10px;
+            padding: 10px;
             background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
         }
 
         .rename-input button:hover {
             background-color: #45a049;
+        }
+
+        .todolist-wrapper {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -172,18 +181,20 @@
     <div class="todolist-container">
         <h2>Your To-Do Lists</h2>
         {% for todolist in todolists %}
-            <div class="todolist" id="todolist-{{ todolist.id }}">
-                <a href="{% url 'todolist_tasks' todolist.id %}">
-                    <h2>{{ todolist.name }}</h2>
-                    <span>Created at: {{ todolist.created_at }}</span>
-                </a>
+            <div class="todolist-wrapper">
+                <div class="todolist" id="todolist-{{ todolist.id }}">
+                    <a href="{% url 'todolist_tasks' todolist.id %}">
+                        <h2>{{ todolist.name }}</h2>
+                        <span>Created at: {{ todolist.created_at }}</span>
+                    </a>
+                </div>
                 <div class="action-buttons">
-                    <button class="delete-button" onclick="deleteTodolist({{ todolist.id }})">Delete</button>
-                    <button class="rename-button" onclick="toggleRenameInput({{ todolist.id }})">Rename</button>
+                    <button class="rename-button" onclick="toggleRenameInput(event, {{ todolist.id }})">Rename</button>
+                    <button class="delete-button" onclick="deleteTodolist(event, {{ todolist.id }})">Delete</button>
                 </div>
                 <div class="rename-input" id="rename-input-{{ todolist.id }}">
                     <input type="text" placeholder="Enter new name" id="rename-text-{{ todolist.id }}">
-                    <button onclick="renameTodolist({{ todolist.id }})">Save</button>
+                    <button onclick="renameTodolist(event, {{ todolist.id }})">Save</button>
                 </div>
             </div>
         {% empty %}
@@ -192,11 +203,12 @@
     </div>
 
     <script>
-        function deleteTodolist(todolistId) {
+        function deleteTodolist(event, todolistId) {
+            event.preventDefault();
             const todolistElement = document.getElementById(`todolist-${todolistId}`);
             if (todolistElement) {
-                fetch(`/delete_todolist/${todolistId}/`, {
-                    method: 'DELETE',
+                fetch(`/todolist/delete_todolist/${todolistId}/`, {
+                    method: 'POST',
                     headers: {
                         'X-CSRFToken': '{{ csrf_token }}',
                         'Content-Type': 'application/json'
@@ -204,7 +216,7 @@
                 })
                 .then(response => {
                     if (response.ok) {
-                        todolistElement.remove();
+                        todolistElement.parentElement.remove();
                     } else {
                         console.error('Failed to delete To-Do List on the server.');
                     }
@@ -215,19 +227,21 @@
             }
         }
 
-        function toggleRenameInput(todolistId) {
+        function toggleRenameInput(event, todolistId) {
+            event.preventDefault();
             const renameInput = document.getElementById(`rename-input-${todolistId}`);
             if (renameInput) {
                 renameInput.style.display = renameInput.style.display === 'none' || renameInput.style.display === '' ? 'block' : 'none';
             }
         }
 
-        function renameTodolist(todolistId) {
+        function renameTodolist(event, todolistId) {
+            event.preventDefault();
             const newNameInput = document.getElementById(`rename-text-${todolistId}`);
             if (newNameInput) {
                 const newName = newNameInput.value;
                 if (newName) {
-                    fetch(`/rename_todolist/${todolistId}/`, {
+                    fetch(`/todolist/rename_todolist/${todolistId}/`, {
                         method: 'POST',
                         headers: {
                             'X-CSRFToken': '{{ csrf_token }}',
@@ -238,7 +252,7 @@
                     .then(response => {
                         if (response.ok) {
                             document.querySelector(`#todolist-${todolistId} h2`).textContent = newName;
-                            toggleRenameInput(todolistId);
+                            toggleRenameInput(event, todolistId);
                         } else {
                             console.error('Failed to rename To-Do List on the server.');
                         }
