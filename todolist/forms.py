@@ -9,8 +9,14 @@ class TaskForm(forms.ModelForm):
 
 
 class CustomUserCreationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
-    confirm_password = forms.CharField(widget=forms.PasswordInput)
+    password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Enter your password',
+        'class': 'form-control'
+    }))
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Confirm your password',
+        'class': 'form-control'
+    }))
 
     class Meta:
         model = CustomUser
@@ -26,7 +32,30 @@ class CustomUserCreationForm(forms.ModelForm):
 
 
 class ProfileForm(forms.ModelForm):
-    """Форма редактирования профиля пользователя."""
+    """Форма редактирования профиля пользователя, включая поле 'About Me'."""
+    about = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'Write something about yourself...',
+            'class': 'form-control'
+        }),
+        required=False
+    )
+
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'avatar']
+        fields = ['username', 'email', 'avatar', 'about']
+
+    def __init__(self, *args, **kwargs):
+        super(ProfileForm, self).__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Enter your username'
+        })
+        self.fields['email'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Enter your email address'
+        })
+        self.fields['avatar'].widget.attrs.update({
+            'class': 'form-control-file'
+        })

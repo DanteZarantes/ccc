@@ -89,7 +89,7 @@ def logout_view(request):
 @login_required
 @csrf_exempt
 def delete_todolist(request, todolist_id):
-    if request.method == "POST":  # Используем POST вместо DELETE
+    if request.method == "POST":
         try:
             todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
             todolist.delete()
@@ -98,6 +98,41 @@ def delete_todolist(request, todolist_id):
             print(f"Error deleting ToDoList: {e}")
             return JsonResponse({"success": False, "message": str(e)}, status=500)
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
+
+
+@login_required
+def profile_edit(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=request.user)
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        about_me = request.POST.get('about')
+
+        if new_password and new_password == confirm_password:
+            request.user.set_password(new_password)
+
+        if about_me:
+            request.user.about = about_me  # Исправлено! Было request.user.profile.about
+            request.user.save()
+
+        if form.is_valid():
+            form.save()
+            return redirect('create_todo')
+    else:
+        form = ProfileForm(instance=request.user)
+
+    # Подготовка данных для статистики профиля
+    tasks_completed = Task.objects.filter(user=request.user, completed=True).count()
+    todo_lists = ToDoList.objects.filter(user=request.user).count()
+    last_login = request.user.last_login
+
+    context = {
+        'form': form,
+        'tasks_completed': tasks_completed,
+        'todo_lists': todo_lists,
+        'last_login': last_login,
+    }
+    return render(request, 'profile_edit.html', context)
 
 
 @login_required
@@ -172,22 +207,6 @@ def add_subtask(request, parent_id):
             Task.objects.create(title=title, parent=parent_task, user=request.user)
             return JsonResponse({"success": True}, status=201)
         return JsonResponse({"success": False, "message": "Subtask title is required."}, status=400)
-
-
-@login_required
-def profile_edit(request):
-    if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=request.user)
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-        if new_password and new_password == confirm_password:
-            request.user.set_password(new_password)
-        if form.is_valid():
-            form.save()
-            return redirect('create_todo')
-    else:
-        form = ProfileForm(instance=request.user)
-    return render(request, 'profile_edit.html', {'form': form})
 
 
 @login_required

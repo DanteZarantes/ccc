@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 class Task(models.Model):
+    """Модель задачи."""
     title = models.CharField(max_length=200)
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -12,7 +13,7 @@ class Task(models.Model):
     parent = models.ForeignKey(
         'self', null=True, blank=True, related_name='subtasks', on_delete=models.CASCADE
     )
-    todolist = models.ForeignKey(  # Связь с блоком To-Do List
+    todolist = models.ForeignKey(
         'ToDoList', null=True, blank=True, related_name='tasks', on_delete=models.CASCADE
     )
 
@@ -20,7 +21,7 @@ class Task(models.Model):
         return self.title
 
     def get_numbering(self):
-        """Generates hierarchical numbering for tasks."""
+        """Создает иерархическую нумерацию для задач."""
         numbering = []
         task = self
         while task:
@@ -31,10 +32,10 @@ class Task(models.Model):
             position = list(siblings).index(task) + 1
             numbering.append(position)
             task = task.parent
-        return '.'.join(map(str, numbering[::-1]))  # Reverses numbering
+        return '.'.join(map(str, numbering[::-1]))  # Обратная нумерация
 
     def check_completion(self):
-        """Checks if all subtasks are completed and updates the task status."""
+        """Проверяет завершение всех подзадач и обновляет статус задачи."""
         if self.subtasks.exists():
             self.completed = all(subtask.completed for subtask in self.subtasks.all())
             self.save()
@@ -53,10 +54,12 @@ class ToDoList(models.Model):
 
 
 class CustomUser(AbstractUser):
+    """Модель кастомного пользователя."""
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png', blank=True)
+    about = models.TextField(max_length=500, blank=True, null=True, help_text="Write something about yourself.")
 
     def __str__(self):
         return self.username

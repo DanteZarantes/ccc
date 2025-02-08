@@ -15,6 +15,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            transition: background 0.3s ease;
         }
         .profile-edit-container {
             background-color: #fff;
@@ -37,6 +38,11 @@
             border: 3px solid #6a11cb;
             margin-bottom: 20px;
             object-fit: cover;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .profile-edit-container img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
         }
         .profile-edit-container label {
             display: block;
@@ -46,7 +52,8 @@
         }
         .profile-edit-container input[type="text"],
         .profile-edit-container input[type="email"],
-        .profile-edit-container input[type="password"] {
+        .profile-edit-container input[type="password"],
+        .profile-edit-container textarea {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -55,9 +62,13 @@
             font-size: 1rem;
             transition: all 0.3s ease;
         }
-        .profile-edit-container input:focus {
+        .profile-edit-container input:focus,
+        .profile-edit-container textarea:focus {
             border-color: #6a11cb;
             box-shadow: 0 0 8px rgba(106, 17, 203, 0.5);
+        }
+        .profile-edit-container textarea {
+            resize: none;
         }
         .custom-file-upload {
             text-align: left;
@@ -114,6 +125,49 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
+        .profile-stats {
+            margin-top: 20px;
+            text-align: left;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(106, 17, 203, 0.1);
+            color: #6a11cb;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .profile-stats h2 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #2575fc;
+        }
+        .profile-stats ul {
+            list-style: none;
+            padding: 0;
+        }
+        .profile-stats li {
+            margin: 5px 0;
+        }
+        .theme-toggle {
+            margin: 15px 0;
+            text-align: center;
+        }
+        .dark-mode {
+            background: linear-gradient(135deg, #141e30, #243b55);
+            color: #e0e0e0;
+        }
+        .dark-mode .profile-edit-container {
+            background: #1e1e2f;
+            color: #e0e0e0;
+        }
+        .dark-mode input {
+            background: #2c2c3e;
+            color: #fff;
+            border-color: #444;
+        }
+        .dark-mode .profile-stats {
+            background: rgba(50, 50, 70, 0.8);
+            color: #9fa8da;
+        }
     </style>
 </head>
 <body>
@@ -127,6 +181,9 @@
 
             <label for="email">Email</label>
             <input type="email" id="email" name="email" value="{{ user.email }}" required>
+
+            <label for="about">About Me</label>
+            <textarea id="about" name="about" placeholder="Write something about yourself..." rows="3">{{ user.about }}</textarea>
 
             <label for="avatar">Avatar</label>
             <div class="custom-file-upload">
@@ -147,6 +204,20 @@
                 <a href="{% url 'homepage' %}" class="custom-back-button">Back to Home</a>
             </div>
         </form>
+
+        <div class="profile-stats">
+            <h2>Profile Statistics</h2>
+            <ul>
+                <li><strong>Tasks Completed:</strong> {{ tasks_completed }}</li>
+                <li><strong>To-Do Lists:</strong> {{ todo_lists }}</li>
+                <li><strong>Last Login:</strong> {{ last_login|date:"d M Y H:i" }}</li>
+            </ul>
+        </div>
+
+        <div class="theme-toggle">
+            <label for="dark-mode">Dark Mode:</label>
+            <input type="checkbox" id="dark-mode">
+        </div>
     </div>
 
     <script>
@@ -159,6 +230,26 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const darkModeToggle = document.getElementById("dark-mode");
+            const isDarkMode = localStorage.getItem("darkMode") === "true";
+
+            if (isDarkMode) {
+                document.body.classList.add("dark-mode");
+                darkModeToggle.checked = true;
+            }
+
+            darkModeToggle.addEventListener("change", () => {
+                if (darkModeToggle.checked) {
+                    document.body.classList.add("dark-mode");
+                    localStorage.setItem("darkMode", "true");
+                } else {
+                    document.body.classList.remove("dark-mode");
+                    localStorage.setItem("darkMode", "false");
+                }
+            });
+        });
     </script>
 </body>
 </html>
