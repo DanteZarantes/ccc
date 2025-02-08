@@ -17,10 +17,11 @@
         }
 
         h1 {
-            margin-top: 3rem;
-            font-size: 2.5rem;
-            color: white;
+            margin-top: 4rem;
+            font-size: 2.8rem;
+            color: #ffffff;
             line-height: 1.2;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
         }
 
         form {
@@ -82,33 +83,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
         }
 
-        .todolist h2 {
-            margin: 0;
-            font-size: 1.2rem;
-            color: white;
-            text-align: left;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 70%;
-        }
-
-        .todolist h2 a {
+        .todolist a {
+            display: block;
+            width: 100%;
             text-decoration: none;
             color: white;
-            transition: color 0.3s;
+            padding: 10px;
+            transition: background-color 0.3s;
         }
 
-        .todolist h2 a:hover {
-            color: #4CAF50;
+        .todolist a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
         .todolist span {
             font-size: 0.9rem;
             color: #e0e0e0;
-            text-align: right;
         }
 
         .action-buttons {
@@ -116,19 +109,54 @@
             gap: 10px;
         }
 
-        .delete-button {
+        .delete-button, .rename-button {
             padding: 8px 15px;
             font-size: 0.9rem;
             color: white;
-            background-color: #ff5252;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s;
         }
 
+        .delete-button {
+            background-color: #ff5252;
+        }
+
         .delete-button:hover {
             background-color: #d50000;
+        }
+
+        .rename-button {
+            background-color: #ffa500;
+        }
+
+        .rename-button:hover {
+            background-color: #cc8400;
+        }
+
+        .rename-input {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .rename-input input {
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .rename-input button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .rename-input button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
@@ -145,12 +173,17 @@
         <h2>Your To-Do Lists</h2>
         {% for todolist in todolists %}
             <div class="todolist" id="todolist-{{ todolist.id }}">
-                <div>
-                    <h2><a href="{% url 'todolist_tasks' todolist.id %}">{{ todolist.name }}</a></h2>
+                <a href="{% url 'todolist_tasks' todolist.id %}">
+                    <h2>{{ todolist.name }}</h2>
                     <span>Created at: {{ todolist.created_at }}</span>
-                </div>
+                </a>
                 <div class="action-buttons">
                     <button class="delete-button" onclick="deleteTodolist({{ todolist.id }})">Delete</button>
+                    <button class="rename-button" onclick="toggleRenameInput({{ todolist.id }})">Rename</button>
+                </div>
+                <div class="rename-input" id="rename-input-{{ todolist.id }}">
+                    <input type="text" placeholder="Enter new name" id="rename-text-{{ todolist.id }}">
+                    <button onclick="renameTodolist({{ todolist.id }})">Save</button>
                 </div>
             </div>
         {% empty %}
@@ -162,10 +195,6 @@
         function deleteTodolist(todolistId) {
             const todolistElement = document.getElementById(`todolist-${todolistId}`);
             if (todolistElement) {
-                // Удаляем элемент из DOM
-                todolistElement.remove();
-
-                // Отправляем запрос на сервер для удаления
                 fetch(`/delete_todolist/${todolistId}/`, {
                     method: 'DELETE',
                     headers: {
@@ -174,13 +203,50 @@
                     }
                 })
                 .then(response => {
-                    if (!response.ok) {
+                    if (response.ok) {
+                        todolistElement.remove();
+                    } else {
                         console.error('Failed to delete To-Do List on the server.');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                 });
+            }
+        }
+
+        function toggleRenameInput(todolistId) {
+            const renameInput = document.getElementById(`rename-input-${todolistId}`);
+            if (renameInput) {
+                renameInput.style.display = renameInput.style.display === 'none' || renameInput.style.display === '' ? 'block' : 'none';
+            }
+        }
+
+        function renameTodolist(todolistId) {
+            const newNameInput = document.getElementById(`rename-text-${todolistId}`);
+            if (newNameInput) {
+                const newName = newNameInput.value;
+                if (newName) {
+                    fetch(`/rename_todolist/${todolistId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ name: newName })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            document.querySelector(`#todolist-${todolistId} h2`).textContent = newName;
+                            toggleRenameInput(todolistId);
+                        } else {
+                            console.error('Failed to rename To-Do List on the server.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
             }
         }
     </script>

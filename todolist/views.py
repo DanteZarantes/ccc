@@ -18,11 +18,11 @@ def homepage(request):
 
 @login_required
 def task_list_view(request, todolist_id=None):
-    """Главная страница задач: отображение задач из выбранного списка."""
+    """Main task list view: displays tasks from a selected To-Do list."""
     if todolist_id:
         todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
         return render(request, 'task_list.html', {'todolist': todolist})
-    return redirect('create_todo')  # Перенаправляем на создание To-Do списка, если ID не указано
+    return redirect('create_todo')  # Redirect to To-Do list creation if no ID is specified
 
 
 def register(request):
@@ -33,9 +33,9 @@ def register(request):
             username = form.cleaned_data.get('username')
 
             if User.objects.filter(email=email).exists():
-                return render(request, 'register.html', {'form': form, 'error': 'Этот email уже используется. Попробуйте другой.'})
+                return render(request, 'register.html', {'form': form, 'error': 'This email is already in use. Please try another one.'})
             if User.objects.filter(username=username).exists():
-                return render(request, 'register.html', {'form': form, 'error': 'Этот логин уже используется. Попробуйте другой.'})
+                return render(request, 'register.html', {'form': form, 'error': 'This username is already in use. Please try another one.'})
 
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
@@ -43,7 +43,7 @@ def register(request):
             login(request, user)
             return redirect('create_todo')
         else:
-            return render(request, 'register.html', {'form': form, 'error': 'Пожалуйста, исправьте ошибки в форме.'})
+            return render(request, 'register.html', {'form': form, 'error': 'Please fix the errors in the form.'})
     else:
         form = CustomUserCreationForm()
     return render(request, 'register.html', {'form': form})
@@ -78,7 +78,7 @@ def login_view(request):
             login(request, user)
             return redirect('create_todo')
         else:
-            return render(request, 'login.html', {'error': 'Неверные учетные данные.'})
+            return render(request, 'login.html', {'error': 'Invalid credentials.'})
     return render(request, 'login.html')
 
 
@@ -90,18 +90,40 @@ def logout_view(request):
 @login_required
 @csrf_exempt
 def delete_todolist(request, todolist_id):
-    """Удаление To-Do List без подтверждения действия."""
+    """Delete a To-Do List."""
     if request.method == "DELETE":
-        todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
-        todolist.delete()
-        return JsonResponse({"success": True}, status=200)
+        try:
+            todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
+            todolist.delete()
+            return JsonResponse({"success": True, "message": "To-Do List deleted successfully."}, status=200)
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
+
+
+@login_required
+@csrf_exempt
+def rename_todolist(request, todolist_id):
+    """Rename a To-Do List."""
+    if request.method == "POST":
+        try:
+            todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
+            data = json.loads(request.body.decode("utf-8"))
+            new_name = data.get("name")
+            if new_name:
+                todolist.name = new_name
+                todolist.save()
+                return JsonResponse({"success": True, "message": "To-Do List renamed successfully."}, status=200)
+            return JsonResponse({"success": False, "message": "New name is required."}, status=400)
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
 
 
 @login_required
 @csrf_exempt
 def task_list(request, todolist_id):
-    """Отображение задач в конкретном To-Do List."""
+    """Display tasks in a specific To-Do List."""
     todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
 
     if request.method == "POST":
@@ -110,7 +132,7 @@ def task_list(request, todolist_id):
         if title:
             Task.objects.create(title=title, todolist=todolist, user=request.user)
             return JsonResponse({"success": True}, status=201)
-        return JsonResponse({"success": False, "message": "Название задачи обязательно."}, status=400)
+        return JsonResponse({"success": False, "message": "Task title is required."}, status=400)
 
     tasks = todolist.tasks.all().order_by("completed", "created_at")
     return render(request, 'task_list.html', {'todolist': todolist, 'tasks': tasks})
@@ -119,27 +141,30 @@ def task_list(request, todolist_id):
 @login_required
 @csrf_exempt
 def delete_task(request, task_id):
+    """Delete a task."""
     task = get_object_or_404(Task, id=task_id, user=request.user)
     if request.method == "POST":
         task.delete()
         return JsonResponse({"success": True}, status=200)
-    return JsonResponse({"success": False, "message": "Неверный метод запроса."}, status=405)
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
 
 
 @login_required
 @csrf_exempt
 def toggle_task(request, task_id):
+    """Toggle task completion status."""
     task = get_object_or_404(Task, id=task_id, user=request.user)
     if request.method == "POST":
         task.completed = not task.completed
         task.save()
         return JsonResponse({"success": True, "completed": task.completed}, status=200)
-    return JsonResponse({"success": False, "message": "Неверный метод запроса."}, status=405)
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
 
 
 @login_required
 @csrf_exempt
 def add_subtask(request, parent_id):
+    """Add a subtask to a task."""
     parent_task = get_object_or_404(Task, id=parent_id, user=request.user)
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
@@ -147,11 +172,12 @@ def add_subtask(request, parent_id):
         if title:
             Task.objects.create(title=title, parent=parent_task, user=request.user)
             return JsonResponse({"success": True}, status=201)
-        return JsonResponse({"success": False, "message": "Название подзадачи обязательно."}, status=400)
+        return JsonResponse({"success": False, "message": "Subtask title is required."}, status=400)
 
 
 @login_required
 def profile_edit(request):
+    """Edit user profile."""
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
         new_password = request.POST.get('new_password')
@@ -168,6 +194,7 @@ def profile_edit(request):
 
 @login_required
 def get_tasks_json(request):
+    """Return tasks in JSON format."""
     todolist_id = request.GET.get('todolist_id')
     if not todolist_id:
         return JsonResponse([], safe=False)
@@ -189,7 +216,7 @@ def get_tasks_json(request):
 
 @login_required
 def create_todo(request):
-    """Создание нового блока To-Do List и отображение всех блоков."""
+    """Create a new To-Do List and display all lists."""
     if request.method == "POST":
         name = request.POST.get("todolist_name")
         if name:
