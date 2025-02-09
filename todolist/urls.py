@@ -19,8 +19,8 @@ urlpatterns = [
     path('add_subtask/<int:parent_id>/', views.add_subtask, name='add_subtask'),  # Добавление подзадачи
 
     # Управление To-Do списками
-    path('delete_todolist/<int:todolist_id>/', views.delete_todolist, name='delete_todolist'),  # Удаление To-Do List
-    path('rename_todolist/<int:todolist_id>/', views.rename_todolist, name='rename_todolist'),  # Переименование To-Do List
+    path('delete_todolist/<int:todolist_id>/', views.delete_todolist, name='delete_todolist'),
+    path('rename_todolist/<int:todolist_id>/', views.rename_todolist, name='rename_todolist'),
 
     # Редактирование профиля
     path('profile/edit/', views.profile_edit, name='profile_edit'),  # Редактирование профиля пользователя

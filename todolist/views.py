@@ -86,18 +86,7 @@ def logout_view(request):
     return redirect('login')
 
 
-@login_required
-@csrf_exempt
-def delete_todolist(request, todolist_id):
-    if request.method == "POST":
-        try:
-            todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
-            todolist.delete()
-            return JsonResponse({"success": True, "message": "To-Do List deleted successfully."}, status=200)
-        except Exception as e:
-            print(f"Error deleting ToDoList: {e}")
-            return JsonResponse({"success": False, "message": str(e)}, status=500)
-    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
+
 
 
 @login_required
@@ -135,27 +124,7 @@ def profile_edit(request):
     return render(request, 'profile_edit.html', context)
 
 
-@login_required
-@csrf_exempt
-def rename_todolist(request, todolist_id):
-    if request.method == "POST":
-        try:
-            todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
-            try:
-                data = json.loads(request.body.decode("utf-8"))
-            except json.JSONDecodeError:
-                return JsonResponse({"success": False, "message": "Invalid JSON."}, status=400)
 
-            new_name = data.get("name")
-            if new_name:
-                todolist.name = new_name
-                todolist.save()
-                return JsonResponse({"success": True, "message": "To-Do List renamed successfully."}, status=200)
-            return JsonResponse({"success": False, "message": "New name is required."}, status=400)
-        except Exception as e:
-            print(f"Error renaming ToDoList: {e}")
-            return JsonResponse({"success": False, "message": str(e)}, status=500)
-    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
 
 
 @login_required
@@ -240,3 +209,41 @@ def create_todo(request):
 
     todolists = ToDoList.objects.filter(user=request.user)
     return render(request, 'create_todo.html', {'todolists': todolists})
+
+
+
+@login_required
+@csrf_exempt
+def delete_todolist(request, todolist_id):
+    if request.method == "POST":
+        try:
+            todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
+            todolist.delete()
+            return JsonResponse({"success": True, "message": "To-Do List deleted successfully."}, status=200)
+        except Exception as e:
+            print(f"Error deleting ToDoList: {e}")
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
+
+
+@login_required
+@csrf_exempt
+def rename_todolist(request, todolist_id):
+    if request.method == "POST":
+        try:
+            todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
+            try:
+                data = json.loads(request.body.decode("utf-8"))
+            except json.JSONDecodeError:
+                return JsonResponse({"success": False, "message": "Invalid JSON."}, status=400)
+
+            new_name = data.get("name")
+            if new_name:
+                todolist.name = new_name
+                todolist.save()
+                return JsonResponse({"success": True, "message": "To-Do List renamed successfully."}, status=200)
+            return JsonResponse({"success": False, "message": "New name is required."}, status=400)
+        except Exception as e:
+            print(f"Error renaming ToDoList: {e}")
+            return JsonResponse({"success": False, "message": str(e)}, status=500)
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)

@@ -202,23 +202,60 @@
         {% endfor %}
     </div>
 
-    <script>
-        function deleteTodolist(event, todolistId) {
-            event.preventDefault();
-            const todolistElement = document.getElementById(`todolist-${todolistId}`);
-            if (todolistElement) {
-                fetch(`/todolist/delete_todolist/${todolistId}/`, {
+<script>
+    // Функция удаления To-Do списка
+    function deleteTodolist(event, todolistId) {
+        event.preventDefault();
+        fetch(`/todolist/delete_todolist/${todolistId}/`, {  // Исправленный URL
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                document.getElementById(`todolist-${todolistId}`).parentElement.remove();  // Удаление из DOM
+            } else {
+                console.error('Failed to delete To-Do List on the server.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Функция отображения поля для переименования
+    function toggleRenameInput(event, todolistId) {
+        event.preventDefault();
+        const renameInput = document.getElementById(`rename-input-${todolistId}`);
+        if (renameInput) {
+            renameInput.style.display = renameInput.style.display === 'none' || renameInput.style.display === '' ? 'block' : 'none';
+        }
+    }
+
+    // Функция переименования To-Do списка
+    function renameTodolist(event, todolistId) {
+        event.preventDefault();
+        const newNameInput = document.getElementById(`rename-text-${todolistId}`);
+        if (newNameInput) {
+            const newName = newNameInput.value.trim();
+            if (newName) {
+                fetch(`/todolist/rename_todolist/${todolistId}/`, {  // Исправленный URL
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': '{{ csrf_token }}',
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({ name: newName })
                 })
-                .then(response => {
-                    if (response.ok) {
-                        todolistElement.parentElement.remove();
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector(`#todolist-${todolistId} h2`).textContent = newName;
+                        toggleRenameInput(event, todolistId);  // Скрываем поле ввода после успешного обновления
                     } else {
-                        console.error('Failed to delete To-Do List on the server.');
+                        console.error('Failed to rename To-Do List:', data.message);
                     }
                 })
                 .catch(error => {
@@ -226,43 +263,9 @@
                 });
             }
         }
+    }
+</script>
 
-        function toggleRenameInput(event, todolistId) {
-            event.preventDefault();
-            const renameInput = document.getElementById(`rename-input-${todolistId}`);
-            if (renameInput) {
-                renameInput.style.display = renameInput.style.display === 'none' || renameInput.style.display === '' ? 'block' : 'none';
-            }
-        }
 
-        function renameTodolist(event, todolistId) {
-            event.preventDefault();
-            const newNameInput = document.getElementById(`rename-text-${todolistId}`);
-            if (newNameInput) {
-                const newName = newNameInput.value;
-                if (newName) {
-                    fetch(`/todolist/rename_todolist/${todolistId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ name: newName })
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            document.querySelector(`#todolist-${todolistId} h2`).textContent = newName;
-                            toggleRenameInput(event, todolistId);
-                        } else {
-                            console.error('Failed to rename To-Do List on the server.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-                }
-            }
-        }
-    </script>
 </body>
 </html>
