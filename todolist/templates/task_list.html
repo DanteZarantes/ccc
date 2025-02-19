@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do List</title>
+    <!-- D3.js и jQuery -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
     <style>
+        /* Глобальные стили */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -14,33 +16,19 @@
             background: linear-gradient(135deg, #6a11cb, #2575fc);
             color: #fff;
             text-align: center;
-            overflow: hidden;
         }
 
-        .tree-container {
-            width: 100vw;
-            height: calc(100vh - 100px);
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin: 0;
-            overflow: auto;
-            position: relative;
-        }
-
+        /* Фиксированная панель сверху с формой добавления задачи */
         .form-container {
             background: #6a11cb;
             padding: 15px;
             position: sticky;
             top: 0;
             z-index: 10;
-            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-
         .form-container input {
             padding: 10px;
             font-size: 1.2rem;
@@ -48,7 +36,6 @@
             border: none;
             width: 300px;
         }
-
         .form-container button {
             padding: 10px 20px;
             font-size: 1.2rem;
@@ -58,12 +45,26 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s;
         }
-
         .form-container button:hover {
             background-color: #ff4040;
         }
 
+        /* Контейнер, в котором рисуется дерево */
+        .tree-container {
+            width: 100vw;
+            height: calc(100vh - 100px);
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 0;
+            overflow: auto; /* скроллим при большом дереве */
+            position: relative;
+        }
+
+        /* Общие стили кнопок */
         .btn {
             display: inline-block;
             margin: 5px;
@@ -74,44 +75,47 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background 0.3s;
         }
-
         .btn:hover {
             background: #2575fc;
         }
-
         .btn-delete {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #fff;
             background: #ff5252;
-            border: 1px solid #ff1744;
-            color: white;
-            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
             transition: background-color 0.3s ease;
         }
-
         .btn-delete:hover {
             background: #d50000;
-            color: white;
         }
 
-        .task-text {
-            font-size: 1.5rem;
-            fill: #333;
-            font-weight: bold;
+        /* Для обертки кнопок (Add, Edit Detail, Delete) и форм */
+        .hidden-buttons {
+            display: none;
+            background: rgba(250,250,250,0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
+        /* Форма добавления подзадачи */
         .subtask-form {
             display: none;
             flex-direction: column;
             align-items: flex-start;
             margin-top: 10px;
         }
-
         .subtask-form input {
             padding: 5px;
             font-size: 1rem;
             margin-bottom: 5px;
         }
-
         .subtask-form button {
             padding: 5px 10px;
             font-size: 1rem;
@@ -121,19 +125,72 @@
             border-radius: 5px;
             cursor: pointer;
         }
-
         .subtask-form button:hover {
             background: #2575fc;
         }
 
-        .hidden-buttons {
+        /* Форма для ввода подробностей (Detail) */
+        .detail-form {
             display: none;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-top: 10px;
+        }
+        .detail-form textarea {
+            width: 200px;
+            height: 60px;
+            padding: 5px;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            resize: vertical;
+        }
+        .detail-form button {
+            padding: 5px 10px;
+            font-size: 1rem;
+            background: #6a11cb;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .detail-form button:hover {
+            background: #2575fc;
+        }
+
+        /* Блок, где отображается detail при нажатии "Show Details" */
+        .detail-display {
+            display: none; /* скрыто по умолчанию */
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #444;
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 5px;
+            word-wrap: break-word;
+            max-width: 200px;
+        }
+
+        /* Стили для линий дерева и кругов */
+        .link {
+            stroke: #aaa;
+            stroke-width: 2;
+            fill: none;
+        }
+        .node circle {
+            r: 7;
+            fill: #6a11cb;
+            cursor: pointer;
+            transition: fill 0.2s;
+        }
+        .node circle:hover {
+            fill: #ffcc00;
         }
     </style>
 </head>
 <body>
     {% include 'header.html' %}
-    <h1>To-Do List: {{ todolist.name }}</h1>
+
+    <h1 style="margin-top: 15px;">To-Do List: {{ todolist.name }}</h1>
 
     <div class="form-container">
         <input type="text" id="task-title" placeholder="Enter a new task" required>
@@ -148,17 +205,19 @@
         const addTaskUrl = todolistId ? `{% url 'todolist_tasks' todolist.id %}` : null;
         const deleteTaskBaseUrl = `{% url 'delete_task' 0 %}`.replace('/0', '');
         const addSubtaskBaseUrl = `{% url 'add_subtask' 0 %}`.replace('/0', '');
+        // Эндпоинт для сохранения/обновления detail:
+        const addDetailBaseUrl = `{% url 'add_detail' 0 %}`.replace('/0', '');
 
         if (!todolistId) {
             console.error("Todolist ID is missing!");
         }
 
+        // Загрузка и отрисовка дерева
         function loadTrees() {
             if (!apiUrl) {
                 console.error("API URL is missing!");
                 return;
             }
-
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => renderTrees(data))
@@ -168,6 +227,20 @@
                 });
         }
 
+        // Функция для иерархической нумерации (1, 1.1, 1.1.1, ...)
+        function getHierarchyNumber(d) {
+            const path = [];
+            const ancestors = d.ancestors().reverse();
+            ancestors.forEach((node) => {
+                if (node.parent) {
+                    const index = node.parent.children.indexOf(node) + 1;
+                    path.push(index);
+                }
+            });
+            return path.join('.') || '1';
+        }
+
+        // Отрисовка каждого дерева
         function renderTrees(data) {
             const treesContainer = document.getElementById("trees-container");
             treesContainer.innerHTML = "";
@@ -177,33 +250,37 @@
                 treeDiv.className = "tree";
                 treeDiv.style.position = "relative";
 
+                // Создаем SVG
+                const svgWidth = 2500;
+                const svgHeight = 1200;
                 const svg = d3.select(treeDiv)
                     .append("svg")
-                    .attr("width", "2000px")
-                    .attr("height", 800);
+                    .attr("width", svgWidth + "px")
+                    .attr("height", svgHeight + "px");
 
                 const g = svg.append("g").attr("transform", "translate(50,50)");
 
+                // Настройка D3 Tree Layout
                 const treeLayout = d3.tree()
-                    .size([800, 1900]) // Увеличено вертикальное расстояние
+                    .size([svgHeight - 100, svgWidth - 200])
                     .separation((a, b) => (a.parent === b.parent ? 2 : 3));
 
+                // Превращаем данные в иерархию
                 const root = d3.hierarchy(treeData);
                 treeLayout(root);
 
+                // Линки
                 g.selectAll(".link")
                     .data(root.links())
                     .enter()
                     .append("path")
                     .attr("class", "link")
-                    .attr("fill", "none")
-                    .attr("stroke", "#555")
-                    .attr("stroke-width", 2)
                     .attr("d", d3.linkHorizontal()
                         .x(d => d.y)
                         .y(d => d.x)
                     );
 
+                // Узлы
                 const nodes = g.selectAll(".node")
                     .data(root.descendants())
                     .enter()
@@ -211,17 +288,38 @@
                     .attr("class", "node")
                     .attr("transform", d => `translate(${d.y},${d.x})`);
 
-                nodes.append("circle")
-                    .attr("r", 5)
-                    .attr("fill", "#6a11cb")
-                    .style("cursor", "pointer")
-                    .on("mouseover", function () {
-                        d3.select(this).attr("fill", "#ffcc00");
-                    })
-                    .on("mouseout", function () {
-                        d3.select(this).attr("fill", "#6a11cb");
-                    })
-                    .on("click", function (event, d) {
+                // Кружок
+                nodes.append("circle");
+
+                // foreignObject для названия задачи (без detail)
+                nodes.each(function(d) {
+                    d3.select(this)
+                        .append("foreignObject")
+                        .attr("width", 400)       // Увеличили ширину
+                        .attr("height", 200)      // Увеличили высоту
+                        .style("overflow", "visible")  // Чтобы не обрезалось
+                        .attr("x", -200)          // центрируем
+                        .attr("y", -60)
+                        .style("pointer-events", "none") // чтобы круг оставался кликабельным
+                        .append("xhtml:div")
+                        .style("display", "flex")
+                        .style("justify-content", "center")
+                        .style("align-items", "center")
+                        .style("text-align", "center")
+                        .style("word-wrap", "break-word")
+                        .style("font-size", "1.1rem")
+                        .style("font-weight", "bold")
+                        .style("color", "#333")
+                        .html(() => {
+                            const numbering = getHierarchyNumber(d);
+                            return numbering + " " + d.data.title;
+                        });
+                });
+
+                // Обработка клика по кругу (показать/скрыть кнопки)
+                nodes.select("circle")
+                    .attr("r", 7)
+                    .on("click", function(event, d) {
                         const buttonId = `buttons-${d.data.id}`;
                         const buttonGroup = document.getElementById(buttonId);
                         if (buttonGroup.style.display === "none" || !buttonGroup.style.display) {
@@ -231,30 +329,38 @@
                         }
                     });
 
-                nodes.append("text")
-                    .attr("class", "task-text")
-                    .attr("dy", -25)
-                    .attr("dx", 0)
-                    .style("text-anchor", "middle")
-                    .text(d => d.data.title);
-
-                nodes.each(function (d) {
+                // Создаём div с кнопками (Add, Edit Detail, Delete) для каждого узла
+                nodes.each(function(d) {
                     const buttonGroup = document.createElement("div");
                     buttonGroup.id = `buttons-${d.data.id}`;
+                    buttonGroup.className = "hidden-buttons";
+                    // Позиция под кругом (x: d.y, y: d.x)
                     buttonGroup.style.position = "absolute";
                     buttonGroup.style.left = `${d.y}px`;
-                    buttonGroup.style.top = `${d.x + 25}px`; // Кнопки под кругом
-                    buttonGroup.className = "hidden-buttons";
+                    buttonGroup.style.top = `${d.x + 10}px`;
+
+                    // detail-text: текст задачи (если есть)
+                    const detailText = d.data.detail ? d.data.detail : "";
 
                     buttonGroup.innerHTML = `
                         <button class="btn" onclick="toggleSubtaskForm(this)">Add</button>
+                        <button class="btn" onclick="toggleDetailForm(this)">Edit Detail</button>
                         <button class="btn-delete" onclick="deleteTask(${d.data.id})">Delete</button>
+
                         <div class="subtask-form">
                             <input type="text" placeholder="Enter subtask title" class="subtask-title-input">
                             <button onclick="submitSubtask(this, ${d.data.id})" class="btn-save-subtask">Save</button>
                         </div>
-                    `;
 
+                        <div class="detail-form">
+                            <textarea class="detail-textarea" placeholder="Enter more details...">${detailText}</textarea>
+                            <button onclick="submitDetail(this, ${d.data.id})" class="btn-save-detail">Save</button>
+                        </div>
+
+                        <!-- Кнопка и блок для отображения detail -->
+                        <button class="btn" onclick="toggleDetailDisplay(this)">Show Details</button>
+                        <div class="detail-display">${detailText}</div>
+                    `;
                     treeDiv.appendChild(buttonGroup);
                 });
 
@@ -262,6 +368,7 @@
             });
         }
 
+        // Добавление новой (корневой) задачи
         document.getElementById("add-task-btn").addEventListener("click", () => {
             const title = document.getElementById("task-title").value.trim();
             if (title) {
@@ -279,15 +386,17 @@
             }
         });
 
+        // Показ/скрытие формы подзадачи
         function toggleSubtaskForm(buttonElement) {
-            const subtaskForm = buttonElement.nextElementSibling.nextElementSibling;
+            const subtaskForm = buttonElement.parentElement.querySelector(".subtask-form");
             if (subtaskForm.style.display === "none" || !subtaskForm.style.display) {
-                subtaskForm.style.display = "block";
+                subtaskForm.style.display = "flex";
             } else {
                 subtaskForm.style.display = "none";
             }
         }
 
+        // Добавление подзадачи
         function submitSubtask(buttonElement, parentId) {
             const subtaskForm = buttonElement.closest(".subtask-form");
             const subtaskTitleInput = subtaskForm.querySelector(".subtask-title-input");
@@ -315,15 +424,67 @@
             }
         }
 
+        // Показ/скрытие формы Detail (редактирования)
+        function toggleDetailForm(buttonElement) {
+            const detailForm = buttonElement.parentElement.querySelector(".detail-form");
+            if (detailForm.style.display === "none" || !detailForm.style.display) {
+                detailForm.style.display = "flex";
+            } else {
+                detailForm.style.display = "none";
+            }
+        }
+
+        // Сохранение подробной информации (Detail)
+        function submitDetail(buttonElement, taskId) {
+            const detailForm = buttonElement.closest(".detail-form");
+            const detailTextarea = detailForm.querySelector(".detail-textarea");
+            const detailText = detailTextarea.value.trim();
+
+            fetch(`${addDetailBaseUrl}${taskId}/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ detail: detailText })
+            })
+            .then(response => {
+                if (response.ok) {
+                    detailForm.style.display = "none";
+                    // Обновим дерево, чтобы увидеть изменения
+                    loadTrees();
+                } else {
+                    console.error("Failed to save detail.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // Кнопка "Show Details" / "Hide Details"
+        function toggleDetailDisplay(buttonElement) {
+            const detailDisplay = buttonElement.parentElement.querySelector(".detail-display");
+            if (detailDisplay.style.display === "none" || !detailDisplay.style.display) {
+                detailDisplay.style.display = "block";
+                buttonElement.textContent = "Hide Details";
+            } else {
+                detailDisplay.style.display = "none";
+                buttonElement.textContent = "Show Details";
+            }
+        }
+
+        // Удаление задачи
         function deleteTask(taskId) {
             fetch(`${deleteTaskBaseUrl}${taskId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": "{{ csrf_token }}"
                 }
-            }).then(() => loadTrees());
+            })
+            .then(() => loadTrees())
+            .catch(err => console.error("Error deleting task:", err));
         }
 
+        // При загрузке
         loadTrees();
     </script>
 </body>

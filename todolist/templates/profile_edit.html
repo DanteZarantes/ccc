@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
     <style>
         body {
@@ -105,12 +104,10 @@
             gap: 10px;
             margin-top: 15px;
         }
-        .buttons-container button,
-        .buttons-container a {
+        .buttons-container button {
             padding: 12px 30px;
             font-size: 0.95rem;
             font-weight: bold;
-            text-decoration: none;
             color: white;
             background: linear-gradient(135deg, #6a11cb, #2575fc);
             border: none;
@@ -119,8 +116,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
-        .buttons-container button:hover,
-        .buttons-container a:hover {
+        .buttons-container button:hover {
             background: linear-gradient(135deg, #2575fc, #6a11cb);
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
@@ -152,12 +148,12 @@
             text-align: center;
         }
         .dark-mode {
-            background: linear-gradient(135deg, #141e30, #243b55);
-            color: #e0e0e0;
+            background: linear-gradient(135deg, #141e30, #243b55) !important;
+            color: #e0e0e0 !important;
         }
         .dark-mode .profile-edit-container {
-            background: #1e1e2f;
-            color: #e0e0e0;
+            background: #1e1e2f !important;
+            color: #e0e0e0 !important;
         }
         .dark-mode input {
             background: #2c2c3e;
@@ -165,12 +161,14 @@
             border-color: #444;
         }
         .dark-mode .profile-stats {
-            background: rgba(50, 50, 70, 0.8);
-            color: #9fa8da;
+            background: rgba(50, 50, 70, 0.8) !important;
+            color: #9fa8da !important;
         }
     </style>
 </head>
 <body>
+    {% include 'header.html' %}
+
     <div class="profile-edit-container">
         <h1>Edit Profile</h1>
         <img id="avatar-preview" src="{{ user.avatar.url }}" alt="Current Avatar">
@@ -200,8 +198,8 @@
             <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
 
             <div class="buttons-container">
+                <!-- Убрали кнопку Back to Home -->
                 <button type="submit">Save Changes</button>
-                <a href="{% url 'homepage' %}" class="custom-back-button">Back to Home</a>
             </div>
         </form>
 

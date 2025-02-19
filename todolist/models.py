@@ -3,10 +3,10 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 
-
 class Task(models.Model):
     """Модель задачи."""
     title = models.CharField(max_length=200)
+    detail = models.TextField(blank=True, null=True)  # <-- Новое поле для подробного описания
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -42,7 +42,6 @@ class Task(models.Model):
         if self.parent:
             self.parent.check_completion()
 
-
 class ToDoList(models.Model):
     """Модель для блоков To-Do List."""
     name = models.CharField(max_length=255)
@@ -51,7 +50,6 @@ class ToDoList(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class CustomUser(AbstractUser):
     """Модель кастомного пользователя."""

@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {
+        /* Сброс и общие настройки */
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
             overflow-x: hidden;
         }
 
-        *, *::before, *::after {
-            box-sizing: inherit;
-        }
-
+        /* Верхняя панель (nav) */
         nav {
             position: fixed;
             top: 0;
@@ -25,16 +25,14 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             display: flex;
             justify-content: space-between;
-            align-items: center; /* Центрирование кнопок вертикально */
+            align-items: center;
             z-index: 1000;
         }
-
         nav .left-buttons {
             display: flex;
             gap: 10px;
-            align-items: center; /* Обеспечивает выравнивание всех кнопок внутри */
+            align-items: center;
         }
-
         nav a, nav button {
             text-decoration: none;
             font-weight: bold;
@@ -44,50 +42,42 @@
             transition: background-color 0.3s ease, transform 0.2s ease;
             border: none;
             cursor: pointer;
-            display: flex; /* Добавлено для управления размерами */
-            align-items: center; /* Центрирование текста внутри кнопки */
+            display: flex;
+            align-items: center;
+            color: #fff;
         }
 
+        /* Кнопка Home (иконка домика) */
         .home-button {
             background-color: #4CAF50;
-            color: white;
         }
-
         .home-button:hover {
             background-color: #45a049;
             transform: scale(1.05);
         }
 
+        /* Кнопка Back (иконка стрелки) */
         .back-button {
             background-color: #ff9800;
-            color: white;
         }
-
         .back-button:hover {
             background-color: #e68900;
             transform: scale(1.05);
         }
 
-        .profile-button {
-            background-color: #ff5722;
-            color: white;
-        }
-
+        /* Примеры стилей для кнопок профиля / logout */
+        .profile-button { background-color: #ff5722; }
         .profile-button:hover {
             background-color: #e64a19;
             transform: scale(1.05);
         }
-
-        .logout-button {
-            background-color: #2196F3;
-            color: white;
-        }
-
+        .logout-button { background-color: #2196F3; }
         .logout-button:hover {
             background-color: #1976D2;
             transform: scale(1.05);
         }
 
+        /* Кнопки логина/регистрации */
         .auth-button {
             padding: 10px 20px;
             font-size: 16px;
@@ -97,22 +87,18 @@
             transition: all 0.3s ease;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-
         .login-button {
             background: linear-gradient(135deg, #2196F3, #21CBF3);
-            color: white;
+            color: #fff;
         }
-
         .login-button:hover {
             background: linear-gradient(135deg, #21CBF3, #2196F3);
             transform: scale(1.05);
         }
-
         .register-button {
             background: linear-gradient(135deg, #FF5722, #FF7043);
-            color: white;
+            color: #fff;
         }
-
         .register-button:hover {
             background: linear-gradient(135deg, #FF7043, #FF5722);
             transform: scale(1.05);
@@ -123,24 +109,92 @@
             align-items: center;
             gap: 15px;
         }
-
         .profile-menu img {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             border: 2px solid white;
         }
+
+        /* Кнопка-гамбургер для боковой панели */
+        .sidebar-toggle {
+            background-color: #0056b3;
+            color: #fff;
+            border: none;
+            font-size: 22px;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .sidebar-toggle:hover {
+            background-color: #003d82;
+            transform: scale(1.05);
+        }
+
+        /* Боковая панель (sidebar) */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0;           /* изначально скрыта */
+            overflow-x: hidden;
+            background-color: #111;
+            transition: width 0.4s;
+            z-index: 999;       /* ниже хедера, но выше контента */
+            padding-top: 60px;  /* отступ под хедер */
+        }
+        .sidebar.open {
+            width: 250px; /* ширина при открытии */
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #ccc;
+            transition: background-color 0.2s ease;
+        }
+        .sidebar a:hover {
+            background-color: #575757;
+            color: #fff;
+        }
+
+        /* Кнопка закрытия (X) */
+        .closebtn {
+            background: none;
+            color: #fff;
+            border: none;
+            font-size: 30px;
+            cursor: pointer;
+            margin-left: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Основной контент (не залезает под хедер) */
+        .main-content {
+            margin-top: 80px; /* отступ под хедер */
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
+    <!-- Верхняя панель (nav) -->
     <nav>
         <div class="left-buttons">
             {% if request.resolver_match.url_name != 'homepage' %}
-                <a href="{% url 'homepage' %}" class="home-button">Home</a>
+                <!-- Иконка домика (Unicode: 🏠) -->
+                <a href="{% url 'homepage' %}" class="home-button" aria-label="Home">🏠</a>
             {% endif %}
             {% if request.resolver_match.url_name != 'homepage' %}
-                <button class="back-button" onclick="goBack()">Back</button>
+                <!-- Иконка стрелки (Unicode: ←) -->
+                <button class="back-button" onclick="goBack()" aria-label="Back">←</button>
             {% endif %}
+
+            <!-- Кнопка для боковой панели -->
+            <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
         </div>
 
         <div class="profile-menu">
@@ -151,16 +205,37 @@
                 <a href="{% url 'profile_edit' %}" class="profile-button">Profile</a>
                 <a href="{% url 'logout' %}" class="logout-button">Logout</a>
             {% else %}
-                <a href="{% url 'login' %}" class="auth-button login-button">Log In</a>
-                <a href="{% url 'register' %}" class="auth-button register-button">Register</a>
+                <a href="{% url 'login' %}" class="login-button auth-button">Log In</a>
+                <a href="{% url 'register' %}" class="register-button auth-button">Register</a>
             {% endif %}
         </div>
     </nav>
 
-    <!-- Back button functionality -->
+    <!-- Боковая панель (sidebar) -->
+    <div id="sidebar" class="sidebar">
+        <!-- Кнопка закрытия (X) -->
+        <button class="closebtn" onclick="toggleSidebar()">×</button>
+
+        <!-- Пример ссылок/разделов в боковой панели -->
+        <a href="{% url 'create_todo' %}">My To-Do Lists</a>
+        <a href="#">Projects</a>
+        <a href="#">Settings</a>
+    </div>
+
+    <!-- Здесь далее идет контент страницы -->
+    <div class="main-content">
+        <!-- Например, {% block content %}{% endblock %} если используете extends -->
+    </div>
+
     <script>
         function goBack() {
             window.history.back();
+        }
+
+        // Переключаем класс "open" у боковой панели
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
         }
     </script>
 </body>

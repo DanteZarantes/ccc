@@ -3,10 +3,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In</title>
     <style>
-        /* Main body styling */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -19,62 +17,12 @@
             align-items: center;
             flex-direction: column;
         }
-
-        /* Navigation bar styling */
         nav {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            background-color: #007bff;
-            padding: 10px 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
         }
-
-        nav .nav-left,
-        nav .nav-right {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        nav button,
-        nav a {
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 16px;
-            padding: 10px 20px;
-            border-radius: 20px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        nav .home-button {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        nav .home-button:hover {
-            background-color: #45a049;
-            transform: scale(1.05);
-        }
-
-        nav .back-button {
-            background-color: #ff9800;
-            color: white;
-        }
-
-        nav .back-button:hover {
-            background-color: #e68900;
-            transform: scale(1.05);
-        }
-
-        /* Login container styling */
         .login-container {
             background: rgba(255, 255, 255, 0.1);
             padding: 40px;
@@ -82,20 +30,17 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             text-align: center;
             width: 300px;
-            margin-top: 120px; /* Adjusted margin for proper spacing */
+            margin-top: 120px;
         }
-
         h1 {
             font-size: 2rem;
             margin-bottom: 1rem;
             color: #fff;
         }
-
         form {
             display: flex;
             flex-direction: column;
         }
-
         input[type="text"],
         input[type="password"] {
             padding: 10px;
@@ -105,13 +50,6 @@
             font-size: 1rem;
             color: #333;
         }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            outline: none;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.7);
-        }
-
         button {
             padding: 10px;
             margin-top: 10px;
@@ -123,23 +61,18 @@
             cursor: pointer;
             transition: background 0.3s ease;
         }
-
         button:hover {
             background: #0056b3;
         }
-
-        /* Extra links styling */
         .extra-links {
             margin-top: 15px;
             font-size: 0.9rem;
         }
-
         .extra-links a {
             color: #ffc107;
             text-decoration: none;
             transition: color 0.3s ease;
         }
-
         .extra-links a:hover {
             color: #fff;
         }
@@ -150,12 +83,56 @@
         <h1>Log In</h1>
         <form method="POST">
             {% csrf_token %}
-            {{ form.as_p }}
+            {{ form.non_field_errors }}
+
+            <!-- Поле для Email (на самом деле "username" в Django) -->
+            <label for="id_username" style="display:none;">Email</label>
+            <input
+                type="text"
+                name="username"
+                id="id_username"
+                placeholder="Email"
+                required
+                value="{{ form.username.value|default_if_none:'' }}"
+            />
+            {% if form.username.errors %}
+                <div style="color: red; font-size: 0.9rem;">
+                    {{ form.username.errors }}
+                </div>
+            {% endif %}
+
+            <!-- Поле для Password -->
+            <label for="id_password" style="display:none;">Password</label>
+            <input
+                type="password"
+                name="password"
+                id="id_password"
+                placeholder="Password"
+                required
+            />
+            {% if form.password.errors %}
+                <div style="color: red; font-size: 0.9rem;">
+                    {{ form.password.errors }}
+                </div>
+            {% endif %}
+
+            <!-- Если нужно перенаправлять после логина -->
             <input type="hidden" name="next" value="{% url 'create_todo' %}">
+
             <button type="submit">Log In</button>
         </form>
+
         <div class="extra-links">
-            <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+            <!-- Ссылка на регистрацию -->
+            <p>
+                Don't have an account?
+                <a href="{% url 'register' %}">Register</a>
+            </p>
+            <!-- Текст "Forgotten password?" + ссылка "reset password" -->
+            <p>
+                Forgotten password?
+                <a href="{% url 'password_reset' %}">Reset password</a>
+            </p>
         </div>
     </div>
 </body>

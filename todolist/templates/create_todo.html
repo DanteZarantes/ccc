@@ -2,270 +2,334 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create To-Do List</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
+        /* Сброс и общие настройки */
+        * {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            /* Анимированный градиент, как на homepage */
+            background: linear-gradient(135deg, #6a11cb, #2575fc, #3d5afe, #6a85ff);
+            background-size: 200% 200%;
+            animation: gradientAnimation 8s ease infinite;
             color: #fff;
-            text-align: center;
+            /* убираем align-items: center и height: 100vh, чтобы можно было скроллить */
             min-height: 100vh;
             overflow-x: hidden;
-        }
-
-        h1 {
-            margin-top: 4rem;
-            font-size: 2.8rem;
-            color: #ffffff;
-            line-height: 1.2;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        form {
-            margin: 2rem auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
-            width: 90%;
-        }
-
-        input[type="text"] {
-            padding: 10px;
-            font-size: 1rem;
-            border: none;
-            border-radius: 5px;
-            width: 100%;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            color: white;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        button:hover {
-            background-color: #45a049;
-            transform: scale(1.05);
-        }
-
-        .todolist-container {
-            margin-top: 3rem;
-            max-width: 800px;
-            padding: 0 10px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .todolist-container h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .todolist {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 15px;
-            margin: 10px auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             position: relative;
         }
 
-        .todolist a {
-            display: block;
+        /* Анимация градиента */
+        @keyframes gradientAnimation {
+            0%   { background-position: 0% 50%; }
+            25%  { background-position: 50% 50%; }
+            50%  { background-position: 100% 50%; }
+            75%  { background-position: 50% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Декоративные полупрозрачные круги (как на homepage) */
+        .circle {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        .circle:nth-child(1) {
+            top: 10%;
+            left: 20%;
+        }
+        .circle:nth-child(2) {
+            top: 60%;
+            left: 60%;
+        }
+        @keyframes float {
+            0%   { transform: translateY(0px); }
+            50%  { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Контейнер для всего контента (чтобы центрировать и ограничить ширину) */
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px 40px; /* отступы сверху и по бокам */
+            text-align: center;
+        }
+
+        /* Заголовок */
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Форма создания нового списка */
+        form {
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px); /* слегка размываем задний фон */
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
             width: 100%;
-            text-decoration: none;
-            color: white;
-            padding: 10px;
-            text-align: left;
-            transition: background-color 0.3s;
         }
-
-        .todolist a:hover {
-            background-color: rgba(255, 255, 255, 0.2);
+        form input[type="text"] {
+            padding: 15px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            width: 70%;
+            margin-right: 10px;
+            outline: none;
         }
-
-        .todolist span {
-            font-size: 0.9rem;
-            color: #e0e0e0;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: -10px;
-            padding: 15px 0;
-        }
-
-        .rename-button, .delete-button {
+        form button {
             padding: 15px 30px;
-            font-size: 1.2rem;
-            color: white;
+            font-size: 1rem;
+            color: #fff;
+            background-color: #4CAF50;
             border: none;
             border-radius: 15px;
             cursor: pointer;
             transition: all 0.3s;
         }
+        form button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
 
+        /* Контейнер для всех списков */
+        .todolist-container {
+            margin-top: 2rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+        .todolist-container h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Обёртка для каждой карточки */
+        .todolist-wrapper {
+            margin-bottom: 30px; /* отступ между карточками */
+        }
+
+        /* Каждая карточка (ссылка) */
+        .todolist {
+            display: block; /* чтобы <a> вел себя как блок */
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: transform 0.3s;
+            text-align: left; /* Чтобы название было слева */
+            text-decoration: none; /* убираем подчеркивание */
+            color: #fff; /* цвет текста */
+        }
+        .todolist:hover {
+            transform: translateY(-5px);
+        }
+        .todolist h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: inherit; /* чтобы текст оставался белым */
+        }
+        .todolist span {
+            font-size: 0.9rem;
+            color: #e0e0e0;
+        }
+
+        /* Кнопки Rename / Delete */
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            /* Раньше было: margin-top: -10px; */
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }
+        .rename-button, .delete-button {
+            padding: 10px 25px;
+            font-size: 1rem;
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
         .rename-button {
             background-color: #ffa500;
         }
-
         .rename-button:hover {
             background-color: #cc8400;
         }
-
         .delete-button {
             background-color: #ff5252;
         }
-
         .delete-button:hover {
             background-color: #d50000;
         }
 
+        /* Поле для переименования */
         .rename-input {
-            margin-top: 10px;
             display: none;
+            text-align: center;
+            margin-top: 10px;
         }
-
         .rename-input input {
             padding: 10px;
             border: none;
             border-radius: 10px;
             margin-right: 10px;
             font-size: 1rem;
-            width: 70%;
+            width: 60%;
         }
-
         .rename-input button {
-            padding: 10px;
+            padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 1rem;
             cursor: pointer;
+            transition: all 0.3s;
         }
-
         .rename-input button:hover {
             background-color: #45a049;
-        }
-
-        .todolist-wrapper {
-            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     {% include 'header.html' %}
-    <h1>Create a New To-Do List</h1>
-    <form method="POST">
-        {% csrf_token %}
-        <input type="text" name="todolist_name" placeholder="Enter To-Do List Name" required>
-        <button type="submit">Create</button>
-    </form>
 
-    <div class="todolist-container">
-        <h2>Your To-Do Lists</h2>
-        {% for todolist in todolists %}
-            <div class="todolist-wrapper">
-                <div class="todolist" id="todolist-{{ todolist.id }}">
-                    <a href="{% url 'todolist_tasks' todolist.id %}">
+    <!-- Декоративные круги -->
+    <div class="circle"></div>
+    <div class="circle"></div>
+
+    <div class="content-container">
+        <h1>Create a New To-Do List</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="todolist_name" placeholder="Enter To-Do List Name" required>
+            <button type="submit">Create</button>
+        </form>
+
+        <div class="todolist-container">
+            <h2>Your To-Do Lists</h2>
+            {% for todolist in todolists %}
+                <!-- Обёртка для каждой карточки -->
+                <div class="todolist-wrapper" id="todolist-wrapper-{{ todolist.id }}">
+                    <!-- Сама кликабельная карточка -->
+                    <a href="{% url 'todolist_tasks' todolist.id %}"
+                       class="todolist"
+                       id="todolist-{{ todolist.id }}">
                         <h2>{{ todolist.name }}</h2>
                         <span>Created at: {{ todolist.created_at }}</span>
                     </a>
+
+                    <!-- Кнопки Rename/Delete -->
+                    <div class="action-buttons">
+                        <button class="rename-button"
+                                onclick="toggleRenameInput(event, {{ todolist.id }})">
+                            Rename
+                        </button>
+                        <button class="delete-button"
+                                onclick="deleteTodolist(event, {{ todolist.id }})">
+                            Delete
+                        </button>
+                    </div>
+
+                    <!-- Поле для ввода нового названия -->
+                    <div class="rename-input" id="rename-input-{{ todolist.id }}">
+                        <input type="text" placeholder="Enter new name" id="rename-text-{{ todolist.id }}">
+                        <button onclick="renameTodolist(event, {{ todolist.id }})">Save</button>
+                    </div>
                 </div>
-                <div class="action-buttons">
-                    <button class="rename-button" onclick="toggleRenameInput(event, {{ todolist.id }})">Rename</button>
-                    <button class="delete-button" onclick="deleteTodolist(event, {{ todolist.id }})">Delete</button>
-                </div>
-                <div class="rename-input" id="rename-input-{{ todolist.id }}">
-                    <input type="text" placeholder="Enter new name" id="rename-text-{{ todolist.id }}">
-                    <button onclick="renameTodolist(event, {{ todolist.id }})">Save</button>
-                </div>
-            </div>
-        {% empty %}
-            <p>You don't have any To-Do Lists yet. Start by creating one!</p>
-        {% endfor %}
+            {% empty %}
+                <p>You don't have any To-Do Lists yet. Start by creating one!</p>
+            {% endfor %}
+        </div>
     </div>
 
-<script>
-    // Функция удаления To-Do списка
-    function deleteTodolist(event, todolistId) {
-        event.preventDefault();
-        fetch(`/todolist/delete_todolist/${todolistId}/`, {  // Исправленный URL
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                document.getElementById(`todolist-${todolistId}`).parentElement.remove();  // Удаление из DOM
-            } else {
-                console.error('Failed to delete To-Do List on the server.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
-
-    // Функция отображения поля для переименования
-    function toggleRenameInput(event, todolistId) {
-        event.preventDefault();
-        const renameInput = document.getElementById(`rename-input-${todolistId}`);
-        if (renameInput) {
-            renameInput.style.display = renameInput.style.display === 'none' || renameInput.style.display === '' ? 'block' : 'none';
+    <script>
+        // Удаление списка
+        function deleteTodolist(event, todolistId) {
+            event.preventDefault();
+            fetch(`/todolist/delete_todolist/${todolistId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Удаляем только весь блок-обёртку (а не всех соседей)
+                    document.getElementById(`todolist-wrapper-${todolistId}`).remove();
+                } else {
+                    console.error('Failed to delete To-Do List on the server.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
-    }
 
-    // Функция переименования To-Do списка
-    function renameTodolist(event, todolistId) {
-        event.preventDefault();
-        const newNameInput = document.getElementById(`rename-text-${todolistId}`);
-        if (newNameInput) {
-            const newName = newNameInput.value.trim();
-            if (newName) {
-                fetch(`/todolist/rename_todolist/${todolistId}/`, {  // Исправленный URL
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name: newName })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelector(`#todolist-${todolistId} h2`).textContent = newName;
-                        toggleRenameInput(event, todolistId);  // Скрываем поле ввода после успешного обновления
-                    } else {
-                        console.error('Failed to rename To-Do List:', data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+        // Показ/скрытие поля "Rename"
+        function toggleRenameInput(event, todolistId) {
+            event.preventDefault();
+            const renameInput = document.getElementById(`rename-input-${todolistId}`);
+            if (renameInput) {
+                renameInput.style.display =
+                    (renameInput.style.display === 'none' || !renameInput.style.display)
+                    ? 'block'
+                    : 'none';
             }
         }
-    }
-</script>
 
-
+        // Сохранение нового имени
+        function renameTodolist(event, todolistId) {
+            event.preventDefault();
+            const newNameInput = document.getElementById(`rename-text-${todolistId}`);
+            if (newNameInput) {
+                const newName = newNameInput.value.trim();
+                if (newName) {
+                    fetch(`/todolist/rename_todolist/${todolistId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ name: newName })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Обновляем заголовок
+                            document.querySelector(`#todolist-${todolistId} h2`).textContent = newName;
+                            // Скрываем поле ввода
+                            toggleRenameInput(event, todolistId);
+                        } else {
+                            console.error('Failed to rename To-Do List:', data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
+            }
+        }
+    </script>
 </body>
 </html>
