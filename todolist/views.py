@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+# УДАЛЯЕМ: from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
@@ -10,6 +11,9 @@ from .tokens import account_activation_token
 from .forms import CustomUserCreationForm, ProfileForm
 from django.views.decorators.csrf import csrf_exempt
 import json
+
+# Обращаемся к кастомной модели
+User = get_user_model()
 
 def homepage(request):
     return render(request, 'homepage.html')
@@ -21,37 +25,44 @@ def task_list_view(request, todolist_id=None):
         return render(request, 'task_list.html', {'todolist': todolist})
     return redirect('create_todo')
 
-def register(request):
+def auth_view(request):
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data.get('email')
-            username = form.cleaned_data.get('username')
+        form_type = request.POST.get('form_type')
+        if form_type == 'login':
+            # ЛОГИН по Email
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            try:
+                user_obj = User.objects.get(email=email)
+                user = authenticate(request, username=user_obj.username, password=password)
+            except User.DoesNotExist:
+                user = None
 
-            if User.objects.filter(email=email).exists():
-                return render(request, 'register.html', {
-                    'form': form,
-                    'error': 'This email is already in use. Please try another one.'
-                })
-            if User.objects.filter(username=username).exists():
-                return render(request, 'register.html', {
-                    'form': form,
-                    'error': 'This username is already in use. Please try another one.'
-                })
+            if user is not None:
+                login(request, user)
+                return redirect('create_todo')
+            else:
+                return render(request, 'auth.html', {'error_login': 'Invalid email or password'})
+        elif form_type == 'register':
+            form = CustomUserCreationForm(request.POST)
+            if form.is_valid():
+                email = form.cleaned_data.get('email')
+                username = form.cleaned_data.get('username')
 
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()
-            login(request, user)
-            return redirect('create_todo')
-        else:
-            return render(request, 'register.html', {
-                'form': form,
-                'error': 'Please fix the errors in the form.'
-            })
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'register.html', {'form': form})
+                if User.objects.filter(email=email).exists():
+                    return render(request, 'auth.html', {'error_register': 'Email already in use'})
+                if User.objects.filter(username=username).exists():
+                    return render(request, 'auth.html', {'error_register': 'Username already in use'})
+
+                user = form.save(commit=False)
+                user.set_password(form.cleaned_data['password'])
+                user.save()
+                login(request, user)
+                return redirect('create_todo')
+            else:
+                return render(request, 'auth.html', {'error_register': 'Please fix the errors in the form'})
+
+    return render(request, 'auth.html')
 
 @login_required
 def home(request):
@@ -67,32 +78,13 @@ def activate(request, uidb64, token):
     if user is not None and account_activation_token.check_token(user, token):
         user.is_active = True
         user.save()
-        return redirect('login')
+        return redirect('auth_view')
     else:
         return JsonResponse({'error': 'Activation link is invalid!'}, status=400)
 
-def login_view(request):
-    if request.method == 'POST':
-        # Здесь мы ожидаем, что пользователь вводит свой Email в поле "username"
-        email = request.POST.get('username')
-        password = request.POST.get('password')
-        try:
-            user_obj = User.objects.get(email=email)
-            # Аутентифицируем, подставляя реальный username
-            user = authenticate(request, username=user_obj.username, password=password)
-        except User.DoesNotExist:
-            user = None
-
-        if user is not None:
-            login(request, user)
-            return redirect('create_todo')
-        else:
-            return render(request, 'login.html', {'error': 'Invalid credentials.'})
-    return render(request, 'login.html')
-
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect('auth_view')
 
 @login_required
 def profile_edit(request):
@@ -115,7 +107,6 @@ def profile_edit(request):
     else:
         form = ProfileForm(instance=request.user)
 
-    # Подготовка данных для статистики профиля
     tasks_completed = Task.objects.filter(user=request.user, completed=True).count()
     todo_lists = ToDoList.objects.filter(user=request.user).count()
     last_login = request.user.last_login
@@ -132,7 +123,6 @@ def profile_edit(request):
 @csrf_exempt
 def task_list(request, todolist_id):
     todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
-
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
         title = data.get("title")
@@ -140,7 +130,6 @@ def task_list(request, todolist_id):
             Task.objects.create(title=title, todolist=todolist, user=request.user)
             return JsonResponse({"success": True}, status=201)
         return JsonResponse({"success": False, "message": "Task title is required."}, status=400)
-
     tasks = todolist.tasks.all().order_by("completed", "created_at")
     return render(request, 'task_list.html', {'todolist': todolist, 'tasks': tasks})
 
@@ -180,18 +169,16 @@ def get_tasks_json(request):
     todolist_id = request.GET.get('todolist_id')
     if not todolist_id:
         return JsonResponse([], safe=False)
-
     todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
 
     def build_task_tree(task):
         return {
             "id": task.id,
             "title": task.title,
-            "detail": task.detail if task.detail else "",  # Теперь возвращаем detail
+            "detail": getattr(task, 'detail', '') or '',
             "completed": task.completed,
             "children": [build_task_tree(subtask) for subtask in task.subtasks.all()]
         }
-
     tasks = todolist.tasks.filter(parent=None)
     task_tree = [build_task_tree(task) for task in tasks]
     return JsonResponse(task_tree, safe=False)
@@ -203,7 +190,6 @@ def create_todo(request):
         if name:
             ToDoList.objects.create(name=name, user=request.user)
             return redirect('create_todo')
-
     todolists = ToDoList.objects.filter(user=request.user)
     return render(request, 'create_todo.html', {'todolists': todolists})
 
@@ -230,7 +216,6 @@ def rename_todolist(request, todolist_id):
                 data = json.loads(request.body.decode("utf-8"))
             except json.JSONDecodeError:
                 return JsonResponse({"success": False, "message": "Invalid JSON."}, status=400)
-
             new_name = data.get("name")
             if new_name:
                 todolist.name = new_name
@@ -242,7 +227,6 @@ def rename_todolist(request, todolist_id):
             return JsonResponse({"success": False, "message": str(e)}, status=500)
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
 
-# Новый эндпоинт для сохранения/обновления detail задачи
 @login_required
 @csrf_exempt
 def add_detail(request, task_id):
@@ -255,12 +239,11 @@ def add_detail(request, task_id):
             task = get_object_or_404(Task, id=task_id, user=request.user)
             data = json.loads(request.body.decode("utf-8"))
             detail_text = data.get("detail", "")
-            task.detail = detail_text
+            setattr(task, 'detail', detail_text)
             task.save()
             return JsonResponse({"success": True}, status=200)
         except Task.DoesNotExist:
             return JsonResponse({"success": False, "message": "Task not found."}, status=404)
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)}, status=500)
-
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)

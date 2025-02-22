@@ -37,47 +37,52 @@
             text-decoration: none;
             font-weight: bold;
             font-size: 16px;
-            padding: 10px 20px;
-            border-radius: 20px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
             border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             color: #fff;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        /* Кнопка Home (иконка домика) */
-        .home-button {
-            background-color: #4CAF50;
+        /*
+          Объединяем стили Home, Back и гамбургера
+          чтобы они выглядели одинаково
+        */
+        .icon-button, .sidebar-toggle {
+            background-color: #0056b3;
+            font-size: 22px;
+            padding: 10px 15px;
+            border-radius: 4px;
         }
-        .home-button:hover {
-            background-color: #45a049;
+        .icon-button:hover, .sidebar-toggle:hover {
+            background-color: #003d82;
             transform: scale(1.05);
         }
 
-        /* Кнопка Back (иконка стрелки) */
-        .back-button {
-            background-color: #ff9800;
+        /* Кнопки профиля и выхода */
+        .profile-button {
+            background-color: #ff5722;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 20px;
         }
-        .back-button:hover {
-            background-color: #e68900;
-            transform: scale(1.05);
-        }
-
-        /* Примеры стилей для кнопок профиля / logout */
-        .profile-button { background-color: #ff5722; }
         .profile-button:hover {
             background-color: #e64a19;
             transform: scale(1.05);
         }
-        .logout-button { background-color: #2196F3; }
+        .logout-button {
+            background-color: #2196F3;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 20px;
+        }
         .logout-button:hover {
             background-color: #1976D2;
             transform: scale(1.05);
         }
 
-        /* Кнопки логина/регистрации */
+        /* Кнопка аутентификации (Log In / Register) */
         .auth-button {
             padding: 10px 20px;
             font-size: 16px;
@@ -89,7 +94,7 @@
         }
         .login-button {
             background: linear-gradient(135deg, #2196F3, #21CBF3);
-            color: #fff;
+            color: white;
         }
         .login-button:hover {
             background: linear-gradient(135deg, #21CBF3, #2196F3);
@@ -97,7 +102,7 @@
         }
         .register-button {
             background: linear-gradient(135deg, #FF5722, #FF7043);
-            color: #fff;
+            color: white;
         }
         .register-button:hover {
             background: linear-gradient(135deg, #FF7043, #FF5722);
@@ -116,37 +121,21 @@
             border: 2px solid white;
         }
 
-        /* Кнопка-гамбургер для боковой панели */
-        .sidebar-toggle {
-            background-color: #0056b3;
-            color: #fff;
-            border: none;
-            font-size: 22px;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        .sidebar-toggle:hover {
-            background-color: #003d82;
-            transform: scale(1.05);
-        }
-
         /* Боковая панель (sidebar) */
         .sidebar {
             position: fixed;
             top: 0;
             left: 0;
             height: 100%;
-            width: 0;           /* изначально скрыта */
+            width: 0;
             overflow-x: hidden;
             background-color: #111;
             transition: width 0.4s;
-            z-index: 999;       /* ниже хедера, но выше контента */
-            padding-top: 60px;  /* отступ под хедер */
+            z-index: 999;
+            padding-top: 60px;
         }
         .sidebar.open {
-            width: 250px; /* ширина при открытии */
+            width: 250px;
         }
 
         .sidebar a {
@@ -175,7 +164,7 @@
 
         /* Основной контент (не залезает под хедер) */
         .main-content {
-            margin-top: 80px; /* отступ под хедер */
+            margin-top: 80px;
             padding: 20px;
         }
     </style>
@@ -185,16 +174,15 @@
     <nav>
         <div class="left-buttons">
             {% if request.resolver_match.url_name != 'homepage' %}
-                <!-- Иконка домика (Unicode: 🏠) -->
-                <a href="{% url 'homepage' %}" class="home-button" aria-label="Home">🏠</a>
+                <!-- Домик (⌂), стилизованный как гамбургер -->
+                <a href="{% url 'homepage' %}" class="icon-button" aria-label="Home">⌂</a>
             {% endif %}
             {% if request.resolver_match.url_name != 'homepage' %}
-                <!-- Иконка стрелки (Unicode: ←) -->
-                <button class="back-button" onclick="goBack()" aria-label="Back">←</button>
+                <!-- Стрелка (◀), стилизованная как гамбургер -->
+                <button class="icon-button" onclick="goBack()" aria-label="Back">◀</button>
             {% endif %}
-
-            <!-- Кнопка для боковой панели -->
-            <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+            <!-- Гамбургер -->
+            <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Open Sidebar">☰</button>
         </div>
 
         <div class="profile-menu">
@@ -205,26 +193,23 @@
                 <a href="{% url 'profile_edit' %}" class="profile-button">Profile</a>
                 <a href="{% url 'logout' %}" class="logout-button">Logout</a>
             {% else %}
-                <a href="{% url 'login' %}" class="login-button auth-button">Log In</a>
-                <a href="{% url 'register' %}" class="register-button auth-button">Register</a>
+                <!-- Используем единый маршрут для аутентификации -->
+                <a href="{% url 'auth_view' %}" class="login-button auth-button">Log In / Register</a>
             {% endif %}
         </div>
     </nav>
 
     <!-- Боковая панель (sidebar) -->
     <div id="sidebar" class="sidebar">
-        <!-- Кнопка закрытия (X) -->
         <button class="closebtn" onclick="toggleSidebar()">×</button>
-
-        <!-- Пример ссылок/разделов в боковой панели -->
         <a href="{% url 'create_todo' %}">My To-Do Lists</a>
         <a href="#">Projects</a>
         <a href="#">Settings</a>
     </div>
 
-    <!-- Здесь далее идет контент страницы -->
+    <!-- Основной контент страницы -->
     <div class="main-content">
-        <!-- Например, {% block content %}{% endblock %} если используете extends -->
+        {% block content %}{% endblock %}
     </div>
 
     <script>
@@ -232,7 +217,6 @@
             window.history.back();
         }
 
-        // Переключаем класс "open" у боковой панели
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('open');

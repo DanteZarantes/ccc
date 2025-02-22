@@ -1,0 +1,147 @@
+{% include 'header.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 350px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        /* Стиль для вывода ошибок */
+        .error-message {
+            color: #ffaaaa;
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Переключатели вкладок -->
+        <div class="tabs">
+            <div class="tab active" id="login-tab">Login</div>
+            <div class="tab" id="register-tab">Register</div>
+        </div>
+
+        <!-- Форма логина -->
+        <div id="login-form" class="form-container active">
+            <form method="POST" action="{% url 'auth_view' %}">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="login">
+
+                <!-- Поля логина -->
+                <input type="text" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+
+                <!-- Отображение ошибки при логине, если есть -->
+                {% if error_login %}
+                    <div class="error-message">{{ error_login }}</div>
+                {% endif %}
+
+                <button type="submit">Log In</button>
+            </form>
+        </div>
+
+        <!-- Форма регистрации -->
+        <div id="register-form" class="form-container">
+            <form method="POST" action="{% url 'auth_view' %}">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="register">
+
+                <!-- Поля регистрации -->
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+
+                <!-- Отображение ошибки при регистрации, если есть -->
+                {% if error_register %}
+                    <div class="error-message">{{ error_register }}</div>
+                {% endif %}
+
+                <button type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Переключение вкладок
+        document.getElementById("login-tab").addEventListener("click", function() {
+            document.getElementById("login-form").classList.add("active");
+            document.getElementById("register-form").classList.remove("active");
+            this.classList.add("active");
+            document.getElementById("register-tab").classList.remove("active");
+        });
+
+        document.getElementById("register-tab").addEventListener("click", function() {
+            document.getElementById("register-form").classList.add("active");
+            document.getElementById("login-form").classList.remove("active");
+            this.classList.add("active");
+            document.getElementById("login-tab").classList.remove("active");
+        });
+    </script>
+</body>
+</html>

@@ -3,10 +3,12 @@ from django.urls import path, include
 from todolist import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),  # Админка
+    path('admin/', admin.site.urls),        # Админка
     path('', views.homepage, name='homepage'),  # Главная страница
-    path('todolist/', include('todolist.urls')),  # Все маршруты To-Do List
-    path('accounts/', include('todolist.urls')),  # Регистрация, вход, выход
+
+    # Маршруты To-Do List (включают в себя всё, что относится к задачам,
+    # а также маршрут для auth_view, если вы его объявили в todolist/urls)
+    path('todolist/', include('todolist.urls')),
 ]
 
 # Добавляем обработку медиа-файлов

@@ -160,8 +160,8 @@
     <div class="content-container">
         <h1>Welcome to the To-Do List App</h1>
         <p>Manage your tasks efficiently and stay organized!</p>
-        <!-- Кнопка Start -->
-        <a href="{% if user.is_authenticated %}{% url 'create_todo' %}{% else %}{% url 'register' %}{% endif %}" class="start-button">
+        <!-- Кнопка Start, обновленная ссылка для неавторизованных пользователей -->
+        <a href="{% if user.is_authenticated %}{% url 'create_todo' %}{% else %}{% url 'auth_view' %}{% endif %}" class="start-button">
             Start
         </a>
 
