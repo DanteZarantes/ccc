@@ -203,8 +203,9 @@
     <div id="sidebar" class="sidebar">
         <button class="closebtn" onclick="toggleSidebar()">×</button>
         <a href="{% url 'create_todo' %}">My To-Do Lists</a>
-        <a href="#">Projects</a>
-        <a href="#">Settings</a>
+        <!-- Исправляем ссылки на Projects & Settings -->
+        <a href="{% url 'projects' %}">Projects</a>
+        <a href="{% url 'settings_view' %}">Settings</a>
     </div>
 
     <!-- Основной контент страницы -->

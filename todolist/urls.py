@@ -50,4 +50,8 @@ urlpatterns = [
         auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'),
         name='password_reset_complete'
     ),
+
+    # Новые маршруты для Projects и Settings
+    path('projects/', views.projects, name='projects'),
+    path('settings/', views.settings_view, name='settings_view'),
 ]

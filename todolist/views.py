@@ -247,3 +247,19 @@ def add_detail(request, task_id):
         except Exception as e:
             return JsonResponse({"success": False, "message": str(e)}, status=500)
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
+
+# Новые представления для Projects и Settings
+
+@login_required
+def projects(request):
+    """
+    Отображает страницу проектов.
+    """
+    return render(request, 'projects.html')
+
+@login_required
+def settings_view(request):
+    """
+    Отображает страницу настроек.
+    """
+    return render(request, 'settings.html')

@@ -3,15 +3,18 @@ from django.urls import path, include
 from todolist import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),        # Админка
-    path('', views.homepage, name='homepage'),  # Главная страница
+    path('admin/', admin.site.urls),
+    path('', views.homepage, name='homepage'),
 
-    # Маршруты To-Do List (включают в себя всё, что относится к задачам,
-    # а также маршрут для auth_view, если вы его объявили в todolist/urls)
+    # Если нужно, чтобы Projects/Settings были без /todolist/
+    path('projects/', views.projects, name='projects'),
+    path('settings/', views.settings_view, name='settings_view'),
+
+    # Остальные маршруты приложения To-Do
     path('todolist/', include('todolist.urls')),
 ]
 
-# Добавляем обработку медиа-файлов
+# Добавляем обработку медиа-файлов (для DEBUG)
 from django.conf import settings
 from django.conf.urls.static import static
 

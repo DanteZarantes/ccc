@@ -1,0 +1,110 @@
+{% extends "header.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-box">
+        <h1 class="page-title">Settings</h1>
+        <p class="description">
+            Здесь вы можете изменить личные настройки, обновить профиль, уведомления и многое другое.
+        </p>
+
+        <!-- Пример секции общих настроек -->
+        <div class="settings-section">
+            <h3>Account Settings</h3>
+            <p>Настройки аккаунта, например изменение пароля, email и т.д.</p>
+            <button class="btn-action">Change Password</button>
+        </div>
+
+        <!-- Пример секции настроек уведомлений -->
+        <div class="settings-section">
+            <h3>Notifications</h3>
+            <p>Управляйте типами уведомлений, которые вы получаете.</p>
+            <button class="btn-action">Manage Notifications</button>
+        </div>
+
+        <!-- Пример секции других настроек -->
+        <div class="settings-section">
+            <h3>Theme & Appearance</h3>
+            <p>Смена темы, цвета, шрифтов и т.д.</p>
+            <button class="btn-action">Customize</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Повторяем стили, чтобы сохранить единый дизайн */
+
+.content-wrapper {
+    position: relative;
+    min-height: calc(100vh - 80px);
+    padding: 50px 20px;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    overflow: hidden;
+}
+.content-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: -100px;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.container-box {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    color: #fff;
+}
+
+.page-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+.description {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+/* Секция настроек */
+.settings-section {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+.settings-section h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+.settings-section p {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+}
+
+/* Кнопки */
+.btn-action {
+    background: #2196F3; /* Синий, как у вашей Logout кнопки */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+.btn-action:hover {
+    background: #1976D2;
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}
