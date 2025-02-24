@@ -45,13 +45,10 @@
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        /*
-          Объединяем стили Home, Back и гамбургера
-          чтобы они выглядели одинаково
-        */
+        /* Иконки (Дом, Назад, Гамбургер) */
         .icon-button, .sidebar-toggle {
             background-color: #0056b3;
-            font-size: 22px;
+            font-size: 22px; /* общий размер текста/иконки */
             padding: 10px 15px;
             border-radius: 4px;
         }
@@ -174,14 +171,18 @@
     <nav>
         <div class="left-buttons">
             {% if request.resolver_match.url_name != 'homepage' %}
-                <!-- Домик (⌂), стилизованный как гамбургер -->
-                <a href="{% url 'homepage' %}" class="icon-button" aria-label="Home">⌂</a>
+                <!-- Домик, залитый белым (inline SVG) -->
+                <a href="{% url 'homepage' %}" class="icon-button" aria-label="Home">
+                    <svg width="22" height="22" viewBox="0 0 576 512" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M541 229.16 312.69 58.53a31.71 31.71 0 0 0-39.38 0L35 229.16a16.14 16.14 0 0 0-2.56 22.59l10 12.19a16.06 16.06 0 0 0 22.59 2.56l27.31-22V464a16 16 0 0 0 16 16H224a16 16 0 0 0 16-16V368h96v96a16 16 0 0 0 16 16h115.64a16 16 0 0 0 16-16V244.41l27.31 22a16.06 16.06 0 0 0 22.59-2.56l10-12.19a16.06 16.06 0 0 0-2.54-22.46z"/>
+                    </svg>
+                </a>
             {% endif %}
             {% if request.resolver_match.url_name != 'homepage' %}
-                <!-- Стрелка (◀), стилизованная как гамбургер -->
+                <!-- Стрелка (◀) -->
                 <button class="icon-button" onclick="goBack()" aria-label="Back">◀</button>
             {% endif %}
-            <!-- Гамбургер -->
+            <!-- Гамбургер (☰) -->
             <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Open Sidebar">☰</button>
         </div>
 
@@ -203,7 +204,6 @@
     <div id="sidebar" class="sidebar">
         <button class="closebtn" onclick="toggleSidebar()">×</button>
         <a href="{% url 'create_todo' %}">My To-Do Lists</a>
-        <!-- Исправляем ссылки на Projects & Settings -->
         <a href="{% url 'projects' %}">Projects</a>
         <a href="{% url 'settings_view' %}">Settings</a>
     </div>
@@ -217,7 +217,6 @@
         function goBack() {
             window.history.back();
         }
-
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('open');

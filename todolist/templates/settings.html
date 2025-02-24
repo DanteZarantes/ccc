@@ -1,110 +1,164 @@
 {% extends "header.html" %}
 
 {% block content %}
-<div class="content-wrapper">
-    <div class="container-box">
-        <h1 class="page-title">Settings</h1>
-        <p class="description">
-            Здесь вы можете изменить личные настройки, обновить профиль, уведомления и многое другое.
-        </p>
+<style>
+/* Делаем фон body градиентным */
+body {
+    background: linear-gradient(135deg, #6a11cb, #2575fc, #3d5afe, #6a85ff);
+    background-size: 200% 200%;
+    animation: gradientAnimation 8s ease infinite;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* чтобы круги не вызывали горизонтальную прокрутку */
+}
 
-        <!-- Пример секции общих настроек -->
-        <div class="settings-section">
+/* Убираем возможный белый фон у .main-content, заданный в header.html */
+.main-content {
+    background-color: transparent !important;
+}
+
+/* Анимация «движения» градиента */
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    25% { background-position: 50% 50%; }
+    50% { background-position: 100% 50%; }
+    75% { background-position: 50% 100%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Декоративный круг */
+.circle {
+    position: absolute;
+    top: 100px; /* чтобы круг не уехал под шапку */
+    left: 20%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Контейнер с основным контентом */
+.content-container {
+    max-width: 1200px;
+    margin: 120px auto 0; /* отступ сверху, чтобы текст не прятался за фикс. шапкой */
+    position: relative;
+    z-index: 1; /* над кругом */
+    text-align: center;
+    padding: 20px;
+}
+
+/* Заголовки и параграфы */
+h1 {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+    animation: fadeIn 2s ease forwards;
+    opacity: 0;
+}
+p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    animation: fadeIn 2.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Контейнер для секций (блоков) настроек */
+.info-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Блоки настроек */
+.info-block {
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    max-width: 300px;
+    flex: 1 1 300px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.info-block:nth-child(1) {
+    background-color: rgba(106, 17, 203, 0.8); /* фиолетовый */
+}
+.info-block:nth-child(2) {
+    background-color: rgba(37, 117, 252, 0.8); /* голубой */
+}
+.info-block:nth-child(3) {
+    background-color: rgba(76, 175, 80, 0.8);  /* зелёный */
+}
+
+.info-block:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.info-block h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+.info-block p {
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+/* Кнопка */
+.btn-action {
+    text-decoration: none;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    color: white;
+    background-color: #4CAF50;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border: none;
+    cursor: pointer;
+}
+.btn-action:hover {
+    background-color: #45a049;
+    transform: scale(1.1) rotate(2deg);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+</style>
+
+<!-- Добавляем декоративный круг и контейнер -->
+<div class="circle"></div>
+<div class="content-container">
+    <h1>Settings</h1>
+    <p>Здесь вы можете изменить личные настройки, обновить профиль, уведомления и многое другое.</p>
+
+    <div class="info-container">
+        <div class="info-block">
             <h3>Account Settings</h3>
             <p>Настройки аккаунта, например изменение пароля, email и т.д.</p>
             <button class="btn-action">Change Password</button>
         </div>
-
-        <!-- Пример секции настроек уведомлений -->
-        <div class="settings-section">
+        <div class="info-block">
             <h3>Notifications</h3>
             <p>Управляйте типами уведомлений, которые вы получаете.</p>
             <button class="btn-action">Manage Notifications</button>
         </div>
-
-        <!-- Пример секции других настроек -->
-        <div class="settings-section">
+        <div class="info-block">
             <h3>Theme & Appearance</h3>
             <p>Смена темы, цвета, шрифтов и т.д.</p>
             <button class="btn-action">Customize</button>
         </div>
     </div>
 </div>
-
-<style>
-/* Повторяем стили, чтобы сохранить единый дизайн */
-
-.content-wrapper {
-    position: relative;
-    min-height: calc(100vh - 80px);
-    padding: 50px 20px;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    overflow: hidden;
-}
-.content-wrapper::before {
-    content: '';
-    position: absolute;
-    top: -100px;
-    left: -100px;
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    z-index: 1;
-}
-
-.container-box {
-    position: relative;
-    z-index: 2;
-    max-width: 600px;
-    margin: 0 auto;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 30px;
-    text-align: center;
-    color: #fff;
-}
-
-.page-title {
-    font-size: 2rem;
-    margin-bottom: 20px;
-}
-.description {
-    font-size: 1.1rem;
-    margin-bottom: 30px;
-}
-
-/* Секция настроек */
-.settings-section {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
-    padding: 20px;
-    margin-bottom: 20px;
-    text-align: left;
-}
-.settings-section h3 {
-    font-size: 1.3rem;
-    margin-bottom: 10px;
-}
-.settings-section p {
-    font-size: 0.95rem;
-    margin-bottom: 10px;
-}
-
-/* Кнопки */
-.btn-action {
-    background: #2196F3; /* Синий, как у вашей Logout кнопки */
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
-}
-.btn-action:hover {
-    background: #1976D2;
-    transform: scale(1.05);
-}
-</style>
-{% endblock %}
+{% endblock content %}
