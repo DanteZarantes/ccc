@@ -12,7 +12,7 @@ urlpatterns = [
     # Выход из системы
     path('logout/', views.logout_view, name='logout'),
 
-    # Маршруты для работы с To-Do списками
+    # Маршруты для работы с To-Do списками (старый вариант)
     path('todolist/<int:todolist_id>/', views.task_list, name='todolist_tasks'),
     path('tasks/json/', views.get_tasks_json, name='get_tasks_json'),
     path('delete/<int:task_id>/', views.delete_task, name='delete_task'),
@@ -54,4 +54,7 @@ urlpatterns = [
     # Новые маршруты для Projects и Settings
     path('projects/', views.projects, name='projects'),
     path('settings/', views.settings_view, name='settings_view'),
+
+    # ВАЖНО: добавляем маршрут для task_list_view, чтобы кнопка "Open" работала
+    path('tasks/<int:todolist_id>/', views.task_list_view, name='task_list_view'),
 ]

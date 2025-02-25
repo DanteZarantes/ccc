@@ -6,15 +6,23 @@ from django.contrib.auth.models import AbstractUser
 class Task(models.Model):
     """Модель задачи."""
     title = models.CharField(max_length=200)
-    detail = models.TextField(blank=True, null=True)  # <-- Новое поле для подробного описания
+    detail = models.TextField(blank=True, null=True)  # <-- Поле для подробного описания
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     parent = models.ForeignKey(
-        'self', null=True, blank=True, related_name='subtasks', on_delete=models.CASCADE
+        'self',
+        null=True,
+        blank=True,
+        related_name='subtasks',
+        on_delete=models.CASCADE
     )
     todolist = models.ForeignKey(
-        'ToDoList', null=True, blank=True, related_name='tasks', on_delete=models.CASCADE
+        'ToDoList',
+        null=True,
+        blank=True,
+        related_name='tasks',
+        on_delete=models.CASCADE
     )
 
     def __str__(self):
@@ -25,14 +33,15 @@ class Task(models.Model):
         numbering = []
         task = self
         while task:
-            siblings = (
-                task.parent.subtasks.order_by('created_at') if task.parent
-                else Task.objects.filter(parent=None, todolist=self.todolist).order_by('created_at')
-            )
+            # Смотрим, среди "братьев" какая у задачи позиция
+            if task.parent:
+                siblings = task.parent.subtasks.order_by('created_at')
+            else:
+                siblings = Task.objects.filter(parent=None, todolist=self.todolist).order_by('created_at')
             position = list(siblings).index(task) + 1
             numbering.append(position)
             task = task.parent
-        return '.'.join(map(str, numbering[::-1]))  # Обратная нумерация
+        return '.'.join(map(str, numbering[::-1]))  # Переворачиваем список и склеиваем
 
     def check_completion(self):
         """Проверяет завершение всех подзадач и обновляет статус задачи."""
@@ -42,14 +51,20 @@ class Task(models.Model):
         if self.parent:
             self.parent.check_completion()
 
+
 class ToDoList(models.Model):
-    """Модель для блоков To-Do List."""
+    """
+    Модель для блоков To-Do List (или "Проектов").
+    Добавили поле description, чтобы можно было хранить описание проекта.
+    """
     name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)  # <-- Новое поле для описания
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
+
 
 class CustomUser(AbstractUser):
     """Модель кастомного пользователя."""

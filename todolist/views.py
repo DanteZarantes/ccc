@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-# УДАЛЯЕМ: from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.utils.http import urlsafe_base64_decode
@@ -12,7 +11,6 @@ from .forms import CustomUserCreationForm, ProfileForm
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-# Обращаемся к кастомной модели
 User = get_user_model()
 
 def homepage(request):
@@ -209,6 +207,10 @@ def delete_todolist(request, todolist_id):
 @login_required
 @csrf_exempt
 def rename_todolist(request, todolist_id):
+    """
+    Обновляет имя (и при желании описание) ToDoList.
+    Принимает JSON с полями "name" и "description" (необязательно).
+    """
     if request.method == "POST":
         try:
             todolist = get_object_or_404(ToDoList, id=todolist_id, user=request.user)
@@ -216,12 +218,19 @@ def rename_todolist(request, todolist_id):
                 data = json.loads(request.body.decode("utf-8"))
             except json.JSONDecodeError:
                 return JsonResponse({"success": False, "message": "Invalid JSON."}, status=400)
+
             new_name = data.get("name")
+            new_description = data.get("description")
+
             if new_name:
                 todolist.name = new_name
-                todolist.save()
-                return JsonResponse({"success": True, "message": "To-Do List renamed successfully."}, status=200)
-            return JsonResponse({"success": False, "message": "New name is required."}, status=400)
+            if new_description is not None:
+                # Если в модели есть поле description:
+                # todolist.description = new_description
+                pass
+
+            todolist.save()
+            return JsonResponse({"success": True, "message": "To-Do List updated successfully."}, status=200)
         except Exception as e:
             print(f"Error renaming ToDoList: {e}")
             return JsonResponse({"success": False, "message": str(e)}, status=500)
@@ -231,8 +240,8 @@ def rename_todolist(request, todolist_id):
 @csrf_exempt
 def add_detail(request, task_id):
     """
-    Сохраняет или обновляет подробное описание (detail) для задачи с id=task_id.
-    Требует, чтобы в модели Task было поле `detail = models.TextField(blank=True, null=True)`.
+    Сохраняет или обновляет подробное описание (detail) для задачи.
+    Требует наличие поля detail в модели Task.
     """
     if request.method == "POST":
         try:
@@ -253,9 +262,22 @@ def add_detail(request, task_id):
 @login_required
 def projects(request):
     """
-    Отображает страницу проектов.
+    Отображает страницу проектов (ToDoList как проекты).
+    При POST - создаёт новый проект.
     """
-    return render(request, 'projects.html')
+    if request.method == "POST":
+        project_name = request.POST.get("project_name")
+        project_description = request.POST.get("project_description", "")
+        if project_name:
+            new_project = ToDoList.objects.create(name=project_name, user=request.user)
+            # Если есть поле description в модели:
+            # new_project.description = project_description
+            new_project.save()
+        return redirect('projects')
+
+    # Если GET
+    projects_list = ToDoList.objects.filter(user=request.user).order_by('-id')
+    return render(request, 'projects.html', {'projects': projects_list})
 
 @login_required
 def settings_view(request):
