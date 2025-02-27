@@ -2,61 +2,55 @@
 
 {% block content %}
 <style>
-/* Делаем фон body градиентным */
-body {
-    background: linear-gradient(135deg, #6a11cb, #2575fc, #3d5afe, #6a85ff);
-    background-size: 200% 200%;
-    animation: gradientAnimation 8s ease infinite;
-    color: #fff;
+/* Задаём 100% высоты для html и body */
+html, body {
     margin: 0;
     padding: 0;
-    overflow-x: hidden; /* чтобы круги не вызывали горизонтальную прокрутку */
+    height: 100%;
 }
 
-/* Убираем возможный белый фон у .main-content, заданный в header.html */
+/* Статичный фон (cover + fixed), без анимации градиента */
+body {
+    background: linear-gradient(135deg, #6a11cb, #2575fc, #3d5afe, #6a85ff) no-repeat center center fixed;
+    background-size: cover;
+    color: #fff;
+    overflow-x: hidden; /* чтобы не было горизонтальной прокрутки */
+}
+
+/* Убираем возможный фон у .main-content из header.html */
 .main-content {
     background-color: transparent !important;
 }
 
-/* Анимация «движения» градиента */
-@keyframes gradientAnimation {
-    0% { background-position: 0% 50%; }
-    25% { background-position: 50% 50%; }
-    50% { background-position: 100% 50%; }
-    75% { background-position: 50% 100%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* Декоративный круг */
+/* Декоративный круг с небольшой анимацией */
 .circle {
     position: absolute;
-    top: 100px; /* чтобы круг не уехал под шапку */
+    top: 100px;
     left: 20%;
     width: 400px;
     height: 400px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
-    animation: float 6s ease-in-out infinite;
     z-index: 0;
+    animation: float 6s ease-in-out infinite; /* плавающее движение */
 }
-
 @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
+    0%   { transform: translateY(0px); }
+    50%  { transform: translateY(-20px); }
     100% { transform: translateY(0px); }
 }
 
-/* Контейнер с основным контентом */
+/* Контейнер всего контента */
 .content-container {
     max-width: 1200px;
-    margin: 120px auto 0; /* отступ сверху, чтобы текст не прятался за фикс. шапкой */
+    margin: 120px auto 0;
     position: relative;
     z-index: 1; /* над кругом */
     text-align: center;
     padding: 20px;
 }
 
-/* Заголовки и параграфы */
+/* Заголовок и параграф (fadeIn-анимация) */
 h1 {
     font-size: 3.5rem;
     margin-bottom: 0.5rem;
@@ -69,13 +63,12 @@ p {
     animation: fadeIn 2.5s ease forwards;
     opacity: 0;
 }
-
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(30px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Контейнер для секций (блоков) настроек */
+/* Контейнер для блоков настроек */
 .info-container {
     display: flex;
     flex-wrap: wrap;
@@ -83,7 +76,7 @@ p {
     gap: 20px;
 }
 
-/* Блоки настроек */
+/* Блоки настроек (стеклянный эффект + тонкая рамка) */
 .info-block {
     padding: 20px;
     border-radius: 15px;
@@ -91,23 +84,22 @@ p {
     max-width: 300px;
     flex: 1 1 300px;
     transition: transform 0.3s, box-shadow 0.3s;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.2);
 }
-
 .info-block:nth-child(1) {
-    background-color: rgba(106, 17, 203, 0.8); /* фиолетовый */
+    background-color: rgba(106, 17, 203, 0.8);
 }
 .info-block:nth-child(2) {
-    background-color: rgba(37, 117, 252, 0.8); /* голубой */
+    background-color: rgba(37, 117, 252, 0.8);
 }
 .info-block:nth-child(3) {
-    background-color: rgba(76, 175, 80, 0.8);  /* зелёный */
+    background-color: rgba(76, 175, 80, 0.8);
 }
-
 .info-block:hover {
     transform: translateY(-10px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
-
 .info-block h3 {
     font-size: 1.5rem;
     margin-bottom: 10px;
@@ -117,7 +109,7 @@ p {
     margin-bottom: 15px;
 }
 
-/* Кнопка */
+/* Кнопка действия */
 .btn-action {
     text-decoration: none;
     padding: 15px 40px;
@@ -137,27 +129,47 @@ p {
 }
 </style>
 
-<!-- Добавляем декоративный круг и контейнер -->
 <div class="circle"></div>
 <div class="content-container">
     <h1>Settings</h1>
-    <p>Здесь вы можете изменить личные настройки, обновить профиль, уведомления и многое другое.</p>
+    <p>Here you can update your personal settings, manage notifications, and more.</p>
 
     <div class="info-container">
+        <!-- Account Settings block -->
         <div class="info-block">
             <h3>Account Settings</h3>
-            <p>Настройки аккаунта, например изменение пароля, email и т.д.</p>
+            <p>Change your password, email, or other account details.</p>
             <button class="btn-action">Change Password</button>
         </div>
+
+        <!-- Notifications block -->
         <div class="info-block">
             <h3>Notifications</h3>
-            <p>Управляйте типами уведомлений, которые вы получаете.</p>
+            <p>Manage the types of notifications you receive.</p>
             <button class="btn-action">Manage Notifications</button>
         </div>
+
+        <!-- Theme & Appearance block -->
         <div class="info-block">
             <h3>Theme & Appearance</h3>
-            <p>Смена темы, цвета, шрифтов и т.д.</p>
-            <button class="btn-action">Customize</button>
+            <p>Switch themes, colors, fonts, and more.</p>
+
+            <!-- Форма для выбора темы (light/dark/gradient) -->
+            <form method="POST" action="{% url 'change_theme' %}">
+                {% csrf_token %}
+                <div style="margin-bottom: 10px;">
+                    <label style="margin-right: 10px;">
+                        <input type="radio" name="theme" value="light"> Light
+                    </label>
+                    <label style="margin-right: 10px;">
+                        <input type="radio" name="theme" value="dark"> Dark
+                    </label>
+                    <label>
+                        <input type="radio" name="theme" value="gradient" checked> Gradient
+                    </label>
+                </div>
+                <button type="submit" class="btn-action">Apply Theme</button>
+            </form>
         </div>
     </div>
 </div>

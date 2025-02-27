@@ -159,7 +159,7 @@
             width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.5);
             z-index: 999;
-            display: none; /* скрыто по умолчанию */
+            display: none;
         }
         .modal {
             position: fixed;
@@ -172,7 +172,7 @@
             padding: 20px;
             border-radius: 10px;
             z-index: 1000;
-            display: none; /* скрыто по умолчанию */
+            display: none;
         }
         .modal-content {
             display: flex;
@@ -203,7 +203,7 @@
     </style>
 </head>
 <body>
-    <!-- Decorative circles -->
+    <!-- Декоративные круги -->
     <div class="circle"></div>
     <div class="circle"></div>
 
@@ -213,7 +213,7 @@
             Here you can manage your projects, add new ones, and view existing ones.
         </p>
 
-        <!-- Form to create a new project -->
+        <!-- Форма создания нового проекта -->
         <form method="POST" class="create-form">
             {% csrf_token %}
             <input type="text" name="project_name" placeholder="Project name" required>
@@ -221,7 +221,7 @@
             <button type="submit" class="btn-project">Create New Project</button>
         </form>
 
-        <!-- Display existing projects from the context -->
+        <!-- Список существующих проектов -->
         <div class="info-container">
             {% for project in projects %}
             <div class="info-block">
@@ -242,7 +242,7 @@
                     {% endif %}
                 </p>
                 <div class="project-actions">
-                    <!-- "Open" ведёт на список задач (task_list_view) -->
+                    <!-- "Open" ведёт на список задач -->
                     <a href="{% url 'task_list_view' project.id %}" class="btn-project">Open</a>
                     <!-- Rename -->
                     <button type="button" class="btn-project" onclick="openEditModal({{ project.id }}, 'rename')">
@@ -262,7 +262,7 @@
         </div>
     </div>
 
-    <!-- ===== Модальное окно для Rename / Edit Description ===== -->
+    <!-- Модальное окно (Rename / Edit Desc) -->
     <div id="modalOverlay" class="modal-overlay" onclick="closeAllModals()"></div>
     <div id="editModal" class="modal">
       <div class="modal-content">
@@ -274,7 +274,7 @@
       </div>
     </div>
 
-    <!-- ===== Модальное окно для Delete ===== -->
+    <!-- Модальное окно (Delete) -->
     <div id="deleteModal" class="modal">
       <div class="modal-content">
         <span class="modal-close" onclick="closeAllModals()">&times;</span>
@@ -291,14 +291,12 @@
     let currentProjectId = null;
     let currentMode = null;  // 'rename' или 'description'
 
-    // ============ Модалки (Rename / Edit Desc) ============
+    // Открыть модалку (Rename / Description)
     function openEditModal(projectId, mode) {
       currentProjectId = projectId;
       currentMode = mode;
 
-      // Показываем оверлей
       document.getElementById('modalOverlay').style.display = 'block';
-      // Показываем окно редактирования
       document.getElementById('editModal').style.display = 'block';
 
       const titleEl = document.getElementById('editModalTitle');
@@ -312,14 +310,14 @@
         titleEl.textContent = "Edit Description";
         labelEl.textContent = "New project description:";
       }
-      // Очищаем поле
       inputEl.value = "";
     }
 
+    // Сохранить изменения (Rename / Description)
     function saveEdit() {
       const newValue = document.getElementById('editModalInput').value.trim();
       if (!newValue) {
-        alert("Value cannot be empty!");
+        // Не выводим alert, просто выходим или делаем что-то другое
         return;
       }
 
@@ -330,7 +328,8 @@
         bodyData = { description: newValue };
       }
 
-      fetch(`/rename_todolist/${currentProjectId}/`, {
+      // Важно: префикс /todolist/, чтобы попасть в правильный маршрут
+      fetch(`/todolist/rename_todolist/${currentProjectId}/`, {
         method: "POST",
         headers: {
           "X-CSRFToken": "{{ csrf_token }}",
@@ -342,24 +341,26 @@
       .then(data => {
         if (data.success) {
           closeAllModals();
-          alert("Updated successfully!");
+          // Убираем alert("Updated successfully!");
           location.reload();
         } else {
-          alert("Error: " + data.message);
+          // Тоже без alert, можно просто console.log
+          console.error("Error: " + data.message);
         }
       })
       .catch(err => console.error(err));
     }
 
-    // ============ Модалка для Delete ============
+    // Открыть модалку для удаления
     function openDeleteModal(projectId) {
       currentProjectId = projectId;
       document.getElementById('modalOverlay').style.display = 'block';
       document.getElementById('deleteModal').style.display = 'block';
     }
 
+    // Подтвердить удаление
     function confirmDelete() {
-      fetch(`/delete_todolist/${currentProjectId}/`, {
+      fetch(`/todolist/delete_todolist/${currentProjectId}/`, {
         method: "POST",
         headers: {
           "X-CSRFToken": "{{ csrf_token }}"
@@ -369,16 +370,16 @@
       .then(data => {
         if (data.success) {
           closeAllModals();
-          alert("Deleted successfully!");
+          // Убираем alert("Deleted successfully!");
           location.reload();
         } else {
-          alert("Error: " + data.message);
+          console.error("Error: " + data.message);
         }
       })
       .catch(err => console.error(err));
     }
 
-    // Закрываем все модалки
+    // Закрыть все модалки
     function closeAllModals() {
       document.getElementById('modalOverlay').style.display = 'none';
       document.getElementById('editModal').style.display = 'none';

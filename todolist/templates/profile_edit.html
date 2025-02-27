@@ -4,18 +4,23 @@
     <meta charset="UTF-8">
     <title>Edit Profile</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
+        /* Общие стили */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #6a11cb, #2575fc);
             color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            transition: background 0.3s ease;
+            overflow-y: auto;
         }
+        /* Контейнер страницы с плавным появлением */
         .profile-edit-container {
             background-color: #fff;
             color: #333;
@@ -24,6 +29,11 @@
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .profile-edit-container h1 {
             font-size: 2rem;
@@ -143,32 +153,10 @@
         .profile-stats li {
             margin: 5px 0;
         }
-        .theme-toggle {
-            margin: 15px 0;
-            text-align: center;
-        }
-        .dark-mode {
-            background: linear-gradient(135deg, #141e30, #243b55) !important;
-            color: #e0e0e0 !important;
-        }
-        .dark-mode .profile-edit-container {
-            background: #1e1e2f !important;
-            color: #e0e0e0 !important;
-        }
-        .dark-mode input {
-            background: #2c2c3e;
-            color: #fff;
-            border-color: #444;
-        }
-        .dark-mode .profile-stats {
-            background: rgba(50, 50, 70, 0.8) !important;
-            color: #9fa8da !important;
-        }
     </style>
 </head>
 <body>
     {% include 'header.html' %}
-
     <div class="profile-edit-container">
         <h1>Edit Profile</h1>
         <img id="avatar-preview" src="{{ user.avatar.url }}" alt="Current Avatar">
@@ -181,7 +169,7 @@
             <input type="email" id="email" name="email" value="{{ user.email }}" required>
 
             <label for="about">About Me</label>
-            <textarea id="about" name="about" placeholder="Write something about yourself..." rows="3">{{ user.about }}</textarea>
+            <textarea id="about" name="about" placeholder="Tell us about yourself..." rows="3">{{ user.about }}</textarea>
 
             <label for="avatar">Avatar</label>
             <div class="custom-file-upload">
@@ -198,7 +186,6 @@
             <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm new password">
 
             <div class="buttons-container">
-                <!-- Убрали кнопку Back to Home -->
                 <button type="submit">Save Changes</button>
             </div>
         </form>
@@ -210,11 +197,6 @@
                 <li><strong>To-Do Lists:</strong> {{ todo_lists }}</li>
                 <li><strong>Last Login:</strong> {{ last_login|date:"d M Y H:i" }}</li>
             </ul>
-        </div>
-
-        <div class="theme-toggle">
-            <label for="dark-mode">Dark Mode:</label>
-            <input type="checkbox" id="dark-mode">
         </div>
     </div>
 
@@ -228,26 +210,6 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const darkModeToggle = document.getElementById("dark-mode");
-            const isDarkMode = localStorage.getItem("darkMode") === "true";
-
-            if (isDarkMode) {
-                document.body.classList.add("dark-mode");
-                darkModeToggle.checked = true;
-            }
-
-            darkModeToggle.addEventListener("change", () => {
-                if (darkModeToggle.checked) {
-                    document.body.classList.add("dark-mode");
-                    localStorage.setItem("darkMode", "true");
-                } else {
-                    document.body.classList.remove("dark-mode");
-                    localStorage.setItem("darkMode", "false");
-                }
-            });
-        });
     </script>
 </body>
 </html>

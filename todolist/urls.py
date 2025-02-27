@@ -12,14 +12,14 @@ urlpatterns = [
     # Выход из системы
     path('logout/', views.logout_view, name='logout'),
 
-    # Маршруты для работы с To-Do списками (старый вариант)
+    # Старые маршруты
     path('todolist/<int:todolist_id>/', views.task_list, name='todolist_tasks'),
     path('tasks/json/', views.get_tasks_json, name='get_tasks_json'),
     path('delete/<int:task_id>/', views.delete_task, name='delete_task'),
     path('toggle/<int:task_id>/', views.toggle_task, name='toggle_task'),
     path('add_subtask/<int:parent_id>/', views.add_subtask, name='add_subtask'),
 
-    # Новый маршрут для добавления/обновления детальной информации задачи
+    # Детальное описание задачи
     path('add_detail/<int:task_id>/', views.add_detail, name='add_detail'),
 
     # Управление To-Do списками
@@ -30,31 +30,18 @@ urlpatterns = [
     path('profile/edit/', views.profile_edit, name='profile_edit'),
 
     # Маршруты для сброса пароля
-    path(
-        'password_reset/',
-        auth_views.PasswordResetView.as_view(template_name='password_reset.html'),
-        name='password_reset'
-    ),
-    path(
-        'password_reset/done/',
-        auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'),
-        name='password_reset_done'
-    ),
-    path(
-        'reset/<uidb64>/<token>/',
-        auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'),
-        name='password_reset_confirm'
-    ),
-    path(
-        'reset/done/',
-        auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'),
-        name='password_reset_complete'
-    ),
+    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='password_reset.html'), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
 
-    # Новые маршруты для Projects и Settings
+    # Новый маршрут для переключения темы
+    path('change_theme/', views.change_theme, name='change_theme'),
+
+    # Projects и Settings (дублируются внутри /todolist/)
     path('projects/', views.projects, name='projects'),
     path('settings/', views.settings_view, name='settings_view'),
 
-    # ВАЖНО: добавляем маршрут для task_list_view, чтобы кнопка "Open" работала
+    # Для кнопки "Open"
     path('tasks/<int:todolist_id>/', views.task_list_view, name='task_list_view'),
 ]

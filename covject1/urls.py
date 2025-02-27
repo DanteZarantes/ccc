@@ -6,15 +6,15 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.homepage, name='homepage'),
 
-    # Если нужно, чтобы Projects/Settings были без /todolist/
+    # Проекты и настройки без префикса /todolist/
     path('projects/', views.projects, name='projects'),
     path('settings/', views.settings_view, name='settings_view'),
 
-    # Остальные маршруты приложения To-Do
+    # Остальные маршруты приложения To-Do идут под /todolist/
     path('todolist/', include('todolist.urls')),
 ]
 
-# Добавляем обработку медиа-файлов (для DEBUG)
+# Для работы с медиа (при DEBUG)
 from django.conf import settings
 from django.conf.urls.static import static
 

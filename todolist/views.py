@@ -222,12 +222,12 @@ def rename_todolist(request, todolist_id):
             new_name = data.get("name")
             new_description = data.get("description")
 
+            # Если есть "name" в JSON, обновляем поле name
             if new_name:
                 todolist.name = new_name
+            # Если есть "description" в JSON, обновляем поле description
             if new_description is not None:
-                # Если в модели есть поле description:
-                # todolist.description = new_description
-                pass
+                todolist.description = new_description
 
             todolist.save()
             return JsonResponse({"success": True, "message": "To-Do List updated successfully."}, status=200)
@@ -269,10 +269,13 @@ def projects(request):
         project_name = request.POST.get("project_name")
         project_description = request.POST.get("project_description", "")
         if project_name:
-            new_project = ToDoList.objects.create(name=project_name, user=request.user)
-            # Если есть поле description в модели:
-            # new_project.description = project_description
-            new_project.save()
+            # Создаём сразу с description
+            new_project = ToDoList.objects.create(
+                name=project_name,
+                user=request.user,
+                description=project_description
+            )
+            # new_project.save()  # create() уже сохраняет
         return redirect('projects')
 
     # Если GET
@@ -285,3 +288,15 @@ def settings_view(request):
     Отображает страницу настроек.
     """
     return render(request, 'settings.html')
+@login_required
+def change_theme(request):
+    """
+    Switches the site theme (light, dark, or gradient) by saving it in the session.
+    """
+    if request.method == 'POST':
+        chosen_theme = request.POST.get('theme')
+        if chosen_theme in ['light', 'dark', 'gradient']:
+            request.session['theme'] = chosen_theme
+        return redirect('settings_view')
+    else:
+        return redirect('settings_view')
