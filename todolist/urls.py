@@ -38,6 +38,9 @@ urlpatterns = [
     # Новый маршрут для переключения темы
     path('change_theme/', views.change_theme, name='change_theme'),
 
+    # Новый маршрут для страницы с инструкциями по смене пароля
+    path('password_instructions/', views.password_instructions, name='password_instructions'),
+
     # Projects и Settings (дублируются внутри /todolist/)
     path('projects/', views.projects, name='projects'),
     path('settings/', views.settings_view, name='settings_view'),

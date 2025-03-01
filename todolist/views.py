@@ -222,10 +222,8 @@ def rename_todolist(request, todolist_id):
             new_name = data.get("name")
             new_description = data.get("description")
 
-            # Если есть "name" в JSON, обновляем поле name
             if new_name:
                 todolist.name = new_name
-            # Если есть "description" в JSON, обновляем поле description
             if new_description is not None:
                 todolist.description = new_description
 
@@ -269,25 +267,20 @@ def projects(request):
         project_name = request.POST.get("project_name")
         project_description = request.POST.get("project_description", "")
         if project_name:
-            # Создаём сразу с description
             new_project = ToDoList.objects.create(
                 name=project_name,
                 user=request.user,
                 description=project_description
             )
-            # new_project.save()  # create() уже сохраняет
         return redirect('projects')
 
-    # Если GET
     projects_list = ToDoList.objects.filter(user=request.user).order_by('-id')
     return render(request, 'projects.html', {'projects': projects_list})
 
 @login_required
 def settings_view(request):
-    """
-    Отображает страницу настроек.
-    """
     return render(request, 'settings.html')
+
 @login_required
 def change_theme(request):
     """
@@ -300,3 +293,14 @@ def change_theme(request):
         return redirect('settings_view')
     else:
         return redirect('settings_view')
+
+
+# ==============================================
+# Новое представление для "Forgot Password" инструкции
+# ==============================================
+
+def password_instructions(request):
+    """
+    Отображает страницу с инструкциями по смене пароля.
+    """
+    return render(request, 'password_instructions.html')

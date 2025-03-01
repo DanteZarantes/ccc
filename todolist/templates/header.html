@@ -14,27 +14,15 @@
             overflow-x: hidden;
         }
 
-        /*
-         Три темы с "переливающимся" (градиентным) фоном:
-         1) light
-         2) dark
-         3) gradient
-         По умолчанию используем класс .gradient
-        */
-
-        /* Светлая тема: градиент от белого к чуть более серому */
+        /* Темы (light, dark, gradient) — без изменений */
         .light {
             background: linear-gradient(135deg, #ffffff, #f4f4f4, #eeeeee, #dddddd);
             color: #333;
         }
-
-        /* Тёмная тема: градиент от почти чёрного к более тёмному серому */
         .dark {
             background: linear-gradient(135deg, #2b2b2b, #1f1f1f, #3a3a3a, #2b2b2b);
             color: #ddd;
         }
-
-        /* Цветная градиентная тема (как у вас изначально) */
         .gradient {
             background: linear-gradient(135deg, #6a11cb, #2575fc, #3d5afe, #6a85ff);
             color: #fff;
@@ -46,7 +34,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            background-color: rgba(0, 123, 255, 0.9); /* полупрозрачный синий, если нужно */
+            background-color: rgba(0, 123, 255, 0.9);
             padding: 10px 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             display: flex;
@@ -54,7 +42,7 @@
             align-items: center;
             z-index: 1000;
         }
-        nav .left-buttons {
+        .left-buttons {
             display: flex;
             gap: 10px;
             align-items: center;
@@ -64,7 +52,7 @@
             font-weight: bold;
             border: none;
             cursor: pointer;
-            display: flex; /* для выравнивания иконок */
+            display: flex;
             align-items: center;
             color: #fff;
             transition: background-color 0.3s ease, transform 0.2s ease;
@@ -80,7 +68,7 @@
             background-color: #003d82;
             transform: scale(1.05);
         }
-        /* Чтобы все SVG в icon-button были 22×22 */
+        /* SVG в иконках */
         .icon-button svg {
             width: 22px;
             height: 22px;
@@ -93,6 +81,7 @@
             padding: 10px 20px;
             font-size: 16px;
             border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .profile-button:hover {
             background-color: #e64a19;
@@ -103,6 +92,7 @@
             padding: 10px 20px;
             font-size: 16px;
             border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .logout-button:hover {
             background-color: #1976D2;
@@ -117,7 +107,7 @@
             text-decoration: none;
             border-radius: 20px;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .login-button {
             background: linear-gradient(135deg, #2196F3, #21CBF3);
@@ -156,28 +146,16 @@
             height: 100%;
             width: 0;
             overflow-x: hidden;
-            background-color: #111;
+            background: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(5px);
             transition: width 0.4s;
             z-index: 999;
             padding-top: 60px;
         }
         .sidebar.open {
-            width: 250px;
+            width: 260px;
         }
-        .sidebar a {
-            display: block;
-            padding: 12px 20px;
-            text-decoration: none;
-            font-size: 18px;
-            color: #ccc;
-            transition: background-color 0.2s ease;
-        }
-        .sidebar a:hover {
-            background-color: #575757;
-            color: #fff;
-        }
-        /* Кнопка закрытия (X) */
-        .closebtn {
+        .sidebar .closebtn {
             background: none;
             color: #fff;
             border: none;
@@ -185,6 +163,23 @@
             cursor: pointer;
             margin-left: 10px;
             margin-bottom: 20px;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+        .sidebar .closebtn:hover {
+            color: #f44336;
+            transform: scale(1.1);
+        }
+        .sidebar a {
+            display: block;
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #ccc;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
 
         /* Основной контент (не залезает под хедер) */
@@ -192,36 +187,10 @@
             margin-top: 80px;
             padding: 20px;
         }
-
-        /* Форма выбора темы (навигация) */
-        .theme-form {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-left: 20px;
-        }
-        .theme-form label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-        }
-        .theme-form button {
-            padding: 6px 12px;
-            background-color: #0056b3;
-            color: #fff;
-            border-radius: 4px;
-            border: none;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        .theme-form button:hover {
-            background-color: #003d82;
-            transform: scale(1.05);
-        }
     </style>
 </head>
 
-<!-- Класс темы берем из request.session.theme, иначе gradient -->
+<!-- По умолчанию берем класс .gradient, либо из сессии -->
 <body class="{% if request.session.theme %}{{ request.session.theme }}{% else %}gradient{% endif %}">
 
     <!-- Верхняя панель (nav) -->
@@ -231,8 +200,8 @@
                 <!-- Домик (Home) -->
                 <a href="{% url 'homepage' %}" class="icon-button" aria-label="Home">
                     <svg viewBox="0 0 576 512" fill="white" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M541 229.16 312.69 58.53a31.71 31.71 0 0 0-39.38
-                        0L35 229.16a16.14 16.14 0 0 0-2.56 22.59l10 12.19a16.06
+                        <path d="M541 229.16 312.69 58.53a31.71 31.71 0 0 0-39.38 0L35
+                        229.16a16.14 16.14 0 0 0-2.56 22.59l10 12.19a16.06
                         16.06 0 0 0 22.59 2.56l27.31-22V464a16 16 0 0 0 16
                         16H224a16 16 0 0 0 16-16V368h96v96a16 16 0 0 0
                         16 16h115.64a16 16 0 0 0 16-16V244.41l27.31
@@ -247,8 +216,8 @@
                 <button class="icon-button" onclick="goBack()" aria-label="Back">
                     <svg viewBox="0 0 448 512" fill="white" xmlns="http://www.w3.org/2000/svg">
                         <path d="M257.5 445.1c12.5 12.5 12.5 32.8
-                        0 45.3s-32.8 12.5-45.3 0l-192-192c-12.5-12.5
-                        -12.5-32.8 0-45.3l192-192c12.5-12.5 32.8
+                        0 45.3s-32.8 12.5-45.3 0l-192-192c-12.5-12.5-12.5
+                        -32.8 0-45.3l192-192c12.5-12.5 32.8
                         -12.5 45.3 0s12.5 32.8 0 45.3L110.6
                         224H424c17.7 0 32 14.3 32 32s-14.3
                         32-32 32H110.6l146.9 146.9z"/>
@@ -256,91 +225,120 @@
                 </button>
             {% endif %}
 
-            <!-- Гамбургер (Меню) -->
-            <button class="icon-button" onclick="toggleSidebar()" aria-label="Open Sidebar">
-                <svg viewBox="0 0 448 512" fill="white" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 88C0 74.7 10.7 64 24
-                    64H424C437.3 64 448 74.7 448
-                    88V104C448 117.3 437.3 128 424
-                    128H24C10.7 128 0 117.3 0
-                    104V88zM0 248C0 234.7 10.7 224
-                    24 224H424C437.3 224 448 234.7
-                    448 248V264C448 277.3 437.3
-                    288 424 288H24C10.7 288 0
-                    277.3 0 264V248zM424
-                    448H24C10.7 448 0 437.3 0
-                    424V408C0 394.7 10.7 384
-                    24 384H424C437.3 384
-                    448 394.7 448 408V424C448
-                    437.3 437.3 448 424
-                    448z"/>
-                </svg>
-            </button>
+            {% if user.is_authenticated %}
+                <!-- Гамбургер (Меню) -->
+                <button class="icon-button" onclick="toggleSidebar()" aria-label="Open Sidebar">
+                    <svg viewBox="0 0 448 512" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 88C0 74.7 10.7 64 24
+                        64H424C437.3 64 448 74.7 448
+                        88V104C448 117.3 437.3 128
+                        424 128H24C10.7 128 0
+                        117.3 0 104V88zM0 248C0
+                        234.7 10.7 224 24
+                        224H424C437.3 224 448
+                        234.7 448 248V264C448
+                        277.3 437.3 288 424
+                        288H24C10.7 288 0
+                        277.3 0 264V248zM424
+                        448H24C10.7 448 0
+                        437.3 0 424V408C0
+                        394.7 10.7 384
+                        24 384H424C437.3
+                        384 448 394.7
+                        448 408V424C448
+                        437.3 437.3
+                        448 424
+                        448z"/>
+                    </svg>
+                </button>
 
-            <!-- Шестерёнка (Settings) -->
-            <a href="{% url 'settings_view' %}" class="icon-button" aria-label="Settings">
-                <svg viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M487.4 315.7l-42.6-24.6c2.7
-                    -16.2 4.2-32.8 4.2-49.1s-1.4
-                    -32.9-4.2-49.1l42.6-24.6c
-                    7.9-4.6 11.6-14.1 8.9-22.8
-                    -11.3-36.6-29.2-69.9-51.9
-                    -98.9c-5.5-7-14.8-9.1
-                    -22.8-5.1l-42.6 24.6c
-                    -25.5-21.9-55.2-38.9
-                    -87.9-50.4V24c0-8.8
-                    -7.2-16-16-16h-99.3
-                    c-8.8 0-16 7.2-16 16v49.4
-                    c-32.7 11.4-62.4 28.5
-                    -87.9 50.4l-42.6-24.6
-                    c-7.9-4.6-17.8-1.9-22.8
-                    5.1c-22.7 29-40.6 62.3
-                    -51.9 98.9c-2.6 8.7
-                    1 18.2 8.9 22.8l42.6
-                    24.6c-2.7 16.2-4.2
-                    32.8-4.2 49.1s1.4
-                    32.9 4.2 49.1l-42.6
-                    24.6c-7.9 4.6-11.6
-                    14.1-8.9 22.8c11.3
-                    36.6 29.2 69.9 51.9
-                    98.9c5.5 7 14.8 9.1
-                    22.8 5.1l42.6-24.6
-                    c25.5 21.9 55.2 38.9
-                    87.9 50.4V488c0 8.8
-                    7.2 16 16 16h99.3c
-                    8.8 0 16-7.2 16-16v
-                    -49.4c32.7-11.4 62.4
-                    -28.5 87.9-50.4l42.6
-                    24.6c7.9 4.6 18.2
-                    1.9 22.8-5.1c22.7
-                    -29 40.6-62.3 51.9
-                    -98.9C499 329.8 495.3
-                    320.3 487.4 315.7zM256
-                    352c-53 0-96-43
-                    -96-96s43-96 96-96
-                    96 43 96 96C352
-                    309 309 352 256
-                    352z"/>
-                </svg>
-            </a>
-
-            <!-- Мини-форма для смены темы -->
-            <form class="theme-form" method="POST" action="{% url 'change_theme' %}">
-                {% csrf_token %}
-                <label>
-                    <input type="radio" name="theme" value="light" />
-                    Light
-                </label>
-                <label>
-                    <input type="radio" name="theme" value="dark" />
-                    Dark
-                </label>
-                <label>
-                    <input type="radio" name="theme" value="gradient" checked />
-                    Gradient
-                </label>
-                <button type="submit">Apply Theme</button>
-            </form>
+                <!-- Шестерёнка (Settings) -->
+                <a href="{% url 'settings_view' %}" class="icon-button" aria-label="Settings">
+                    <svg viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M487.4 315.7l-42.6-24.6c2.7
+                        -16.2 4.2-32.8 4.2-49.1s-1.4
+                        -32.9-4.2-49.1l42.6-24.6c
+                        7.9-4.6 11.6-14.1 8.9
+                        -22.8c-11.3-36.6-29.2
+                        -69.9-51.9-98.9c-5.5
+                        -7-14.8-9.1-22.8
+                        -5.1l-42.6 24.6c
+                        -25.5-21.9-55.2-38.9
+                        -87.9-50.4V24c0
+                        -8.8-7.2-16
+                        -16-16h-99.3
+                        c-8.8 0-16 7.2
+                        -16 16v49.4
+                        c-32.7 11.4
+                        -62.4 28.5
+                        -87.9 50.4
+                        l-42.6-24.6
+                        c-7.9-4.6
+                        -17.8-1.9
+                        -22.8 5.1
+                        c-22.7 29
+                        -40.6 62.3
+                        -51.9 98.9
+                        c-2.6 8.7
+                        1 18.2
+                        8.9 22.8
+                        l42.6 24.6
+                        c-2.7 16.2
+                        -4.2 32.8
+                        -4.2 49.1
+                        s1.4 32.9
+                        4.2 49.1
+                        l-42.6 24.6
+                        c-7.9 4.6
+                        -11.6 14.1
+                        -8.9 22.8
+                        c11.3 36.6
+                        29.2 69.9
+                        51.9 98.9
+                        c5.5 7
+                        14.8 9.1
+                        22.8 5.1
+                        l42.6-24.6
+                        c25.5 21.9
+                        55.2 38.9
+                        87.9 50.4
+                        V488c0
+                        8.8 7.2
+                        16 16
+                        16h99.3c
+                        8.8 0
+                        16-7.2
+                        16-16v
+                        -49.4c
+                        32.7
+                        -11.4
+                        62.4
+                        -28.5
+                        87.9
+                        -50.4l42.6
+                        24.6c7.9
+                        4.6 18.2
+                        1.9 22.8
+                        -5.1c22.7
+                        -29 40.6
+                        -62.3 51.9
+                        -98.9C499
+                        329.8 495.3
+                        320.3 487.4
+                        315.7zM256
+                        352c-53
+                        0-96-43
+                        -96-96s43
+                        -96 96
+                        -96 96
+                        43 96
+                        96C352
+                        309 309
+                        352 256
+                        352z"/>
+                    </svg>
+                </a>
+            {% endif %}
         </div>
 
         <div class="profile-menu">

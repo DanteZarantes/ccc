@@ -111,6 +111,7 @@ p {
 
 /* Кнопка действия */
 .btn-action {
+    display: inline-block; /* чтобы ссылка вела себя как кнопка */
     text-decoration: none;
     padding: 15px 40px;
     font-size: 1.2rem;
@@ -139,7 +140,8 @@ p {
         <div class="info-block">
             <h3>Account Settings</h3>
             <p>Change your password, email, or other account details.</p>
-            <button class="btn-action">Change Password</button>
+            <!-- Ссылка на страницу password_instructions (вместо кнопки) -->
+            <a href="{% url 'password_instructions' %}" class="btn-action">Change Password</a>
         </div>
 
         <!-- Notifications block -->
@@ -153,7 +155,6 @@ p {
         <div class="info-block">
             <h3>Theme & Appearance</h3>
             <p>Switch themes, colors, fonts, and more.</p>
-
             <!-- Форма для выбора темы (light/dark/gradient) -->
             <form method="POST" action="{% url 'change_theme' %}">
                 {% csrf_token %}
