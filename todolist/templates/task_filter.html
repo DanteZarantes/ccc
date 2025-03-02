@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Filter</title>
+</head>
+<body>
+    <h2>All Tasks</h2>
+
+    <!--
+       The view passes:
+         'tasks' - queryset of tasks
+         'selected_tag' - currently selected tag
+    -->
+    <form method="get" action="">
+        <label for="tag">Filter by tag:</label>
+        <select name="tag" id="tag">
+            <option value="">All</option>
+            <option value="Work" {% if selected_tag == "Work" %}selected{% endif %}>Work</option>
+            <option value="Study" {% if selected_tag == "Study" %}selected{% endif %}>Study</option>
+            <option value="Personal" {% if selected_tag == "Personal" %}selected{% endif %}>Personal</option>
+        </select>
+        <button type="submit">Apply Filter</button>
+    </form>
+
+    <ul>
+    {% for task in tasks %}
+        <li>
+            <strong>{{ task.title }}</strong>
+            {% if task.tags %} (tags: {{ task.tags }}){% endif %}
+            <br>Status: {{ task.status }}
+        </li>
+    {% empty %}
+        <li>No tasks found.</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

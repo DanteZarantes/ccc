@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to To-Do List App</title>
     <style>
-        /* Общий стиль */
+        /* Global style */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -23,14 +23,14 @@
             position: relative;
         }
 
-        /* Контейнер для всех элементов */
+        /* Container for all elements */
         .content-container {
             max-width: 1200px;
             text-align: center;
             margin: auto;
         }
 
-        /* Анимированный градиентный фон */
+        /* Animated gradient background */
         @keyframes gradientAnimation {
             0% { background-position: 0% 50%; }
             25% { background-position: 50% 50%; }
@@ -39,7 +39,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Заголовок и текст */
+        /* Heading and text */
         h1 {
             font-size: 3.5rem;
             margin-bottom: 0.5rem;
@@ -54,13 +54,13 @@
             opacity: 0;
         }
 
-        /* Анимация появления текста */
+        /* Fade-in animation for text */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Кнопка Start */
+        /* Start button */
         .start-button {
             text-decoration: none;
             padding: 15px 40px;
@@ -80,7 +80,7 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
 
-        /* Блоки информации */
+        /* Information blocks container */
         .info-container {
             display: flex;
             justify-content: center;
@@ -97,16 +97,15 @@
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
+        /* Three colored blocks (purple, blue, green) */
         .info-block:nth-child(1) {
-            background-color: rgba(106, 17, 203, 0.8); /* Фиолетовый */
+            background-color: rgba(106, 17, 203, 0.8); /* Purple */
         }
-
         .info-block:nth-child(2) {
-            background-color: rgba(37, 117, 252, 0.8); /* Голубой */
+            background-color: rgba(37, 117, 252, 0.8); /* Blue */
         }
-
         .info-block:nth-child(3) {
-            background-color: rgba(76, 175, 80, 0.8); /* Зелёный */
+            background-color: rgba(76, 175, 80, 0.8); /* Green */
         }
 
         .info-block:hover {
@@ -124,7 +123,7 @@
             line-height: 1.5;
         }
 
-        /* Декоративные фигуры */
+        /* Decorative circles */
         .circle {
             position: absolute;
             width: 400px;
@@ -133,12 +132,10 @@
             border-radius: 50%;
             animation: float 6s ease-in-out infinite;
         }
-
         .circle:nth-child(1) {
             top: 10%;
             left: 20%;
         }
-
         .circle:nth-child(2) {
             top: 60%;
             left: 60%;
@@ -152,20 +149,22 @@
     </style>
 </head>
 <body>
+    <!-- If you have a header, keep this line; otherwise remove it -->
     {% include 'header.html' %}
 
-    <!-- Декоративные фигуры -->
+    <!-- Decorative circles -->
     <div class="circle"></div>
 
     <div class="content-container">
         <h1>Welcome to the To-Do List App</h1>
         <p>Manage your tasks efficiently and stay organized!</p>
-        <!-- Кнопка Start, обновленная ссылка для неавторизованных пользователей -->
+
+        <!-- "Start" button; if user is authenticated, link to create_todo, otherwise link to auth_view -->
         <a href="{% if user.is_authenticated %}{% url 'create_todo' %}{% else %}{% url 'auth_view' %}{% endif %}" class="start-button">
             Start
         </a>
 
-        <!-- Контейнер для блоков информации -->
+        <!-- Info blocks container -->
         <div class="info-container">
             <div class="info-block">
                 <h3>Plan Your Day</h3>

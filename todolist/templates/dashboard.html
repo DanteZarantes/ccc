@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tasks Dashboard</title>
+    <!-- Include Chart.js from a CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>Tasks Dashboard</h2>
+    <canvas id="tasksChart" width="400" height="200"></canvas>
+
+    <script>
+        // Django will pass 'labels' and 'data_for_chart' from the view
+        // Example:
+        //   context['labels'] = ['2025-03-01', '2025-03-02', ...];
+        //   context['data_for_chart'] = [3, 5, 2, ...];
+
+        const labels = {{ labels|safe }};
+        const dataForChart = {{ data_for_chart|safe }};
+
+        const ctx = document.getElementById('tasksChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Completed Tasks',
+                    data: dataForChart,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

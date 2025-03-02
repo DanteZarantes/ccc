@@ -1,12 +1,10 @@
 from django import forms
 from .models import CustomUser, Task
 
-
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'completed', 'parent']
-
+        fields = ['title', 'is_completed', 'parent']
 
 class CustomUserCreationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={
@@ -30,9 +28,8 @@ class CustomUserCreationForm(forms.ModelForm):
         if password and confirm_password and password != confirm_password:
             raise forms.ValidationError("Passwords do not match")
 
-
 class ProfileForm(forms.ModelForm):
-    """Форма редактирования профиля пользователя, включая поле 'About Me'."""
+    """User profile editing form including the 'about' field."""
     about = forms.CharField(
         widget=forms.Textarea(attrs={
             'rows': 3,
