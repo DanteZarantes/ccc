@@ -1,27 +1,118 @@
+{% include 'header.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Kanban Board</title>
     <style>
-        /* Основной контейнер страницы (у вас уже есть .main-content в header.html,
-           но если нужно отдельный блок, оставляем этот класс) */
-        .main-content {
-            margin-top: 80px; /* чтобы не залезать под фиксированный хедер */
-            padding: 20px;
-            min-height: calc(100vh - 80px);
+        /* Сброс и базовые стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* Тело страницы:
+           - flex-колонка, чтобы шапка и контент шли сверху вниз
+           - выравниваем по центру (align-items: center)
+        */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Градиентный фон */
+            background: linear-gradient(135deg, #fff, #ffe5e5);
+            font-family: Arial, sans-serif;
+            position: relative;
         }
 
-        /* Контейнер для всех колонок (To-Do, In Progress, Done) */
+        /* Плавающий круг */
+        .circle {
+            position: absolute;
+            top: 5%; /* чуть выше */
+            left: 10%; /* сместили левее */
+            width: 350px;  /* уменьшили размер */
+            height: 350px;
+            background: rgba(255, 0, 0, 0.15);
+            border-radius: 50%;
+            z-index: 1;
+            animation: floatCircle 6s ease-in-out infinite;
+        }
+        @keyframes floatCircle {
+            0%   { transform: translateY(0); }
+            50%  { transform: translateY(-30px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Волна снизу */
+        .wave {
+            position: absolute;
+            bottom: -10px; /* слегка опустили ниже экрана */
+            left: 0;
+            width: 100%;
+            height: 180px;
+            background: #FF0000;
+            clip-path: ellipse(70% 100% at 50% 100%);
+            z-index: 1;
+        }
+
+        /* Шапка (header) – не трогаем, но она внутри body.flex */
+        /* Основной контейнер Kanban */
+        .main-content {
+            position: relative;
+            z-index: 2; /* Выше круга и волны */
+            width: 100%;
+            max-width: 1200px;
+            margin: 100px auto 0; /* отступ сверху от шапки */
+            padding: 20px;
+            animation: fadeIn 0.7s ease forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            color: #FF0000;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        .kanban-intro {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 20px;
+            font-size: 1.1rem;
+            color: #333;
+            line-height: 1.4;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(5px);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+        .task-count {
+            text-align: center;
+            margin: 15px 0 25px;
+            font-size: 1rem;
+            color: #333;
+        }
+        .task-count strong {
+            color: #FF0000;
+        }
         .board-container {
             display: flex;
             gap: 20px;
-            margin: 0 auto; /* центрируем по горизонтали */
-            max-width: 1200px; /* ограничиваем ширину */
+            margin: 0 auto;
+            max-width: 1200px;
             padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-
-        /* Каждая колонка */
         .column {
             flex: 1;
             background: rgba(255, 255, 255, 0.8);
@@ -29,9 +120,10 @@
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            min-height: 500px;
+            min-height: 450px;
             transition: transform 0.2s;
             position: relative;
+            overflow: hidden;
         }
         .column:hover {
             transform: translateY(-3px);
@@ -40,71 +132,56 @@
             text-align: center;
             margin-bottom: 10px;
             font-size: 1.3rem;
-            color: #333;
+            color: #FF0000;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
-
-        /* Карточки задач */
         .task {
             background: #fff;
             margin: 8px 0;
             padding: 10px 14px;
             border-radius: 6px;
             border: 1px solid #ddd;
-            color: #333; /* тёмный текст */
+            color: #333;
             cursor: move;
             transition: background 0.3s, transform 0.2s;
+            animation: popIn 0.5s ease;
+        }
+        @keyframes popIn {
+            0%   { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1);   opacity: 1; }
         }
         .task:hover {
             background: #f7f7f7;
             transform: scale(1.02);
         }
-
-        /* Статистика задач (опционально) */
-        .task-count {
-            text-align: center;
-            margin: 15px 0 25px;
-            font-size: 1rem;
-            color: #fff;
-        }
-
-        /* Краткое описание */
-        .kanban-intro {
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto 20px;
-            font-size: 1.1rem;
-            color: #fff;
-            line-height: 1.4;
+        .column p {
+            color: #444;
+            font-style: italic;
         }
     </style>
 </head>
+<body class="{% if request.session.theme %}{{ request.session.theme }}{% else %}light{% endif %}">
+    <!-- Плавающий круг -->
+    <div class="circle"></div>
 
-<!--
-     Класс body у вас уже определяется через header.html (theme),
-     так что мы предполагаем, что вы используете:
-     <body class="{% if request.session.theme %}{{ request.session.theme }}{% else %}gradient{% endif %}">
--->
-<body class="{% if request.session.theme %}{{ request.session.theme }}{% else %}gradient{% endif %}">
-    <!-- Подключаем ваш общий хедер -->
+    <!-- Волна снизу -->
+    <div class="wave"></div>
+
     {% include 'header.html' %}
 
     <div class="main-content">
-        <h2 style="text-align: center; color: #fff; margin-bottom: 10px;">Kanban Board</h2>
-
+        <h2>Kanban Board</h2>
         <p class="kanban-intro">
-            Easily manage your tasks by dragging them between columns. Keep track of what needs
-            to be done, what's in progress, and what you've successfully completed!
+            Easily manage your tasks by dragging them between columns.
+            Keep track of what needs to be done, what's in progress,
+            and what you've successfully completed!
         </p>
-
-        <!-- Небольшая статистика по колонкам (опционально) -->
         <div class="task-count">
             <strong>To-Do:</strong> {{ tasks_todo.count }} &nbsp;|&nbsp;
             <strong>In Progress:</strong> {{ tasks_in_progress.count }} &nbsp;|&nbsp;
             <strong>Done:</strong> {{ tasks_done.count }}
         </div>
-
         <div class="board-container">
-            <!-- To-Do Column -->
             <div class="column" id="todo" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                 <h3>To-Do</h3>
                 {% for task in tasks_todo %}
@@ -112,11 +189,9 @@
                         {{ task.title }}
                     </div>
                 {% empty %}
-                    <p style="color: #444; font-style: italic;">No tasks</p>
+                    <p>No tasks</p>
                 {% endfor %}
             </div>
-
-            <!-- In Progress Column -->
             <div class="column" id="in_progress" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                 <h3>In Progress</h3>
                 {% for task in tasks_in_progress %}
@@ -124,11 +199,9 @@
                         {{ task.title }}
                     </div>
                 {% empty %}
-                    <p style="color: #444; font-style: italic;">No tasks</p>
+                    <p>No tasks</p>
                 {% endfor %}
             </div>
-
-            <!-- Done Column -->
             <div class="column" id="done" ondragover="allowDrop(event)" ondrop="dropTask(event)">
                 <h3>Done</h3>
                 {% for task in tasks_done %}
@@ -136,50 +209,48 @@
                         {{ task.title }}
                     </div>
                 {% empty %}
-                    <p style="color: #444; font-style: italic;">No tasks</p>
+                    <p>No tasks</p>
                 {% endfor %}
             </div>
         </div>
     </div>
 
     <script>
-    function allowDrop(ev) {
-      ev.preventDefault();
-    }
-
-    function dragTask(ev) {
-      ev.dataTransfer.setData("text", ev.target.id);
-    }
-
-    function dropTask(ev) {
-      ev.preventDefault();
-      const data = ev.dataTransfer.getData("text");
-      const taskElement = document.getElementById(data);
-      const dropColumn = ev.target.closest('.column');
-      if (!dropColumn) return;
-
-      dropColumn.appendChild(taskElement);
-
-      // Determine new status based on the column's ID
-      const newStatus = dropColumn.id; // 'todo', 'in_progress', or 'done'
-      const taskId = data.split('-')[1];
-
-      fetch("{% url 'update_task_status' %}", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify({ task_id: taskId, status: newStatus })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (!data.success) {
-          alert('Failed to update task status.');
+        function allowDrop(ev) {
+            ev.preventDefault();
         }
-      })
-      .catch(error => console.error('Error:', error));
-    }
+        function dragTask(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+        function dropTask(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const taskElement = document.getElementById(data);
+            const dropColumn = ev.target.closest('.column');
+            if (!dropColumn) return;
+
+            dropColumn.appendChild(taskElement);
+
+            // Определяем новый статус по id колонки
+            const newStatus = dropColumn.id;
+            const taskId = data.split('-')[1];
+
+            fetch("{% url 'update_task_status' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ task_id: taskId, status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    alert('Failed to update task status.');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
     </script>
 </body>
 </html>

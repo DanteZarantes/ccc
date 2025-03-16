@@ -1,38 +1,206 @@
+{% include 'header.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Task Filter</title>
+    <style>
+        /* Сброс и базовые стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            /* Фон: градиент + позиционирование для волны */
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            background: linear-gradient(135deg, #fff, #ffe5e5);
+            font-family: Arial, sans-serif;
+        }
+
+        /* Волна внизу (фиксированная) */
+        .wave {
+            position: fixed; /* или absolute, но тогда bottom:0; top:auto; */
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 180px;
+            background: #FF0000;
+            clip-path: ellipse(70% 100% at 50% 100%);
+            z-index: 1;
+        }
+
+        /* Плавающий круг (необязательно) */
+        .circle {
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 350px;
+            height: 350px;
+            background: rgba(255, 0, 0, 0.15);
+            border-radius: 50%;
+            z-index: 1;
+            animation: floatCircle 6s ease-in-out infinite;
+        }
+        @keyframes floatCircle {
+            0%   { transform: translateY(0); }
+            50%  { transform: translateY(-30px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Основной контейнер */
+        .main-content {
+            position: relative;
+            z-index: 2; /* над волной */
+            width: 100%;
+            max-width: 800px;
+            margin: 120px auto 0; /* отступ сверху, чтобы не залезать под header */
+            padding: 20px;
+            /* Добавляем нижний отступ, чтобы контент не заезжал на волну */
+            padding-bottom: 220px;
+            animation: fadeIn 0.6s ease forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Заголовок */
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            color: #FF0000;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* Фильтр */
+        .filter-container {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 20px;
+            text-align: center;
+        }
+        .filter-container form {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .filter-container label {
+            font-weight: bold;
+            color: #333;
+        }
+        .filter-container select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            outline: none;
+        }
+        .filter-container button {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            background: #FF0000;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .filter-container button:hover {
+            background: #cc0000;
+        }
+
+        /* Список задач */
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto;
+            max-width: 600px;
+        }
+        .task-list li {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+            margin: 10px 0;
+            padding: 10px 15px;
+            transition: transform 0.3s;
+        }
+        .task-list li:hover {
+            transform: scale(1.02);
+        }
+        .task-list li strong {
+            color: #FF0000;
+            font-size: 1.1rem;
+        }
+        .task-tags {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .task-status {
+            color: #333;
+            font-size: 0.9rem;
+        }
+        .empty-message {
+            font-style: italic;
+            color: #444;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h2>All Tasks</h2>
+    <!-- Волна снизу (фиксированная) -->
+    <div class="wave"></div>
 
-    <!--
-       The view passes:
-         'tasks' - queryset of tasks
-         'selected_tag' - currently selected tag
-    -->
-    <form method="get" action="">
-        <label for="tag">Filter by tag:</label>
-        <select name="tag" id="tag">
-            <option value="">All</option>
-            <option value="Work" {% if selected_tag == "Work" %}selected{% endif %}>Work</option>
-            <option value="Study" {% if selected_tag == "Study" %}selected{% endif %}>Study</option>
-            <option value="Personal" {% if selected_tag == "Personal" %}selected{% endif %}>Personal</option>
-        </select>
-        <button type="submit">Apply Filter</button>
-    </form>
+    <!-- Плавающий круг -->
+    <div class="circle"></div>
 
-    <ul>
-    {% for task in tasks %}
-        <li>
-            <strong>{{ task.title }}</strong>
-            {% if task.tags %} (tags: {{ task.tags }}){% endif %}
-            <br>Status: {{ task.status }}
-        </li>
-    {% empty %}
-        <li>No tasks found.</li>
-    {% endfor %}
-    </ul>
+    {% include 'header.html' %}
+
+    <div class="main-content">
+        <h2>All Tasks</h2>
+
+        <div class="filter-container">
+            <form method="get" action="">
+                <label for="tag">Filter by tag:</label>
+                <select name="tag" id="tag">
+                    <option value="">All</option>
+                    <option value="Work" {% if selected_tag == "Work" %}selected{% endif %}>Work</option>
+                    <option value="Study" {% if selected_tag == "Study" %}selected{% endif %}>Study</option>
+                    <option value="Personal" {% if selected_tag == "Personal" %}selected{% endif %}>Personal</option>
+                </select>
+                <button type="submit">Apply Filter</button>
+            </form>
+        </div>
+
+        <ul class="task-list">
+            {% for task in tasks %}
+                <li>
+                    <strong>{{ task.title }}</strong>
+                    {% if task.tags %}
+                        <span class="task-tags"> (tags: {{ task.tags }})</span>
+                    {% endif %}
+                    <br>
+                    <span class="task-status">Status: {{ task.status }}</span>
+                </li>
+            {% empty %}
+                <li class="empty-message">No tasks found.</li>
+            {% endfor %}
+        </ul>
+    </div>
 </body>
 </html>

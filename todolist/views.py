@@ -444,3 +444,26 @@ def password_instructions(request):
     Displays the password instructions page.
     """
     return render(request, 'password_instructions.html')
+
+
+# ===============================
+# NEW PAGES: Terms of Service, Privacy Policy, Contact Support
+# ===============================
+
+def terms_of_service(request):
+    return render(request, 'terms_of_service.html')
+
+def privacy_policy(request):
+    return render(request, 'privacy_policy.html')
+
+def contact_support(request):
+    """
+    Renders a contact form or handles submission.
+    For now, just a static page.
+    """
+    if request.method == 'POST':
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+        # Здесь можно добавить логику: отправить письмо, сохранить в БД, etc.
+        # return redirect(...)  # после успешной отправки
+    return render(request, 'contact_support.html')

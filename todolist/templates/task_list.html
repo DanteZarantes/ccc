@@ -1,542 +1,521 @@
+{% include 'header.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>To-Do List</title>
-    <!-- Include D3.js and jQuery -->
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <meta charset="UTF-8">
+  <title>To-Do List: {{ todolist.name }}</title>
+  <!-- Подключение D3.js и jQuery -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <style>
+    /* Общие стили и сброс */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      background: linear-gradient(135deg, #fff, #ffe5e5);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* Переполнение скрываем, дерево прокручиваем в контейнере */
+    }
 
-    <style>
-        /* Global styles */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            color: #fff;
-            text-align: center;
-            overflow: hidden;
-        }
+    /* Заголовок */
+    h1 {
+      margin: 15px 0;
+      font-size: 2.3rem;
+      color: #FF0000;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      text-align: center;
+      z-index: 2;
+    }
 
-        /* Fixed top panel for task input */
-        .form-container {
-            background: linear-gradient(135deg, #4CAF50, #8BC34A);
-            padding: 15px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .form-container input {
-            padding: 10px;
-            font-size: 1.2rem;
-            border-radius: 5px;
-            border: none;
-            width: 300px;
-            margin-right: 10px;
-            outline: none;
-        }
-        .form-container input:focus {
-            box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
-        }
-        .form-container button {
-            padding: 10px 20px;
-            font-size: 1.2rem;
-            background-color: #ff5f5f;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-        }
-        .form-container button:hover {
-            background-color: #ff4040;
-            transform: scale(1.05);
-        }
+    /* Форма добавления задачи */
+    .form-container {
+      background: #4CAF50;
+      padding: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .form-container input {
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: none;
+      width: 250px;
+      margin-right: 10px;
+      outline: none;
+    }
+    .form-container button {
+      padding: 8px 15px;
+      font-size: 1rem;
+      background-color: #ff5f5f;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .form-container button:hover {
+      background-color: #ff4040;
+      transform: scale(1.05);
+    }
 
-        /* To-Do List header */
-        h1 {
-            margin-top: 15px;
-            font-size: 2.5rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
-        }
+    /* Контейнер для дерева */
+    .tree-container {
+      width: 100%;
+      height: calc(100vh - 160px); /* уменьшаем высоту, чтобы форма и заголовок не перекрывались */
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+      background-size: 400% 400%;
+      animation: floatBG 10s ease-in-out infinite;
+      border-radius: 8px;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
+      padding: 10px;
+      margin: 10px 0;
+      overflow: auto; /* прокрутка */
+      position: relative;
+      z-index: 2;
+    }
+    @keyframes floatBG {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-        /* Container for the tree */
-        .tree-container {
-            width: 100vw;
-            height: calc(100vh - 150px);
-            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
-            background-size: 400% 400%;
-            animation: floatBG 10s ease-in-out infinite;
-            border-radius: 8px;
-            box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
-            padding: 20px;
-            margin: 0;
-            overflow: auto; /* allow scrolling for large trees */
-            position: relative;
-        }
-        /* Background animation */
-        @keyframes floatBG {
-            0%   { background-position: 0% 50%; }
-            50%  { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+    /* Кнопки управления задачами */
+    .btn {
+      display: inline-block;
+      margin: 4px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      color: #fff;
+      background: #6a11cb;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .btn:hover {
+      background: #2575fc;
+      transform: scale(1.05);
+    }
+    .btn-delete {
+      background: #ff5252;
+    }
+    .btn-delete:hover {
+      background: #d50000;
+    }
 
-        /* Button styles */
-        .btn {
-            display: inline-block;
-            margin: 4px;
-            padding: 8px 14px;
-            font-size: 0.9rem;
-            color: white;
-            background: #6a11cb;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-        }
-        .btn:hover {
-            background: #2575fc;
-            transform: scale(1.05);
-        }
-        .btn-delete {
-            margin: 4px;
-            padding: 8px 14px;
-            font-size: 0.9rem;
-            color: #fff;
-            background: #ff5252;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s;
-        }
-        .btn-delete:hover {
-            background: #d50000;
-            transform: scale(1.05);
-        }
+    /* Блок с кнопками у каждого узла */
+    .hidden-buttons {
+      display: none;
+      background: rgba(255,255,255,0.9);
+      padding: 6px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      position: absolute;
+    }
+    .close-manage {
+      background: #e91e63;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+      float: right;
+      margin-left: 5px;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .close-manage:hover {
+      background: #d81b60;
+      transform: scale(1.1);
+    }
 
-        /* Hidden buttons block (Add, Edit Detail, Delete) */
-        .hidden-buttons {
-            display: none;
-            background: rgba(255,255,255,0.9);
-            padding: 8px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
+    /* Формы добавления сабтаска / редактирования деталей */
+    .subtask-form, .detail-form {
+      display: none;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .subtask-form input, .detail-form textarea {
+      padding: 5px;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+      width: 140px;
+    }
+    .detail-form textarea {
+      resize: vertical;
+      height: 50px;
+    }
+    .subtask-form button, .detail-form button {
+      padding: 5px 10px;
+      font-size: 0.9rem;
+      background: #6a11cb;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .subtask-form button:hover, .detail-form button:hover {
+      background: #2575fc;
+    }
 
-        /* Close button for button block */
-        .close-manage {
-            background: #e91e63;
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-size: 1rem;
-            line-height: 1;
-            cursor: pointer;
-            float: right;
-            margin-left: 5px;
-            transition: background 0.3s, transform 0.2s;
-        }
-        .close-manage:hover {
-            background: #d81b60;
-            transform: scale(1.1);
-        }
+    /* Детальное описание задачи */
+    .detail-display {
+      display: none;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #444;
+      background: #f0f0f0;
+      padding: 8px;
+      border-radius: 5px;
+      word-wrap: break-word;
+      max-width: 220px;
+      white-space: pre-wrap;
+    }
 
-        /* Subtask form */
-        .subtask-form {
-            display: none;
-            flex-direction: column;
-            align-items: flex-start;
-            margin-top: 8px;
-        }
-        .subtask-form input {
-            padding: 5px;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            width: 160px;
-        }
-        .subtask-form button {
-            padding: 5px 10px;
-            font-size: 0.9rem;
-            background: #6a11cb;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .subtask-form button:hover {
-            background: #2575fc;
-        }
+    /* Линии (links) в D3 */
+    .link {
+      stroke: #444;
+      stroke-width: 2.5;
+      fill: none;
+      /* Лёгкая анимация прорисовки */
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawLink 1s forwards;
+    }
+    @keyframes drawLink {
+      to { stroke-dashoffset: 0; }
+    }
 
-        /* Detail form */
-        .detail-form {
-            display: none;
-            flex-direction: column;
-            align-items: flex-start;
-            margin-top: 8px;
-        }
-        .detail-form textarea {
-            width: 180px;
-            height: 50px;
-            padding: 5px;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            resize: vertical;
-        }
-        .detail-form button {
-            padding: 5px 10px;
-            font-size: 0.9rem;
-            background: #6a11cb;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .detail-form button:hover {
-            background: #2575fc;
-        }
-
-        /* Detail display block */
-        .detail-display {
-            display: none;
-            margin-top: 8px;
-            font-size: 0.85rem;
-            color: #444;
-            background: #f0f0f0;
-            padding: 8px;
-            border-radius: 5px;
-            word-wrap: break-word;
-            max-width: 220px;
-            white-space: pre-wrap;
-        }
-
-        /* Tree links and nodes */
-        .link {
-            stroke: #444;
-            stroke-width: 3;
-            fill: none;
-        }
-        .node circle {
-            r: 7;
-            fill: #ff5722;
-            cursor: pointer;
-            transition: fill 0.2s;
-            pointer-events: all;
-        }
-        .node circle:hover {
-            fill: #ffc107;
-        }
-        .node foreignObject {
-            pointer-events: none;
-        }
-    </style>
+    /* Узлы (node) */
+    .node circle {
+      r: 6; /* чуть меньше */
+      fill: #ff5722;
+      cursor: pointer;
+      transition: fill 0.2s;
+      pointer-events: all;
+      /* анимация появления */
+      opacity: 0;
+      animation: fadeInCircle 0.6s forwards;
+    }
+    @keyframes fadeInCircle {
+      to { opacity: 1; }
+    }
+    .node circle:hover {
+      fill: #ffc107;
+    }
+    .node foreignObject {
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
-    {% include 'header.html' %}
+  {% include 'header.html' %}
+  <h1>To-Do List: {{ todolist.name }}</h1>
 
-    <h1>To-Do List: {{ todolist.name }}</h1>
+  <!-- Форма добавления задачи -->
+  <div class="form-container">
+    <input type="text" id="task-title" placeholder="Enter a new task" required>
+    <button id="add-task-btn" class="btn">Add Task</button>
+  </div>
 
-    <div class="form-container">
-        <input type="text" id="task-title" placeholder="Enter a new task" required>
-        <button id="add-task-btn" class="btn">Add Task</button>
-    </div>
+  <!-- Контейнер для дерева -->
+  <div class="tree-container" id="trees-container"></div>
 
-    <div class="tree-container" id="trees-container"></div>
+  <script>
+    // Получаем нужные URL'ы из Django
+    const todolistId = "{{ todolist.id|default:'' }}";
+    const apiUrl = todolistId ? `{% url 'get_tasks_json' %}?todolist_id=${todolistId}` : null;
+    const addTaskUrl = todolistId ? `{% url 'todolist_tasks' todolist.id %}` : null;
+    const deleteTaskBaseUrl = `{% url 'delete_task' 0 %}`.replace('/0', '');
+    const addSubtaskBaseUrl = `{% url 'add_subtask' 0 %}`.replace('/0', '');
+    const addDetailBaseUrl = `{% url 'add_detail' 0 %}`.replace('/0', '');
 
-    <script>
-        const todolistId = "{{ todolist.id|default:'' }}";
-        const apiUrl = todolistId ? `{% url 'get_tasks_json' %}?todolist_id=${todolistId}` : null;
-        const addTaskUrl = todolistId ? `{% url 'todolist_tasks' todolist.id %}` : null;
-        const deleteTaskBaseUrl = `{% url 'delete_task' 0 %}`.replace('/0', '');
-        const addSubtaskBaseUrl = `{% url 'add_subtask' 0 %}`.replace('/0', '');
-        const addDetailBaseUrl = `{% url 'add_detail' 0 %}`.replace('/0', '');
+    // Функция загрузки дерева
+    function loadTrees() {
+      if (!apiUrl) {
+        console.error("API URL is missing!");
+        return;
+      }
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => renderTrees(data))
+        .catch(err => console.error("Error loading trees:", err));
+    }
 
-        // Load and render the tree
-        function loadTrees() {
-            if (!apiUrl) {
-                console.error("API URL is missing!");
-                return;
-            }
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => renderTrees(data))
-                .catch(err => {
-                    console.error("Error loading trees:", err);
-                    // Removed alert to avoid intrusive confirmation window
-                });
+    // Генерация иерархического номера узла (1, 1.1, 1.1.1, ...)
+    function getHierarchyNumber(d) {
+      const path = [];
+      const ancestors = d.ancestors().reverse();
+      ancestors.forEach((node) => {
+        if (node.parent) {
+          const index = node.parent.children.indexOf(node) + 1;
+          path.push(index);
         }
+      });
+      return path.join('.') || '1';
+    }
 
-        // Hierarchical numbering
-        function getHierarchyNumber(d) {
-            const path = [];
-            const ancestors = d.ancestors().reverse();
-            ancestors.forEach((node) => {
-                if (node.parent) {
-                    const index = node.parent.children.indexOf(node) + 1;
-                    path.push(index);
-                }
+    // Отрисовка деревьев
+    function renderTrees(data) {
+      const treesContainer = document.getElementById("trees-container");
+      treesContainer.innerHTML = "";
+
+      data.forEach(treeData => {
+        const treeDiv = document.createElement("div");
+        treeDiv.className = "tree";
+        treeDiv.style.position = "relative";
+
+        // Уменьшенная ширина/высота для более компактного вида
+        const svgWidth = 1800;
+        const svgHeight = 900;
+
+        const svg = d3.select(treeDiv)
+          .append("svg")
+          .attr("width", svgWidth + "px")
+          .attr("height", svgHeight + "px");
+
+        const g = svg.append("g").attr("transform", "translate(50,50)");
+
+        // Настройка layout'а
+        const treeLayout = d3.tree()
+          .size([svgHeight - 100, svgWidth - 200])
+          .separation((a, b) => (a.parent === b.parent ? 1.5 : 2.5));
+
+        const root = d3.hierarchy(treeData);
+        treeLayout(root);
+
+        // Рисуем связи
+        g.selectAll(".link")
+          .data(root.links())
+          .enter()
+          .append("path")
+          .attr("class", "link")
+          .attr("d", d3.linkHorizontal()
+            .x(d => d.y)
+            .y(d => d.x)
+          );
+
+        // Рисуем узлы
+        const nodes = g.selectAll(".node")
+          .data(root.descendants())
+          .enter()
+          .append("g")
+          .attr("class", "node")
+          .attr("transform", d => `translate(${d.y},${d.x})`);
+
+        nodes.append("circle");
+
+        // Добавляем текст (через foreignObject)
+        nodes.each(function(d) {
+          d3.select(this)
+            .append("foreignObject")
+            .attr("width", 350)
+            .attr("height", 250)
+            .style("overflow", "visible")
+            .attr("x", -180)
+            .attr("y", -60)
+            .style("pointer-events", "none")
+            .append("xhtml:div")
+            .style("display", "flex")
+            .style("flex-direction", "column")
+            .style("justify-content", "center")
+            .style("align-items", "center")
+            .style("text-align", "center")
+            .style("word-wrap", "break-word")
+            .style("white-space", "normal")
+            .style("overflow-wrap", "break-word")
+            .style("font-size", "1rem")
+            .style("font-weight", "bold")
+            .style("color", "#333")
+            .html(() => {
+              const numbering = getHierarchyNumber(d);
+              return numbering + " " + d.data.title;
             });
-            return path.join('.') || '1';
-        }
-
-        // Render the tree
-        function renderTrees(data) {
-            const treesContainer = document.getElementById("trees-container");
-            treesContainer.innerHTML = "";
-
-            data.forEach(treeData => {
-                const treeDiv = document.createElement("div");
-                treeDiv.className = "tree";
-                treeDiv.style.position = "relative";
-
-                const svgWidth = 2500;
-                const svgHeight = 1200;
-                const svg = d3.select(treeDiv)
-                    .append("svg")
-                    .attr("width", svgWidth + "px")
-                    .attr("height", svgHeight + "px");
-
-                const g = svg.append("g").attr("transform", "translate(50,50)");
-
-                const treeLayout = d3.tree()
-                    .size([svgHeight - 100, svgWidth - 200])
-                    .separation((a, b) => (a.parent === b.parent ? 2 : 3));
-
-                const root = d3.hierarchy(treeData);
-                treeLayout(root);
-
-                // Draw links
-                g.selectAll(".link")
-                    .data(root.links())
-                    .enter()
-                    .append("path")
-                    .attr("class", "link")
-                    .attr("d", d3.linkHorizontal()
-                        .x(d => d.y)
-                        .y(d => d.x)
-                    );
-
-                // Draw nodes
-                const nodes = g.selectAll(".node")
-                    .data(root.descendants())
-                    .enter()
-                    .append("g")
-                    .attr("class", "node")
-                    .attr("transform", d => `translate(${d.y},${d.x})`);
-
-                // Draw circle
-                nodes.append("circle");
-
-                // Create foreignObject for title
-                nodes.each(function(d) {
-                    d3.select(this)
-                        .append("foreignObject")
-                        .attr("width", 450)
-                        .attr("height", 300)
-                        .style("overflow", "visible")
-                        .attr("x", -220)
-                        .attr("y", -70)
-                        .style("pointer-events", "none")
-                        .append("xhtml:div")
-                        .style("display", "flex")
-                        .style("flex-direction", "column")
-                        .style("justify-content", "center")
-                        .style("align-items", "center")
-                        .style("text-align", "center")
-                        .style("word-wrap", "break-word")
-                        .style("white-space", "normal")
-                        .style("overflow-wrap", "break-word")
-                        .style("font-size", "1rem")
-                        .style("font-weight", "bold")
-                        .style("color", "#333")
-                        .html(() => {
-                            const numbering = getHierarchyNumber(d);
-                            return numbering + " " + d.data.title;
-                        });
-                });
-
-                // On circle click, toggle button block visibility
-                nodes.select("circle")
-                    .attr("r", 7)
-                    .on("click", function(event, d) {
-                        const buttonId = `buttons-${d.data.id}`;
-                        const buttonGroup = document.getElementById(buttonId);
-                        if (!buttonGroup) return;
-                        if (buttonGroup.style.display === "none" || !buttonGroup.style.display) {
-                            buttonGroup.style.display = "block";
-                        } else {
-                            buttonGroup.style.display = "none";
-                        }
-                    });
-
-                // Create button block for each node
-                nodes.each(function(d) {
-                    const buttonGroup = document.createElement("div");
-                    buttonGroup.id = `buttons-${d.data.id}`;
-                    buttonGroup.className = "hidden-buttons";
-                    buttonGroup.style.position = "absolute";
-                    buttonGroup.style.left = `${d.y}px`;
-                    buttonGroup.style.top = `${d.x + 10}px`;
-
-                    const detailText = d.data.detail ? d.data.detail : "";
-
-                    buttonGroup.innerHTML = `
-                        <!-- Close button -->
-                        <button class="close-manage" onclick="closeButtonGroup(this)">×</button>
-
-                        <button class="btn" onclick="toggleSubtaskForm(this)">Add</button>
-                        <button class="btn" onclick="toggleDetailForm(this)">Edit Detail</button>
-                        <button class="btn-delete" onclick="deleteTask(${d.data.id})">Delete</button>
-
-                        <div class="subtask-form">
-                            <input type="text" placeholder="Enter subtask title" class="subtask-title-input">
-                            <button onclick="submitSubtask(this, ${d.data.id})" class="btn-save-subtask">Save</button>
-                        </div>
-
-                        <div class="detail-form">
-                            <textarea class="detail-textarea" placeholder="Enter more details...">${detailText}</textarea>
-                            <button onclick="submitDetail(this, ${d.data.id})" class="btn-save-detail">Save</button>
-                        </div>
-
-                        <button class="btn" onclick="toggleDetailDisplay(this)">Show Details</button>
-                        <div class="detail-display">${detailText}</div>
-                    `;
-                    treeDiv.appendChild(buttonGroup);
-                });
-
-                treesContainer.appendChild(treeDiv);
-            });
-        }
-
-        // Close button block
-        function closeButtonGroup(buttonElement) {
-            buttonElement.parentElement.style.display = "none";
-        }
-
-        // Add new task
-        document.getElementById("add-task-btn").addEventListener("click", () => {
-            const title = document.getElementById("task-title").value.trim();
-            if (title) {
-                fetch(addTaskUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: JSON.stringify({ title })
-                }).then(() => {
-                    document.getElementById("task-title").value = "";
-                    loadTrees();
-                }).catch(err => console.error("Error adding task:", err));
-            }
         });
 
-        // Toggle subtask form
-        function toggleSubtaskForm(buttonElement) {
-            const subtaskForm = buttonElement.parentElement.querySelector(".subtask-form");
-            if (subtaskForm.style.display === "none" || !subtaskForm.style.display) {
-                subtaskForm.style.display = "flex";
+        // Клик на круг - показываем/скрываем кнопки
+        nodes.select("circle")
+          .attr("r", 6)
+          .on("click", function(event, d) {
+            const buttonId = `buttons-${d.data.id}`;
+            const buttonGroup = document.getElementById(buttonId);
+            if (!buttonGroup) return;
+            if (buttonGroup.style.display === "none" || !buttonGroup.style.display) {
+              buttonGroup.style.display = "block";
             } else {
-                subtaskForm.style.display = "none";
+              buttonGroup.style.display = "none";
             }
-        }
+          });
 
-        // Add subtask
-        function submitSubtask(buttonElement, parentId) {
-            const subtaskForm = buttonElement.closest(".subtask-form");
-            const subtaskTitleInput = subtaskForm.querySelector(".subtask-title-input");
-            const title = subtaskTitleInput.value.trim();
+        // Добавляем контейнер кнопок для каждого узла
+        nodes.each(function(d) {
+          const buttonGroup = document.createElement("div");
+          buttonGroup.id = `buttons-${d.data.id}`;
+          buttonGroup.className = "hidden-buttons";
+          buttonGroup.style.left = `${d.y}px`;
+          buttonGroup.style.top = `${d.x + 10}px`;
 
-            if (title) {
-                fetch(`${addSubtaskBaseUrl}${parentId}/`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: JSON.stringify({ title })
-                })
-                .then(response => {
-                    if (response.ok) {
-                        loadTrees();
-                        subtaskForm.style.display = "none";
-                        subtaskTitleInput.value = "";
-                    } else {
-                        console.error("Failed to add subtask.");
-                    }
-                })
-                .catch(error => console.error("Error:", error));
-            }
-        }
+          const detailText = d.data.detail ? d.data.detail : "";
+          buttonGroup.innerHTML = `
+            <button class="close-manage" onclick="closeButtonGroup(this)">×</button>
+            <button class="btn" onclick="toggleSubtaskForm(this)">Add</button>
+            <button class="btn" onclick="toggleDetailForm(this)">Edit Detail</button>
+            <button class="btn-delete" onclick="deleteTask(${d.data.id})">Delete</button>
+            <div class="subtask-form">
+              <input type="text" placeholder="Enter subtask title" class="subtask-title-input">
+              <button onclick="submitSubtask(this, ${d.data.id})" class="btn-save-subtask">Save</button>
+            </div>
+            <div class="detail-form">
+              <textarea class="detail-textarea" placeholder="Enter more details...">${detailText}</textarea>
+              <button onclick="submitDetail(this, ${d.data.id})" class="btn-save-detail">Save</button>
+            </div>
+            <button class="btn" onclick="toggleDetailDisplay(this)">Show Details</button>
+            <div class="detail-display">${detailText}</div>
+          `;
+          treeDiv.appendChild(buttonGroup);
+        });
 
-        // Toggle detail form
-        function toggleDetailForm(buttonElement) {
-            const detailForm = buttonElement.parentElement.querySelector(".detail-form");
-            if (detailForm.style.display === "none" || !detailForm.style.display) {
-                detailForm.style.display = "flex";
-            } else {
-                detailForm.style.display = "none";
-            }
-        }
+        treesContainer.appendChild(treeDiv);
+      });
+    }
 
-        // Save detail
-        function submitDetail(buttonElement, taskId) {
-            const detailForm = buttonElement.closest(".detail-form");
-            const detailTextarea = detailForm.querySelector(".detail-textarea");
-            const detailText = detailTextarea.value.trim();
+    // Закрыть блок кнопок
+    function closeButtonGroup(buttonElement) {
+      buttonElement.parentElement.style.display = "none";
+    }
 
-            fetch(`${addDetailBaseUrl}${taskId}/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: JSON.stringify({ detail: detailText })
-            })
-            .then(response => {
-                if (response.ok) {
-                    detailForm.style.display = "none";
-                    loadTrees();
-                } else {
-                    console.error("Failed to save detail.");
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        }
+    // Добавление новой задачи
+    document.getElementById("add-task-btn").addEventListener("click", () => {
+      const title = document.getElementById("task-title").value.trim();
+      if (title) {
+        fetch(addTaskUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({ title })
+        }).then(() => {
+          document.getElementById("task-title").value = "";
+          loadTrees();
+        }).catch(err => console.error("Error adding task:", err));
+      }
+    });
 
-        // Toggle detail display (Show/Hide)
-        function toggleDetailDisplay(buttonElement) {
-            const detailDisplay = buttonElement.parentElement.querySelector(".detail-display");
-            if (detailDisplay.style.display === "none" || !detailDisplay.style.display) {
-                detailDisplay.style.display = "block";
-                buttonElement.textContent = "Hide Details";
-            } else {
-                detailDisplay.style.display = "none";
-                buttonElement.textContent = "Show Details";
-            }
-        }
+    // Показ/скрытие формы сабтаска
+    function toggleSubtaskForm(buttonElement) {
+      const subtaskForm = buttonElement.parentElement.querySelector(".subtask-form");
+      if (subtaskForm.style.display === "none" || !subtaskForm.style.display) {
+        subtaskForm.style.display = "flex";
+      } else {
+        subtaskForm.style.display = "none";
+      }
+    }
 
-        // Delete task
-        function deleteTask(taskId) {
-            fetch(`${deleteTaskBaseUrl}${taskId}/`, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-            })
-            .then(() => loadTrees())
-            .catch(err => console.error("Error deleting task:", err));
-        }
-
-        // Load trees if API URL exists
-        if (apiUrl) {
+    // Добавление сабтаска
+    function submitSubtask(buttonElement, parentId) {
+      const subtaskForm = buttonElement.closest(".subtask-form");
+      const subtaskTitleInput = subtaskForm.querySelector(".subtask-title-input");
+      const title = subtaskTitleInput.value.trim();
+      if (title) {
+        fetch(`${addSubtaskBaseUrl}${parentId}/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({ title })
+        })
+        .then(response => {
+          if (response.ok) {
             loadTrees();
+            subtaskForm.style.display = "none";
+            subtaskTitleInput.value = "";
+          } else {
+            console.error("Failed to add subtask.");
+          }
+        })
+        .catch(error => console.error("Error:", error));
+      }
+    }
+
+    // Показ/скрытие формы деталей
+    function toggleDetailForm(buttonElement) {
+      const detailForm = buttonElement.parentElement.querySelector(".detail-form");
+      if (detailForm.style.display === "none" || !detailForm.style.display) {
+        detailForm.style.display = "flex";
+      } else {
+        detailForm.style.display = "none";
+      }
+    }
+
+    // Сохранение деталей
+    function submitDetail(buttonElement, taskId) {
+      const detailForm = buttonElement.closest(".detail-form");
+      const detailTextarea = detailForm.querySelector(".detail-textarea");
+      const detailText = detailTextarea.value.trim();
+      fetch(`${addDetailBaseUrl}${taskId}/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ detail: detailText })
+      })
+      .then(response => {
+        if (response.ok) {
+          detailForm.style.display = "none";
+          loadTrees();
+        } else {
+          console.error("Failed to save detail.");
         }
-    </script>
+      })
+      .catch(error => console.error("Error:", error));
+    }
+
+    // Показ/скрытие деталей
+    function toggleDetailDisplay(buttonElement) {
+      const detailDisplay = buttonElement.parentElement.querySelector(".detail-display");
+      if (detailDisplay.style.display === "none" || !detailDisplay.style.display) {
+        detailDisplay.style.display = "block";
+        buttonElement.textContent = "Hide Details";
+      } else {
+        detailDisplay.style.display = "none";
+        buttonElement.textContent = "Show Details";
+      }
+    }
+
+    // Удаление задачи
+    function deleteTask(taskId) {
+      fetch(`${deleteTaskBaseUrl}${taskId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}"
+        }
+      })
+      .then(() => loadTrees())
+      .catch(err => console.error("Error deleting task:", err));
+    }
+
+    // Инициализация дерева, если есть URL
+    if (apiUrl) {
+      loadTrees();
+    }
+  </script>
 </body>
 </html>

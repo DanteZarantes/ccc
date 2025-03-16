@@ -1,3 +1,4 @@
+{% include 'header.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,15 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to To-Do List App</title>
     <style>
-        /* Global style */
+        /* Сброс и базовые стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #6a11cb, #2575fc, #3d5afe, #6a85ff);
-            background-size: 200% 200%;
-            animation: gradientAnimation 8s ease infinite;
-            color: #fff;
+            color: inherit;
             text-align: center;
             display: flex;
             justify-content: center;
@@ -21,32 +24,31 @@
             height: 100vh;
             overflow: hidden;
             position: relative;
+            /* Фон-градиент от белого к очень светло-розовому (или используйте #FF0000 + #fff) */
+            background: linear-gradient(135deg, #ffffff, #ffe5e5);
         }
 
-        /* Container for all elements */
+        /* Контейнер для всего контента (заголовок, описание, кнопка и т.д.) */
         .content-container {
             max-width: 1200px;
-            text-align: center;
             margin: auto;
+            text-align: center;
+            position: relative;
+            z-index: 2; /* чтобы элементы были над волной */
+            padding: 20px;
         }
 
-        /* Animated gradient background */
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 50% 50%; }
-            50% { background-position: 100% 50%; }
-            75% { background-position: 50% 100%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Heading and text */
+        /* Заголовок */
         h1 {
             font-size: 3.5rem;
             margin-bottom: 0.5rem;
             animation: fadeIn 2s ease forwards;
             opacity: 0;
+            color: #FF0000; /* Насыщенный красный заголовок */
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
         }
 
+        /* Подзаголовок / описание */
         p {
             font-size: 1.2rem;
             margin-bottom: 2rem;
@@ -54,83 +56,106 @@
             opacity: 0;
         }
 
-        /* Fade-in animation for text */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Start button */
+        /* Кнопка Start */
         .start-button {
             text-decoration: none;
             padding: 15px 40px;
             font-size: 1.2rem;
             color: white;
-            background-color: #4CAF50;
+            background-color: #FF0000; /* Насыщенно-красная кнопка */
             border-radius: 25px;
             transition: all 0.3s ease;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 2;
+            animation: pulse 2s infinite; /* Добавляем анимацию пульса */
         }
-
         .start-button:hover {
-            background-color: #45a049;
-            transform: scale(1.1) rotate(2deg);
+            background-color: #cc0000;
+            transform: scale(1.05) rotate(1deg);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
 
-        /* Information blocks container */
+        /* Контейнер с блоками (Plan Your Day / Stay Focused / Track Progress) */
         .info-container {
             display: flex;
             justify-content: center;
             gap: 20px;
             margin-top: 30px;
+            flex-wrap: wrap; /* Чтобы на маленьких экранах они переносились */
         }
-
         .info-block {
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            flex: 1;
+            flex: 1 1 250px;
             max-width: 300px;
             transition: transform 0.3s, box-shadow 0.3s;
         }
-
-        /* Three colored blocks (purple, blue, green) */
-        .info-block:nth-child(1) {
-            background-color: rgba(106, 17, 203, 0.8); /* Purple */
-        }
-        .info-block:nth-child(2) {
-            background-color: rgba(37, 117, 252, 0.8); /* Blue */
-        }
+        /* Розоватый фон */
+        .info-block:nth-child(1),
         .info-block:nth-child(3) {
-            background-color: rgba(76, 175, 80, 0.8); /* Green */
+            background-color: rgba(255, 0, 0, 0.08);
         }
-
+        /* Белый полупрозрачный фон */
+        .info-block:nth-child(2) {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
         .info-block:hover {
             transform: translateY(-10px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
         }
-
         .info-block h3 {
             font-size: 1.5rem;
             margin-bottom: 10px;
+            color: #FF0000; /* Красный заголовок */
         }
-
         .info-block p {
             font-size: 1rem;
             line-height: 1.5;
+            color: #333;
         }
 
-        /* Decorative circles */
+        /* Дополнительный блок: Why Use Our App? */
+        .extra-content {
+            margin-top: 40px;
+        }
+        .extra-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #FF0000;
+            animation: fadeIn 2s ease forwards;
+            opacity: 0;
+        }
+        .extra-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto;
+            max-width: 600px;
+            text-align: left;
+        }
+        .extra-content li {
+            background-color: rgba(255, 255, 255, 0.6);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            transition: transform 0.3s;
+            color: #333;
+        }
+        .extra-content li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Плавающие круги */
         .circle {
             position: absolute;
             width: 400px;
             height: 400px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 0, 0, 0.15);
             border-radius: 50%;
             animation: float 6s ease-in-out infinite;
+            z-index: 1; /* Под контентом */
         }
         .circle:nth-child(1) {
             top: 10%;
@@ -141,30 +166,51 @@
             left: 60%;
         }
 
+        /* Волна (wave) внизу экрана */
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 180px;
+            background: #FF0000; /* Ярко-красная волна */
+            clip-path: ellipse(70% 100% at 50% 100%);
+            z-index: 1;
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+            0%   { transform: translateY(0px); }
+            50%  { transform: translateY(-20px); }
             100% { transform: translateY(0px); }
+        }
+        @keyframes pulse {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
-    <!-- If you have a header, keep this line; otherwise remove it -->
-    {% include 'header.html' %}
-
-    <!-- Decorative circles -->
+    <!-- Плавающие круги -->
+    <div class="circle"></div>
     <div class="circle"></div>
 
+    <!-- Основной контент -->
     <div class="content-container">
         <h1>Welcome to the To-Do List App</h1>
         <p>Manage your tasks efficiently and stay organized!</p>
 
-        <!-- "Start" button; if user is authenticated, link to create_todo, otherwise link to auth_view -->
+        <!-- Кнопка Start -->
         <a href="{% if user.is_authenticated %}{% url 'create_todo' %}{% else %}{% url 'auth_view' %}{% endif %}" class="start-button">
             Start
         </a>
 
-        <!-- Info blocks container -->
+        <!-- Три блока с описанием основных преимуществ -->
         <div class="info-container">
             <div class="info-block">
                 <h3>Plan Your Day</h3>
@@ -179,6 +225,21 @@
                 <p>Monitor your progress and see how much you’ve accomplished over time.</p>
             </div>
         </div>
+
+        <!-- Дополнительный блок: Why Use Our App? -->
+        <div class="extra-content">
+            <h2>Why Use Our App?</h2>
+            <ul>
+                <li>✅ Easy to create and manage tasks</li>
+                <li>✅ Collaborative features for team projects</li>
+                <li>✅ Kanban boards and analytics to boost productivity</li>
+                <li>✅ Customizable reminders and notifications</li>
+                <li>✅ Secure cloud storage for your data</li>
+            </ul>
+        </div>
     </div>
+
+    <!-- Красная волна внизу страницы -->
+    <div class="wave"></div>
 </body>
 </html>

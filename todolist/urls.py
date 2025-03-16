@@ -46,7 +46,7 @@ urlpatterns = [
     # New route for password instructions page
     path('password_instructions/', views.password_instructions, name='password_instructions'),
 
-    # Projects and settings (duplicated inside /todolist/)
+    # Projects and settings
     path('projects/', views.projects, name='projects'),
     path('settings/', views.settings_view, name='settings_view'),
 
@@ -56,5 +56,13 @@ urlpatterns = [
     # NEW: route for updating task status via AJAX
     path('update-task-status/', views.update_task_status, name='update_task_status'),
 
-    # New routes for additional functionalities can be added here if needed.
+    # Dashboard, Kanban, Task Filter
+    path('dashboard/', views.dashboard_view, name='dashboard_view'),
+    path('kanban/', views.kanban_view, name='kanban_view'),
+    path('task_filter/', views.task_filter_view, name='task_filter_view'),
+
+    # NEW PAGES: Terms of Service, Privacy Policy, Contact Support
+    path('terms-of-service/', views.terms_of_service, name='terms_of_service'),
+    path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
+    path('contact-support/', views.contact_support, name='contact_support'),
 ]

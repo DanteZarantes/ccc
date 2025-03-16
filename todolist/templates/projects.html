@@ -8,38 +8,33 @@
     <meta charset="UTF-8">
     <title>Projects</title>
     <style>
-        /* ============ Фон и анимация ============ */
-        body {
+        /* Сброс и базовые стили */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #6a11cb, #2575fc, #3d5afe, #6a85ff);
-            background-size: 200% 200%;
-            animation: gradientAnimation 8s ease infinite;
-            color: #fff;
+            background: linear-gradient(135deg, #fff, #ffe5e5);
+            color: inherit;
             text-align: center;
-            height: 100vh;
+            min-height: 100vh;
             overflow: hidden;
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        @keyframes gradientAnimation {
-            0%   { background-position: 0% 50%; }
-            25%  { background-position: 50% 50%; }
-            50%  { background-position: 100% 50%; }
-            75%  { background-position: 50% 100%; }
-            100% { background-position: 0% 50%; }
-        }
-
+        /* Плавающие круги */
         .circle {
             position: absolute;
             width: 400px;
             height: 400px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 0, 0, 0.15);
             border-radius: 50%;
             animation: float 6s ease-in-out infinite;
+            z-index: 1;
         }
         .circle:nth-child(1) {
             top: 10%;
@@ -54,22 +49,32 @@
             50%  { transform: translateY(-20px); }
             100% { transform: translateY(0px); }
         }
-
-        /* ============ Контейнер контента ============ */
+        /* Красная волна внизу */
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: #FF0000;
+            clip-path: ellipse(70% 100% at 50% 100%);
+            z-index: 1;
+        }
         .content-container {
             max-width: 1200px;
             margin: auto;
             position: relative;
-            z-index: 2;
+            z-index: 2; /* Выше кругов */
             text-align: center;
             padding: 20px;
         }
-
         .projects-title {
             font-size: 3rem;
             margin-bottom: 1rem;
             animation: fadeIn 2s ease forwards;
             opacity: 0;
+            color: #FF0000;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
         }
         .projects-desc {
             font-size: 1.2rem;
@@ -81,7 +86,6 @@
             from { opacity: 0; transform: translateY(30px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-
         .info-container {
             display: flex;
             justify-content: center;
@@ -89,9 +93,9 @@
             flex-wrap: wrap;
             margin-top: 30px;
         }
-
         .info-block {
             background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -100,6 +104,7 @@
             transition: transform 0.3s, box-shadow 0.3s;
             margin: 10px;
             text-align: left;
+            color: #fff;
         }
         .info-block:hover {
             transform: translateY(-10px);
@@ -108,40 +113,13 @@
         .info-block h3 {
             font-size: 1.5rem;
             margin-bottom: 10px;
+            color: #fff;
         }
         .info-block p {
             font-size: 1rem;
             line-height: 1.5;
             margin-bottom: 15px;
         }
-
-        .btn-project {
-            text-decoration: none;
-            padding: 12px 25px;
-            font-size: 1rem;
-            color: #fff;
-            background-color: #ff5722;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            border: none;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        .btn-project:hover {
-            background-color: #e64a19;
-            transform: scale(1.05);
-        }
-        .btn-create-project {
-            margin-top: 20px;
-        }
-
-        .project-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
         .create-form {
             margin-bottom: 30px;
         }
@@ -151,8 +129,34 @@
             border: none;
             border-radius: 4px;
         }
-
-        /* ============ Стили модалок ============ */
+        .btn-project {
+            text-decoration: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            color: #fff;
+            background-color: #FF0000; /* Красная кнопка */
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn-project:hover {
+            background-color: #cc0000;
+            transform: scale(1.05);
+        }
+        .btn-confirm-delete {
+            background-color: #d32f2f;
+        }
+        .btn-confirm-delete:hover {
+            background-color: #b71c1c;
+        }
+        .project-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
         .modal-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -194,18 +198,36 @@
             width: 100%;
             box-sizing: border-box;
         }
-        .btn-confirm-delete {
-            background-color: #d32f2f;
+
+        /* Дополнительный блок для мотивации */
+        .extra-block {
+            margin-top: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            padding: 20px;
+            color: #fff;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .btn-confirm-delete:hover {
-            background-color: #b71c1c;
+        .extra-block h2 {
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        .extra-block p {
+            font-size: 1rem;
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
-    <!-- Декоративные круги -->
+    <!-- Плавающие круги -->
     <div class="circle"></div>
     <div class="circle"></div>
+
+    <!-- Красная волна -->
+    <div class="wave"></div>
 
     <div class="content-container">
         <h1 class="projects-title">Projects</h1>
@@ -213,7 +235,6 @@
             Here you can manage your projects, add new ones, and view existing ones.
         </p>
 
-        <!-- Форма создания нового проекта -->
         <form method="POST" class="create-form">
             {% csrf_token %}
             <input type="text" name="project_name" placeholder="Project name" required>
@@ -221,7 +242,6 @@
             <button type="submit" class="btn-project">Create New Project</button>
         </form>
 
-        <!-- Список существующих проектов -->
         <div class="info-container">
             {% for project in projects %}
             <div class="info-block">
@@ -242,17 +262,13 @@
                     {% endif %}
                 </p>
                 <div class="project-actions">
-                    <!-- "Open" ведёт на список задач -->
                     <a href="{% url 'task_list_view' project.id %}" class="btn-project">Open</a>
-                    <!-- Rename -->
                     <button type="button" class="btn-project" onclick="openEditModal({{ project.id }}, 'rename')">
                         Rename
                     </button>
-                    <!-- Edit Description -->
                     <button type="button" class="btn-project" onclick="openEditModal({{ project.id }}, 'description')">
                         Edit Description
                     </button>
-                    <!-- Delete -->
                     <button type="button" class="btn-project" onclick="openDeleteModal({{ project.id }})">
                         Delete
                     </button>
@@ -260,9 +276,18 @@
             </div>
             {% endfor %}
         </div>
+
+        <!-- Дополнительный блок (пример) -->
+        <div class="extra-block">
+            <h2>Why Manage Projects Here?</h2>
+            <p>
+                Our project management tool helps you stay organized, collaborate with teammates,
+                and track progress seamlessly. Empower your workflow with a clear overview of tasks,
+                deadlines, and responsibilities.
+            </p>
+        </div>
     </div>
 
-    <!-- Модальное окно (Rename / Edit Desc) -->
     <div id="modalOverlay" class="modal-overlay" onclick="closeAllModals()"></div>
     <div id="editModal" class="modal">
       <div class="modal-content">
@@ -274,7 +299,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно (Delete) -->
     <div id="deleteModal" class="modal">
       <div class="modal-content">
         <span class="modal-close" onclick="closeAllModals()">&times;</span>
@@ -289,20 +313,16 @@
 
     <script>
     let currentProjectId = null;
-    let currentMode = null;  // 'rename' или 'description'
+    let currentMode = null;
 
-    // Открыть модалку (Rename / Description)
     function openEditModal(projectId, mode) {
       currentProjectId = projectId;
       currentMode = mode;
-
       document.getElementById('modalOverlay').style.display = 'block';
       document.getElementById('editModal').style.display = 'block';
-
       const titleEl = document.getElementById('editModalTitle');
       const labelEl = document.getElementById('editModalLabel');
       const inputEl = document.getElementById('editModalInput');
-
       if (mode === 'rename') {
         titleEl.textContent = "Rename Project";
         labelEl.textContent = "New project name:";
@@ -313,22 +333,15 @@
       inputEl.value = "";
     }
 
-    // Сохранить изменения (Rename / Description)
     function saveEdit() {
       const newValue = document.getElementById('editModalInput').value.trim();
-      if (!newValue) {
-        // Не выводим alert, просто выходим или делаем что-то другое
-        return;
-      }
-
+      if (!newValue) return;
       let bodyData = {};
       if (currentMode === 'rename') {
         bodyData = { name: newValue };
       } else {
         bodyData = { description: newValue };
       }
-
-      // Важно: префикс /todolist/, чтобы попасть в правильный маршрут
       fetch(`/todolist/rename_todolist/${currentProjectId}/`, {
         method: "POST",
         headers: {
@@ -341,24 +354,20 @@
       .then(data => {
         if (data.success) {
           closeAllModals();
-          // Убираем alert("Updated successfully!");
           location.reload();
         } else {
-          // Тоже без alert, можно просто console.log
           console.error("Error: " + data.message);
         }
       })
       .catch(err => console.error(err));
     }
 
-    // Открыть модалку для удаления
     function openDeleteModal(projectId) {
       currentProjectId = projectId;
       document.getElementById('modalOverlay').style.display = 'block';
       document.getElementById('deleteModal').style.display = 'block';
     }
 
-    // Подтвердить удаление
     function confirmDelete() {
       fetch(`/todolist/delete_todolist/${currentProjectId}/`, {
         method: "POST",
@@ -370,7 +379,6 @@
       .then(data => {
         if (data.success) {
           closeAllModals();
-          // Убираем alert("Deleted successfully!");
           location.reload();
         } else {
           console.error("Error: " + data.message);
@@ -379,7 +387,6 @@
       .catch(err => console.error(err));
     }
 
-    // Закрыть все модалки
     function closeAllModals() {
       document.getElementById('modalOverlay').style.display = 'none';
       document.getElementById('editModal').style.display = 'none';
