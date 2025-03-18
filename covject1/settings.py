@@ -1,22 +1,29 @@
 import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# 1. Подключаем load_dotenv
+from dotenv import load_dotenv
+
+# Определяем базовую директорию проекта (папка на уровень выше текущего файла)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+# 2. Указываем путь к .env и загружаем его
+env_file = os.path.join(BASE_DIR, ".env")
+load_dotenv(env_file)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-x4$h+sqhe+k8@r*sxz)t=$)9b_cqkk6hnzwedf(!!7_c%z6^yr'
+# Теперь os.environ.get(...) будет подтягивать переменные из .env
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-значение-по-умолчанию')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+# Чтение ALLOWED_HOSTS из переменной окружения.
+# Если переменная не задана, по умолчанию используется "127.0.0.1,localhost"
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+
+# Пример: ключ OpenAI для использования GPT (если требуется)
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -24,7 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'todolist',
+    'todolist',  # ваше приложение
 ]
 
 MIDDLEWARE = [
@@ -42,8 +49,9 @@ ROOT_URLCONF = 'covject1.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Глобальная папка templates
-        'APP_DIRS': True,  # Включает поиск шаблонов в приложениях
+        # Глобальная папка templates
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -58,8 +66,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'covject1.wsgi.application'
 
 # Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -68,8 +74,6 @@ DATABASES = {
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -85,38 +89,30 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Email config
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # SMTP-сервер, например, Gmail
+EMAIL_HOST = 'smtp.gmail.com'  # или другой SMTP-сервер
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'alen.pak07@gmail.com'  # Ваш email
-EMAIL_HOST_PASSWORD = 'Chempen23032007!'  # Пароль или App Password
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
+# Настройка кастомного пользователя
 AUTH_USER_MODEL = 'todolist.CustomUser'
 LOGOUT_REDIRECT_URL = 'task_list'
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = 'static/'
 LOGIN_URL = 'login'
 
 # Media files (user-uploaded content)
-MEDIA_URL = '/media/'  # URL для доступа к медиа-файлам
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Директория для хранения медиа-файлов
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

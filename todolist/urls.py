@@ -65,4 +65,8 @@ urlpatterns = [
     path('terms-of-service/', views.terms_of_service, name='terms_of_service'),
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('contact-support/', views.contact_support, name='contact_support'),
+
+    # NEW: routes for GPT-ассистента
+    path('chat_api/', views.chat_api, name='chat_api'),
+    path('chat/', views.chat_page, name='chat_page'),
 ]

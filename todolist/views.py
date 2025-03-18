@@ -13,6 +13,11 @@ import json
 import datetime
 from django.utils import timezone
 
+# =============== НОВОЕ: импорт для GPT ===============
+import openai
+from django.conf import settings
+# =====================================================
+
 User = get_user_model()
 
 def homepage(request):
@@ -364,7 +369,7 @@ def task_filter_view(request):
 
 
 # ===============================
-# New view for updating task status via AJAX
+# End of new views
 # ===============================
 
 @login_required
@@ -394,10 +399,6 @@ def update_task_status(request):
             return JsonResponse({'success': False, 'error': 'Task not found'}, status=404)
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
-
-# ===============================
-# End of new views
-# ===============================
 
 @login_required
 def projects(request):
@@ -467,3 +468,61 @@ def contact_support(request):
         # Здесь можно добавить логику: отправить письмо, сохранить в БД, etc.
         # return redirect(...)  # после успешной отправки
     return render(request, 'contact_support.html')
+
+
+# ===============================
+# НОВОЕ: GPT-ассистент (chat_api + тестовая страница)
+# ===============================
+
+@login_required
+@csrf_exempt
+def chat_api(request):
+    """
+    Принимает POST с полем 'message' и возвращает ответ GPT в JSON.
+    Хранит историю в сессии, чтобы GPT "помнил" контекст.
+    """
+    if request.method == "POST":
+        user_message = request.POST.get("message", "")
+        if not user_message:
+            return JsonResponse({"error": "No message provided."}, status=400)
+
+        # Инициируем или берём историю чата из сессии
+        conversation_history = request.session.get("gpt_history", [])
+        if not conversation_history:
+            # Пример system-промпта: можно описать роль ассистента
+            conversation_history = [
+                {"role": "system", "content": "You are a helpful assistant that helps with tasks."}
+            ]
+
+        # Добавляем новое сообщение
+        conversation_history.append({"role": "user", "content": user_message})
+
+        # Указываем ключ
+        openai.api_key = settings.OPENAI_API_KEY
+
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",  # Или 'gpt-4', если есть доступ
+                messages=conversation_history,
+                max_tokens=512,
+                temperature=0.7,
+            )
+            gpt_answer = response.choices[0].message["content"]
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+        # Сохраняем ответ ассистента
+        conversation_history.append({"role": "assistant", "content": gpt_answer})
+        request.session["gpt_history"] = conversation_history
+
+        return JsonResponse({"answer": gpt_answer}, status=200)
+    else:
+        return JsonResponse({"error": "Only POST method allowed."}, status=405)
+
+
+@login_required
+def chat_page(request):
+    """
+    Тестовая страница для чата GPT.
+    """
+    return render(request, 'chat_page.html')
