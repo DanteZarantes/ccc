@@ -14,14 +14,12 @@
             overflow-x: hidden;
         }
 
-        /* Темы: light и dark */
+        /* Themes: light and dark */
         .light {
-            /* Светлая тема: сочетание нежно-розового и белого */
             background: linear-gradient(135deg, #fff0f0, #ffffff);
             color: #333;
         }
         .dark {
-            /* Тёмная тема: перелив тёмных оттенков */
             background: linear-gradient(135deg, #1a1a1a, #333333);
             color: #ddd;
         }
@@ -32,13 +30,18 @@
             top: 0;
             left: 0;
             width: 100%;
-            background-color: #2196F3; /* Оставим синий топ-бар (или можно заменить на красный) */
+            background-color: #2196F3; /* Blue top bar */
             padding: 10px 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
+        }
+        /* Active navigation item */
+        .active {
+            background-color: #0d47a1 !important;
+            border: 2px solid #fff;
         }
         .left-buttons {
             display: flex;
@@ -70,31 +73,7 @@
             display: block;
         }
 
-        /* Profile and logout */
-        .profile-button {
-            background-color: #FF0000; /* Ярко-красная кнопка */
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .profile-button:hover {
-            background-color: #cc0000;
-            transform: scale(1.05);
-        }
-        .logout-button {
-            background-color: #FF0000; /* Тоже красная */
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        .logout-button:hover {
-            background-color: #cc0000;
-            transform: scale(1.05);
-        }
-
-        /* Кнопки «Log In» и «Register» – делаем их заметными */
+        /* Auth buttons: Log In and Register */
         .auth-button {
             padding: 10px 20px;
             font-size: 16px;
@@ -105,7 +84,6 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             margin-left: 10px;
         }
-        /* Кнопка логина – красная с белым текстом */
         .login-button {
             background-color: #FF0000;
             color: #fff;
@@ -114,7 +92,6 @@
             background-color: #cc0000;
             transform: scale(1.05);
         }
-        /* Кнопка регистрации – белая с красным текстом */
         .register-button {
             background-color: #fff;
             color: #FF0000;
@@ -125,16 +102,50 @@
             transform: scale(1.05);
         }
 
-        .profile-menu {
+        /* Avatar dropdown container */
+        .avatar-dropdown {
+            position: relative;
             display: flex;
             align-items: center;
-            gap: 15px;
+            cursor: pointer;
         }
-        .profile-menu img {
+        .avatar-img {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             border: 2px solid white;
+            object-fit: cover;
+        }
+        /* The dropdown menu hidden by default */
+        .avatar-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 50px; /* slightly below the avatar */
+            right: 0;
+            background-color: #ffffff;
+            min-width: 140px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 6px;
+            overflow: hidden;
+            z-index: 1001;
+        }
+        .avatar-dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+        .avatar-dropdown-menu a:hover {
+            background: #f0f0f0;
+        }
+        /* Icon for user and logout inside the dropdown */
+        .avatar-dropdown-menu a svg {
+            width: 18px;
+            height: 18px;
+            fill: #333;
         }
 
         /* Sidebar */
@@ -181,13 +192,13 @@
             color: #fff;
         }
 
-        /* Основной контент */
+        /* Main content */
         .main-content {
             margin-top: 80px;
             padding: 20px;
         }
 
-        /* Дополнительный элемент - узкая красная полоска сверху (можно убрать, если не нужно) */
+        /* Decorative red bar */
         .decor-bar {
             height: 5px;
             background-color: #FF0000;
@@ -195,14 +206,14 @@
     </style>
 </head>
 <body class="{% if request.session.theme %}{{ request.session.theme }}{% else %}light{% endif %}">
-    <!-- Декоративная красная полоска -->
+    <!-- Decorative red bar -->
     <div class="decor-bar"></div>
 
     <!-- Top navigation bar -->
     <nav>
         <div class="left-buttons">
             {% if request.resolver_match.url_name != 'homepage' %}
-                <a href="{% url 'homepage' %}" class="icon-button" aria-label="Home">
+                <a href="{% url 'homepage' %}" class="icon-button {% if request.resolver_match.url_name == 'homepage' %}active{% endif %}" aria-label="Home">
                     <svg viewBox="0 0 576 512" fill="white" xmlns="http://www.w3.org/2000/svg">
                         <path d="M541 229.16 312.69 58.53a31.71 31.71 0 0 0-39.38 0L35
                         229.16a16.14 16.14 0 0 0-2.56 22.59l10 12.19a16.06
@@ -241,7 +252,26 @@
                     </svg>
                 </button>
 
-                <a href="{% url 'settings_view' %}" class="icon-button" aria-label="Settings">
+                <!-- NEW BUTTON: Subscription with coin icon -->
+                <a href="{% url 'subscription_plans' %}"
+                   class="icon-button {% if request.resolver_match.url_name == 'subscription_plans' or request.resolver_match.url_name == 'upgrade_account_view' %}active{% endif %}"
+                   aria-label="Subscription Plans">
+                    <svg viewBox="0 0 576 512" fill="white" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M287.9 0C128.9 0 0 84.6 0 188.8c0 36.4 21.2 69.1 53.7 95.1
+                        16.7 12.8 31.5 25.5 45.6 37.8 4.1 3.2 7.8 6.3 11.3 9.2C98.8 347
+                        112 374.1 112 402.1c0 76.7 103.4 139.9 231.9 139.9S575.8 478.8 575.8
+                        402.1c0-28-13.2-55.1-37.3-73.3-3.5-2.9-7.2-6-11.3-9.2-14.1-12.3-28.9-25-45.6-37.8
+                        32.5-26 53.7-58.7 53.7-95.1C576 84.6 447.1 0 287.9 0zM287.9 432c-68.8
+                        0-124.8-31.2-124.8-70.1 0-12.2 11.2-26.4 26.2-36.8 13.8-9.4 31.6-20.6 47.5-31.8
+                        15.9 11.2 33.7 22.4 47.5 31.8 15 10.4 26.2 24.6 26.2 36.8 0 38.9-56 70.1-124.8
+                        70.1zm0-240c-69 0-125 30.3-125 67.6 0 10.3 9.4 22.4 24.5 32.5 14.8 10.1 33.6 21.1
+                        50.4 32.1 16.8-11 35.6-22 50.4-32.1 15.1-10.1 24.5-22.2 24.5-32.5 0-37.3-56-67.6-125-67.6z"/>
+                    </svg>
+                </a>
+
+                <a href="{% url 'settings_view' %}"
+                   class="icon-button {% if request.resolver_match.url_name == 'settings_view' %}active{% endif %}"
+                   aria-label="Settings">
                     <svg viewBox="0 0 512 512" fill="white" xmlns="http://www.w3.org/2000/svg">
                         <path d="M487.4 315.7l-42.6-24.6c2.7-16.2 4.2-32.8 4.2-49.1s-1.4-32.9-4.2-49.1l42.6-24.6c7.9-4.6 11.6-14.1 8.9-22.8c-11.3-36.6-29.2-69.9-51.9-98.9c-5.5-7-14.8-9.1-22.8-5.1l-42.6 24.6c-25.5-21.9-55.2-38.9-87.9-50.4V24c0-8.8-7.2-16-16-16h-99.3c-8.8 0-16 7.2-16 16v49.4c-32.7 11.4-62.4 28.5-87.9 50.4l-42.6-24.6c-7.9-4.6-17.8-1.9-22.8 5.1c-22.7 29-40.6 62.3-51.9 98.9c-2.6 8.7 1 18.2 8.9 22.8l42.6 24.6c-2.7 16.2-4.2 32.8-4.2 49.1s1.4 32.9 4.2 49.1l-42.6 24.6c-7.9 4.6-11.6 14.1-8.9 22.8c11.3 36.6 29.2 69.9 51.9 98.9c5.5 7 14.8 9.1 22.8 5.1l42.6-24.6c25.5 21.9 55.2 38.9 87.9 50.4V488c0 8.8 7.2 16 16 16h99.3c8.8 0 16-7.2 16-16v-49.4c32.7-11.4 62.4-28.5 87.9-50.4l42.6 24.6c7.9 4.6 18.2 1.9 22.8-5.1c22.7-29 40.6-62.3 51.9-98.9C499 329.8 495.3 320.3 487.4 315.7zM256 352c-53 0-96-43-96-96s43-96 96-96 96 43 96 96C352 309 309 352 256 352z"/>
                     </svg>
@@ -251,13 +281,56 @@
 
         <div class="profile-menu">
             {% if user.is_authenticated %}
-                {% if user.avatar %}
-                    <img src="{{ user.avatar.url }}" alt="Avatar">
-                {% endif %}
-                <a href="{% url 'profile_edit' %}" class="profile-button">Profile</a>
-                <a href="{% url 'logout' %}" class="logout-button">Logout</a>
+                <!-- AVATAR DROPDOWN -->
+                <div class="avatar-dropdown" onclick="toggleAvatarDropdown()">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-img">
+                    {% else %}
+                        <!-- Fallback avatar if user has no avatar -->
+                        <img src="https://via.placeholder.com/40" alt="Avatar" class="avatar-img">
+                    {% endif %}
+                    <div class="avatar-dropdown-menu" id="avatarDropdownMenu">
+                        <a href="{% url 'profile_edit' %}">
+                            <!-- User Icon -->
+                            <svg viewBox="0 0 448 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M224 256A128 128 0 1 0 96 128a128 128 0 0 0 128 128zm89.6
+                                32.4-37.4-12.5-12.5-37.4C286.6 230.6 288 226.4 288 224a64 64 0 1 0-128
+                                0c0 2.4 1.4 6.6 3.3 14.4l-12.5 37.4-37.4 12.5C92.4 291.3 80 310.4
+                                80 331.2V448H368V331.2c0-20.8-12.4-39.9-30.4-42.8z"/>
+                            </svg>
+                            Profile
+                        </a>
+                        <a href="{% url 'logout' %}">
+                            <!-- Logout Icon -->
+                            <svg viewBox="0 0 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M497 273l-160 160c-9.4 9.4-24.6
+                                9.4-33.9 0l-22.6-22.6c-9.5-9.5-9.3-25
+                                .4-34.3l96.6-92.1H136c-13.3 0-24-10.7-24-24v-32c0-13.3
+                                10.7-24 24-24h241.2l-96.6-92.1c-9.8-9.4-9.9-24.8-.4-34.3l22.6-22.6c9.4-9.4
+                                24.6-9.4 33.9 0l160 160c9.4 9.4 9.4 24.6
+                                .1 34zM192 400v-40c0-13.3-10.7-24-24-24H80V80c0-26.5
+                                21.5-48 48-48h192c26.5 0 48 21.5
+                                48 48v40c0 13.3 10.7 24 24 24h40c8.8
+                                0 16 7.2 16 16v32c0 8.8-7.2
+                                16-16 16h-40c-13.3 0-24
+                                10.7-24 24v152c0 13.3
+                                10.7 24 24 24h40c8.8 0
+                                16 7.2 16 16v32c0 8.8-7.2
+                                16-16 16h-40c-26.5 0-48-21.5-48-48V224c0-26.5
+                                21.5-48 48-48h40c8.8 0
+                                16-7.2 16-16v-32c0-8.8-7.2
+                                -16-16-16h-40c-13.3 0-24
+                                -10.7-24-24V80c0-44.2-35.8-80-80-80H128C83.8 0 48
+                                35.8 48 80v320c0 44.2
+                                35.8 80 80 80h88c13.3
+                                0 24-10.7 24-24z"/>
+                            </svg>
+                            Logout
+                        </a>
+                    </div>
+                </div>
             {% else %}
-                <!-- Две кнопки: Log In (красная), Register (белая с красной обводкой) -->
+                <!-- Two buttons: Log In (red) and Register (white with red border) -->
                 <a href="{% url 'auth_view' %}" class="login-button auth-button">Log In</a>
                 <a href="{% url 'auth_view' %}?mode=register" class="register-button auth-button">Register</a>
             {% endif %}
@@ -272,8 +345,6 @@
         <a href="{% url 'dashboard_view' %}">Dashboard</a>
         <a href="{% url 'kanban_view' %}">Kanban Board</a>
         <a href="{% url 'task_filter_view' %}">Task Filter</a>
-
-        <!-- Добавляем ссылку на чат-ассистента -->
         <a href="{% url 'chat_page' %}">AI Assistant</a>
     </div>
 
@@ -288,6 +359,16 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('open');
+        }
+
+        function toggleAvatarDropdown() {
+            const menu = document.getElementById('avatarDropdownMenu');
+            // Simple toggle: hide if open, show if closed
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+            } else {
+                menu.style.display = 'block';
+            }
         }
     </script>
 </body>

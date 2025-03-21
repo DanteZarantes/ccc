@@ -5,20 +5,22 @@ from django.contrib.auth.decorators import login_required
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.http import JsonResponse
-from .models import Task, ToDoList
+from .models import Task, ToDoList, Project, Subscription, Payment  # Added Project model
 from .tokens import account_activation_token
 from .forms import CustomUserCreationForm, ProfileForm
 from django.views.decorators.csrf import csrf_exempt
 import json
 import datetime
 from django.utils import timezone
-
-# =============== НОВОЕ: импорт для GPT ===============
 import openai
 from django.conf import settings
-# =====================================================
+
+# Stripe import
+import stripe
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 User = get_user_model()
+
 
 def homepage(request):
     return render(request, 'homepage.html')
@@ -42,7 +44,6 @@ def auth_view(request):
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
         if form_type == 'login':
-            # Login using email
             email = request.POST.get('email')
             password = request.POST.get('password')
             try:
@@ -50,7 +51,6 @@ def auth_view(request):
                 user = authenticate(request, username=user_obj.username, password=password)
             except User.DoesNotExist:
                 user = None
-
             if user is not None:
                 login(request, user)
                 return redirect('create_todo')
@@ -61,12 +61,10 @@ def auth_view(request):
             if form.is_valid():
                 email = form.cleaned_data.get('email')
                 username = form.cleaned_data.get('username')
-
                 if User.objects.filter(email=email).exists():
                     return render(request, 'auth.html', {'error_register': 'Email already in use'})
                 if User.objects.filter(username=username).exists():
                     return render(request, 'auth.html', {'error_register': 'Username already in use'})
-
                 user = form.save(commit=False)
                 user.set_password(form.cleaned_data['password'])
                 user.save()
@@ -74,7 +72,6 @@ def auth_view(request):
                 return redirect('create_todo')
             else:
                 return render(request, 'auth.html', {'error_register': 'Please fix the errors in the form'})
-
     return render(request, 'auth.html')
 
 
@@ -92,7 +89,6 @@ def activate(request, uidb64, token):
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
-
     if user is not None and account_activation_token.check_token(user, token):
         user.is_active = True
         user.save()
@@ -113,27 +109,22 @@ def profile_edit(request):
     """
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-        about_me = request.POST.get('about')
-
-        if new_password and new_password == confirm_password:
-            request.user.set_password(new_password)
-
-        if about_me:
-            request.user.about = about_me
-            request.user.save()
-
         if form.is_valid():
-            form.save()
+            user = form.save(commit=False)
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            about_me = request.POST.get('about')
+            if new_password and new_password == confirm_password:
+                user.set_password(new_password)
+            if about_me:
+                user.about = about_me
+            user.save()
             return redirect('create_todo')
     else:
         form = ProfileForm(instance=request.user)
-
     tasks_completed = Task.objects.filter(user=request.user, is_completed=True).count()
     todo_lists = ToDoList.objects.filter(user=request.user).count()
     last_login = request.user.last_login
-
     context = {
         'form': form,
         'tasks_completed': tasks_completed,
@@ -180,13 +171,67 @@ def delete_task(request, task_id):
 def toggle_task(request, task_id):
     """
     Toggles the completion status of a task.
+    Additionally syncs 'status' with 'is_completed' for Kanban and Dashboard consistency.
     """
     task = get_object_or_404(Task, id=task_id, user=request.user)
     if request.method == "POST":
-        task.is_completed = not task.is_completed
+        if not task.is_completed:
+            task.is_completed = True
+            task.status = 'done'
+            if not task.completed_at:
+                task.completed_at = timezone.now()
+        else:
+            task.is_completed = False
+            task.status = 'todo'
+            task.completed_at = None
         task.save()
         return JsonResponse({"success": True, "is_completed": task.is_completed}, status=200)
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
+
+
+@login_required
+@csrf_exempt
+def complete_task(request, task_id):
+    """
+    Toggles a task's completion:
+    - If the task is already completed, uncomplete it.
+    - If the task is incomplete, check that all subtasks are completed; if not, return an error.
+    """
+    if request.method == "POST":
+        task = get_object_or_404(Task, id=task_id, user=request.user)
+        if task.is_completed:
+            task.is_completed = False
+            task.status = 'todo'
+            task.completed_at = None
+            task.save()
+            return JsonResponse({"success": True, "is_completed": False}, status=200)
+        else:
+            if not all_subtasks_completed(task):
+                return JsonResponse({
+                    "success": False,
+                    "error": "Cannot complete this task because one or more subtasks are incomplete."
+                }, status=400)
+            task.is_completed = True
+            task.status = 'done'
+            if not task.completed_at:
+                task.completed_at = timezone.now()
+            task.save()
+            if task.parent:
+                task.parent.check_completion()
+            return JsonResponse({"success": True, "is_completed": True}, status=200)
+    return JsonResponse({"success": False, "error": "Invalid request method."}, status=405)
+
+
+def all_subtasks_completed(task):
+    """
+    Recursively checks that all subtasks (and their subtasks) are completed.
+    """
+    for sub in task.subtasks.all():
+        if not sub.is_completed:
+            return False
+        if not all_subtasks_completed(sub):
+            return False
+    return True
 
 
 @login_required
@@ -209,6 +254,7 @@ def add_subtask(request, parent_id):
 def get_tasks_json(request):
     """
     Returns a JSON representation of tasks for a given To-Do List.
+    This data is used by the D3 tree to color branches for completed/incomplete tasks.
     """
     todolist_id = request.GET.get('todolist_id')
     if not todolist_id:
@@ -223,6 +269,7 @@ def get_tasks_json(request):
             "is_completed": task.is_completed,
             "children": [build_task_tree(subtask) for subtask in task.subtasks.all()]
         }
+
     tasks = todolist.tasks.filter(parent=None)
     task_tree = [build_task_tree(task) for task in tasks]
     return JsonResponse(task_tree, safe=False)
@@ -273,15 +320,12 @@ def rename_todolist(request, todolist_id):
                 data = json.loads(request.body.decode("utf-8"))
             except json.JSONDecodeError:
                 return JsonResponse({"success": False, "message": "Invalid JSON."}, status=400)
-
             new_name = data.get("name")
             new_description = data.get("description")
-
             if new_name:
                 todolist.name = new_name
             if new_description is not None:
                 todolist.description = new_description
-
             todolist.save()
             return JsonResponse({"success": True, "message": "To-Do List updated successfully."}, status=200)
         except Exception as e:
@@ -319,7 +363,7 @@ def add_detail(request, task_id):
 def dashboard_view(request):
     """
     Displays a dashboard with a bar chart showing the number of completed tasks
-    for the last 7 days.
+    for the last 7 days. We use is_completed and completed_at to track them.
     """
     today = timezone.now().date()
     labels = []
@@ -343,6 +387,7 @@ def dashboard_view(request):
 def kanban_view(request):
     """
     Displays a Kanban board with tasks separated into columns based on status.
+    Completed tasks (status 'done') appear in the 'Done' column.
     """
     tasks_todo = Task.objects.filter(user=request.user, status='todo')
     tasks_in_progress = Task.objects.filter(user=request.user, status='in_progress')
@@ -358,13 +403,35 @@ def kanban_view(request):
 @login_required
 def task_filter_view(request):
     """
-    Displays tasks filtered by tag. Uses the GET parameter 'tag' for filtering.
+    Displays tasks filtered by tag, search query, and sorted by a given field.
+    Accepts the following GET parameters:
+      - tag: Filter tasks by tag (case-insensitive substring match).
+      - sort_by: Order tasks by 'title', 'status', or 'created' (created_at).
+      - q: A search query to filter tasks by title.
     """
     selected_tag = request.GET.get('tag', '')
+    sort_by = request.GET.get('sort_by', 'created')
+    query = request.GET.get('q', '')
+
     tasks = Task.objects.filter(user=request.user)
     if selected_tag:
         tasks = tasks.filter(tags__icontains=selected_tag)
-    context = {'tasks': tasks, 'selected_tag': selected_tag}
+    if query:
+        tasks = tasks.filter(title__icontains=query)
+
+    if sort_by == 'title':
+        tasks = tasks.order_by('title')
+    elif sort_by == 'status':
+        tasks = tasks.order_by('status')
+    elif sort_by == 'created':
+        tasks = tasks.order_by('-created_at')
+
+    context = {
+        'tasks': tasks,
+        'selected_tag': selected_tag,
+        'sort_by': sort_by,
+        'q': query
+    }
     return render(request, 'task_filter.html', context)
 
 
@@ -376,8 +443,9 @@ def task_filter_view(request):
 @csrf_exempt
 def update_task_status(request):
     """
-    Updates the status of a task via AJAX.
-    Expects JSON with 'task_id' and 'status'.
+    Updates the status of a task via AJAX (for drag-and-drop in Kanban, etc.).
+    If status is set to 'done', we also set is_completed=True and completed_at.
+    Otherwise, is_completed=False.
     """
     if request.method == "POST":
         data = json.loads(request.body.decode("utf-8"))
@@ -400,25 +468,66 @@ def update_task_status(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
 
+# ===============================
+# Autonomous Projects (not linked to To-Do lists)
+# ===============================
+
 @login_required
 def projects(request):
     """
-    Displays the projects page (To-Do Lists as projects).
+    Displays the projects page with autonomous project management.
     If POST, creates a new project.
     """
     if request.method == "POST":
         project_name = request.POST.get("project_name")
         project_description = request.POST.get("project_description", "")
         if project_name:
-            ToDoList.objects.create(
+            # Create a new Project instance (ensure you have defined Project in models.py)
+            Project.objects.create(
                 name=project_name,
                 user=request.user,
                 description=project_description
             )
         return redirect('projects')
-
-    projects_list = ToDoList.objects.filter(user=request.user).order_by('-id')
+    projects_list = Project.objects.filter(user=request.user).order_by('-id')
     return render(request, 'projects.html', {'projects': projects_list})
+
+
+@login_required
+@csrf_exempt
+def delete_project(request, project_id):
+    """
+    Deletes a project.
+    """
+    project = get_object_or_404(Project, id=project_id, user=request.user)
+    if request.method == "POST":
+        project.delete()
+        return JsonResponse({"success": True, "message": "Project deleted successfully."}, status=200)
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
+
+
+@login_required
+@csrf_exempt
+def rename_project(request, project_id):
+    """
+    Updates the name (and optionally description) of a project.
+    Expects JSON with "name" and optional "description".
+    """
+    if request.method == "POST":
+        project = get_object_or_404(Project, id=project_id, user=request.user)
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid JSON."}, status=400)
+        new_name = data.get("name")
+        new_description = data.get("description")
+        if new_name:
+            project.name = new_name
+        if new_description is not None:
+            project.description = new_description
+        project.save()
+        return JsonResponse({"success": True, "message": "Project updated successfully."}, status=200)
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
 
 
 @login_required
@@ -454,8 +563,10 @@ def password_instructions(request):
 def terms_of_service(request):
     return render(request, 'terms_of_service.html')
 
+
 def privacy_policy(request):
     return render(request, 'privacy_policy.html')
+
 
 def contact_support(request):
     """
@@ -465,44 +576,35 @@ def contact_support(request):
     if request.method == 'POST':
         subject = request.POST.get('subject')
         message = request.POST.get('message')
-        # Здесь можно добавить логику: отправить письмо, сохранить в БД, etc.
-        # return redirect(...)  # после успешной отправки
+        # Additional logic to send email or save in DB, etc.
     return render(request, 'contact_support.html')
 
 
 # ===============================
-# НОВОЕ: GPT-ассистент (chat_api + тестовая страница)
+# GPT Assistant (chat_api + test page)
 # ===============================
 
 @login_required
 @csrf_exempt
 def chat_api(request):
     """
-    Принимает POST с полем 'message' и возвращает ответ GPT в JSON.
-    Хранит историю в сессии, чтобы GPT "помнил" контекст.
+    Accepts POST with 'message' and returns GPT response as JSON.
+    Maintains conversation history in session.
     """
     if request.method == "POST":
         user_message = request.POST.get("message", "")
         if not user_message:
             return JsonResponse({"error": "No message provided."}, status=400)
-
-        # Инициируем или берём историю чата из сессии
         conversation_history = request.session.get("gpt_history", [])
         if not conversation_history:
-            # Пример system-промпта: можно описать роль ассистента
             conversation_history = [
                 {"role": "system", "content": "You are a helpful assistant that helps with tasks."}
             ]
-
-        # Добавляем новое сообщение
         conversation_history.append({"role": "user", "content": user_message})
-
-        # Указываем ключ
         openai.api_key = settings.OPENAI_API_KEY
-
         try:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",  # Или 'gpt-4', если есть доступ
+                model="gpt-3.5-turbo",
                 messages=conversation_history,
                 max_tokens=512,
                 temperature=0.7,
@@ -510,11 +612,8 @@ def chat_api(request):
             gpt_answer = response.choices[0].message["content"]
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
-
-        # Сохраняем ответ ассистента
         conversation_history.append({"role": "assistant", "content": gpt_answer})
         request.session["gpt_history"] = conversation_history
-
         return JsonResponse({"answer": gpt_answer}, status=200)
     else:
         return JsonResponse({"error": "Only POST method allowed."}, status=405)
@@ -523,6 +622,168 @@ def chat_api(request):
 @login_required
 def chat_page(request):
     """
-    Тестовая страница для чата GPT.
+    Test page for GPT chat.
     """
     return render(request, 'chat_page.html')
+
+
+# ===============================
+# Payment Integration (Stripe)
+# ===============================
+
+@login_required
+def start_payment(request, plan):
+    """
+    Creates a Stripe Checkout Session for the selected plan.
+    """
+    if plan not in ['business', 'premium']:
+        return redirect('subscription_plans')
+    price_map = {
+        'business': 49900,
+        'premium': 99900,
+    }
+    amount = price_map[plan]
+    payment = Payment.objects.create(
+        user=request.user,
+        plan=plan,
+    )
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'rub',
+                'product_data': {
+                    'name': f"{plan.capitalize()} Plan",
+                },
+                'unit_amount': amount,
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url=request.build_absolute_uri('/payment/success/?session_id={CHECKOUT_SESSION_ID}'),
+        cancel_url=request.build_absolute_uri('/payment/cancel/'),
+        client_reference_id=str(payment.id),
+    )
+    payment.stripe_checkout_session_id = session.id
+    payment.save()
+    return redirect(session.url, code=303)
+
+
+@login_required
+def payment_success(request):
+    """
+    Page shown after a successful payment.
+    """
+    session_id = request.GET.get('session_id', '')
+    if not session_id:
+        return render(request, 'payment_failed.html', {"error": "No session ID provided."})
+    session = stripe.checkout.Session.retrieve(session_id)
+    payment_id = session.client_reference_id
+    payment = Payment.objects.get(id=payment_id)
+    payment.paid = True
+    payment.save()
+    plan = payment.plan
+    sub, created = Subscription.objects.get_or_create(
+        user=request.user,
+        plan=plan,
+        defaults={
+            'is_active': True,
+            'start_date': timezone.now(),
+            'end_date': timezone.now() + datetime.timedelta(days=30),
+        }
+    )
+    if not created:
+        sub.is_active = True
+        sub.end_date = timezone.now() + datetime.timedelta(days=30)
+        sub.save()
+    request.user.account_type = plan
+    request.user.save()
+    return render(request, 'payment_success.html', {"plan": plan})
+
+
+@login_required
+def payment_cancel(request):
+    """
+    Page shown if the user cancels the payment.
+    """
+    return render(request, 'payment_cancel.html')
+
+
+# -------------------------
+# Intermediate Payment Page
+# -------------------------
+
+@login_required
+def payment_options(request, plan):
+    """
+    Intermediate page where the user confirms the selected plan and chooses the payment method.
+    """
+    if plan not in ['business', 'premium']:
+        return redirect('subscription_plans')
+    return render(request, 'payment_options.html', {'plan': plan})
+
+
+@login_required
+def process_payment(request):
+    """
+    Processes the payment options form submission.
+    """
+    if request.method == "POST":
+        plan = request.POST.get("plan")
+        payment_method = request.POST.get("payment_method", "stripe")
+        if plan not in ['business', 'premium']:
+            return redirect('subscription_plans')
+        if payment_method == "stripe":
+            return redirect('start_payment', plan=plan)
+        return redirect('subscription_plans')
+    else:
+        return redirect('subscription_plans')
+
+
+# ===============================
+# Subscription and Business-Only Views
+# ===============================
+
+from functools import wraps
+
+def subscription_required(allowed_plans=('business', 'premium')):
+    """
+    Checks if the user has one of the allowed subscription plans.
+    If not, redirects to subscription_plans.
+    """
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if request.user.account_type not in allowed_plans:
+                return redirect('subscription_plans')
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
+@login_required
+def subscription_plans(request):
+    """
+    Page showing available plans: free, business, premium.
+    """
+    active_sub = Subscription.objects.filter(user=request.user, is_active=True).order_by('-start_date').first()
+    return render(request, 'subscription_plans.html', {'active_sub': active_sub})
+
+
+@login_required
+def upgrade_account_view(request, plan):
+    """
+    Demonstration logic for upgrading an account.
+    """
+    if plan not in ['business', 'premium']:
+        return redirect('subscription_plans')
+    return redirect('payment_options', plan=plan)
+
+
+@login_required
+@subscription_required(allowed_plans=('business', 'premium'))
+def business_only_view(request):
+    """
+    Example of a view only accessible to business/premium users.
+    """
+    return render(request, 'business_only.html', {})

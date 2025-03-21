@@ -1,0 +1,9 @@
+{% extends 'header.html' %}
+
+{% block content %}
+<div style="margin-top: 50px; text-align: center;">
+    <h1>Payment Canceled</h1>
+    <p>You have canceled the payment process.</p>
+    <a href="{% url 'subscription_plans' %}" style="color: #FF0000; text-decoration: none;">Back to Subscription Plans</a>
+</div>
+{% endblock %}

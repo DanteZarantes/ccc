@@ -23,6 +23,12 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(","
 # Пример: ключ OpenAI для использования GPT (если требуется)
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
+# ========== ДОБАВЛЕННЫЕ СТРОКИ ДЛЯ STRIPE ==========
+# Здесь мы берём секретный и публичный ключ из .env
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', '')
+# ================================================
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',

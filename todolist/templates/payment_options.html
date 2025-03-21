@@ -1,0 +1,30 @@
+<!-- payment_options.html -->
+{% extends 'header.html' %}
+
+{% block content %}
+<div style="margin-top: 50px; text-align: center;">
+    <h1>Payment Options for {{ plan|capfirst }} Plan</h1>
+    {% if plan == "business" %}
+        <p>Price: 499 ₽ / month</p>
+    {% elif plan == "premium" %}
+        <p>Price: 999 ₽ / month</p>
+    {% endif %}
+
+    <!-- Пример: пользователь может выбрать способ оплаты (Stripe, PayPal, etc.) -->
+    <form method="POST" action="{% url 'process_payment' %}">
+        {% csrf_token %}
+        <input type="hidden" name="plan" value="{{ plan }}">
+
+        <label for="payment_method">Select payment method:</label>
+        <select name="payment_method" id="payment_method" style="margin: 10px;">
+            <option value="stripe">Stripe (Credit Card)</option>
+            <!-- Можно добавить другие методы -->
+            <!-- <option value="paypal">PayPal</option> -->
+        </select>
+
+        <button type="submit" style="padding:10px 20px; background-color:#FF0000; color:#fff; border:none; border-radius:5px; cursor:pointer;">
+            Proceed to Payment
+        </button>
+    </form>
+</div>
+{% endblock %}

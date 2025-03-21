@@ -1,11 +1,11 @@
 {% for task in tasks %}
-    <li class="task-container {% if task.completed %}completed{% endif %}">
+    <li class="task-container {% if task.is_completed %}completed{% endif %}">
         <div class="task-content">
-            <form method="POST" action="{% url 'toggle_task' task.id %}" style="margin: 0;">
+            <form method="POST" action="{% url 'complete_task' task.id %}" style="margin: 0;">
                 {% csrf_token %}
-                <input type="checkbox" name="completed" {% if task.completed %}checked{% endif %} onchange="this.form.submit()">
+                <input type="checkbox" name="completed" {% if task.is_completed %}checked{% endif %} onchange="this.form.submit()">
             </form>
-            <span>{{ task.get_numbering }} - {{ task.title }}</span>
+            <span>{{ task.get_numbering }} - {{ task.title }} {% if task.is_completed %}✓{% endif %}</span>
         </div>
         <a href="{% url 'delete_task' task.id %}">
             <button>Delete</button>

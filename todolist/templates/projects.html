@@ -5,313 +5,363 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Projects</title>
-    <style>
-        /* Сброс и базовые стили */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #fff, #ffe5e5);
-            color: inherit;
-            text-align: center;
-            min-height: 100vh;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        /* Плавающие круги */
-        .circle {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 0, 0, 0.15);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-            z-index: 1;
-        }
-        .circle:nth-child(1) {
-            top: 10%;
-            left: 20%;
-        }
-        .circle:nth-child(2) {
-            top: 60%;
-            left: 60%;
-        }
-        @keyframes float {
-            0%   { transform: translateY(0px); }
-            50%  { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-        /* Красная волна внизу */
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 150px;
-            background: #FF0000;
-            clip-path: ellipse(70% 100% at 50% 100%);
-            z-index: 1;
-        }
-        .content-container {
-            max-width: 1200px;
-            margin: auto;
-            position: relative;
-            z-index: 2; /* Выше кругов */
-            text-align: center;
-            padding: 20px;
-        }
-        .projects-title {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            animation: fadeIn 2s ease forwards;
-            opacity: 0;
-            color: #FF0000;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-        }
-        .projects-desc {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            animation: fadeIn 2.5s ease forwards;
-            opacity: 0;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .info-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 30px;
-        }
-        .info-block {
-            background-color: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(5px);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            flex: 1 1 250px;
-            max-width: 300px;
-            transition: transform 0.3s, box-shadow 0.3s;
-            margin: 10px;
-            text-align: left;
-            color: #fff;
-        }
-        .info-block:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-        }
-        .info-block h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #fff;
-        }
-        .info-block p {
-            font-size: 1rem;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-        .create-form {
-            margin-bottom: 30px;
-        }
-        .create-form input {
-            padding: 8px;
-            margin-right: 10px;
-            border: none;
-            border-radius: 4px;
-        }
-        .btn-project {
-            text-decoration: none;
-            padding: 12px 25px;
-            font-size: 1rem;
-            color: #fff;
-            background-color: #FF0000; /* Красная кнопка */
-            border-radius: 25px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            border: none;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        .btn-project:hover {
-            background-color: #cc0000;
-            transform: scale(1.05);
-        }
-        .btn-confirm-delete {
-            background-color: #d32f2f;
-        }
-        .btn-confirm-delete:hover {
-            background-color: #b71c1c;
-        }
-        .project-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 999;
-            display: none;
-        }
-        .modal {
-            position: fixed;
-            top: 50%; left: 50%;
-            width: 400px;
-            max-width: 80%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            color: #000;
-            padding: 20px;
-            border-radius: 10px;
-            z-index: 1000;
-            display: none;
-        }
-        .modal-content {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .modal-close {
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            align-self: flex-end;
-        }
-        .modal h2 {
-            margin: 0;
-        }
-        .modal input {
-            padding: 8px;
-            font-size: 1rem;
-            width: 100%;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <title>Projects</title>
+  <style>
+    /* Reset and basic styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    /* Убираем overflow: hidden, чтобы текст и элементы не обрезались */
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #fff, #ffe5e5);
+      color: #333; /* Тёмный цвет текста для лучшей видимости */
+      text-align: center;
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column; /* позволяем странице прокручиваться */
+    }
 
-        /* Дополнительный блок для мотивации */
-        .extra-block {
-            margin-top: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            border-radius: 15px;
-            padding: 20px;
-            color: #fff;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .extra-block h2 {
-            margin-bottom: 10px;
-            color: #fff;
-        }
-        .extra-block p {
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-    </style>
+    /* Floating circles */
+    .circle {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: rgba(255, 0, 0, 0.15);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+      z-index: 1;
+    }
+    .circle:nth-child(1) {
+      top: 10%;
+      left: 20%;
+    }
+    .circle:nth-child(2) {
+      top: 60%;
+      left: 60%;
+    }
+    @keyframes float {
+      0%   { transform: translateY(0px); }
+      50%  { transform: translateY(-20px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* Red wave at the bottom */
+    .wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      background: #FF0000;
+      clip-path: ellipse(70% 100% at 50% 100%);
+      z-index: 1;
+    }
+
+    /* Main container for content */
+    .content-container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2; /* above circles */
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    /* Title and description */
+    .projects-title {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: fadeIn 2s ease forwards;
+      opacity: 0;
+      color: #FF0000;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+    .projects-desc {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      animation: fadeIn 2.5s ease forwards;
+      opacity: 0;
+      color: #333;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Create form */
+    .create-form {
+      margin-bottom: 30px;
+    }
+    .create-form input {
+      padding: 8px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      color: #333;
+    }
+    .create-form input::placeholder {
+      color: #666;
+    }
+    .btn-project {
+      text-decoration: none;
+      padding: 12px 25px;
+      font-size: 1rem;
+      color: #fff;
+      background-color: #FF0000; /* Red button */
+      border-radius: 25px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      border: none;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    .btn-project:hover {
+      background-color: #cc0000;
+      transform: scale(1.05);
+    }
+    .btn-confirm-delete {
+      background-color: #d32f2f;
+    }
+    .btn-confirm-delete:hover {
+      background-color: #b71c1c;
+    }
+
+    /* Container for project cards */
+    .info-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+
+    /* Project card */
+    .info-block {
+      background-color: rgba(255, 255, 255, 0.85); /* Светлый фон для видимого текста */
+      backdrop-filter: blur(5px);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      flex: 1 1 250px;
+      max-width: 300px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      margin: 10px;
+      text-align: left;
+      opacity: 0; /* Для анимации */
+      animation: fadeSlideIn 0.8s ease forwards;
+    }
+    .info-block:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+    .info-block h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #FF0000;
+    }
+    .info-block p {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .project-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* Fade & slide in for project cards */
+    @keyframes fadeSlideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Modal overlay and windows */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+    }
+    .modal {
+      position: fixed;
+      top: 50%; left: 50%;
+      width: 400px;
+      max-width: 80%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 1000;
+      display: none;
+    }
+    .modal-content {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .modal-close {
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+    .modal h2 {
+      margin: 0;
+    }
+    .modal input {
+      padding: 8px;
+      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+      color: #333;
+    }
+
+    /* Extra block for text with fade-in-up animation */
+    .extra-block {
+      margin-top: 40px;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(5px);
+      border-radius: 15px;
+      padding: 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      opacity: 0;
+      animation: fadeInUp 1s ease forwards 1.2s; /* Небольшая задержка для анимации */
+    }
+    .extra-block h2 {
+      margin-bottom: 10px;
+      color: #FF0000;
+    }
+    .extra-block p {
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #333;
+    }
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Плавающие круги -->
-    <div class="circle"></div>
-    <div class="circle"></div>
+  <!-- Floating circles -->
+  <div class="circle"></div>
+  <div class="circle"></div>
 
-    <!-- Красная волна -->
-    <div class="wave"></div>
+  <!-- Red wave -->
+  <div class="wave"></div>
 
-    <div class="content-container">
-        <h1 class="projects-title">Projects</h1>
-        <p class="projects-desc">
-            Here you can manage your projects, add new ones, and view existing ones.
+  <div class="content-container">
+    <h1 class="projects-title">Projects</h1>
+    <p class="projects-desc">
+      Here you can manage your projects, add new ones, and view existing ones.
+    </p>
+
+    <!-- Creating new project -->
+    <form method="POST" class="create-form">
+      {% csrf_token %}
+      <input type="text" name="project_name" placeholder="Project name" required>
+      <input type="text" name="project_description" placeholder="Project description (optional)">
+      <button type="submit" class="btn-project">Create New Project</button>
+    </form>
+
+    <!-- Displaying existing projects -->
+    <div class="info-container">
+      {% for project in projects %}
+      <div class="info-block">
+        <h3>{{ project.name }}</h3>
+        <p>
+          Description:
+          {% if project.description %}
+            {{ project.description }}
+          {% else %}
+            No description
+          {% endif %}
+          <br>
+          Created on:
+          {% if project.created_at %}
+            {{ project.created_at|date:"Y-m-d" }}
+          {% else %}
+            unknown
+          {% endif %}
         </p>
-
-        <form method="POST" class="create-form">
-            {% csrf_token %}
-            <input type="text" name="project_name" placeholder="Project name" required>
-            <input type="text" name="project_description" placeholder="Project description (optional)">
-            <button type="submit" class="btn-project">Create New Project</button>
-        </form>
-
-        <div class="info-container">
-            {% for project in projects %}
-            <div class="info-block">
-                <h3>{{ project.name }}</h3>
-                <p>
-                    Description:
-                    {% if project.description %}
-                        {{ project.description }}
-                    {% else %}
-                        No description
-                    {% endif %}
-                    <br>
-                    Created on:
-                    {% if project.created_at %}
-                        {{ project.created_at|date:"Y-m-d" }}
-                    {% else %}
-                        unknown
-                    {% endif %}
-                </p>
-                <div class="project-actions">
-                    <a href="{% url 'task_list_view' project.id %}" class="btn-project">Open</a>
-                    <button type="button" class="btn-project" onclick="openEditModal({{ project.id }}, 'rename')">
-                        Rename
-                    </button>
-                    <button type="button" class="btn-project" onclick="openEditModal({{ project.id }}, 'description')">
-                        Edit Description
-                    </button>
-                    <button type="button" class="btn-project" onclick="openDeleteModal({{ project.id }})">
-                        Delete
-                    </button>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        <!-- Дополнительный блок (пример) -->
-        <div class="extra-block">
-            <h2>Why Manage Projects Here?</h2>
-            <p>
-                Our project management tool helps you stay organized, collaborate with teammates,
-                and track progress seamlessly. Empower your workflow with a clear overview of tasks,
-                deadlines, and responsibilities.
-            </p>
-        </div>
-    </div>
-
-    <div id="modalOverlay" class="modal-overlay" onclick="closeAllModals()"></div>
-    <div id="editModal" class="modal">
-      <div class="modal-content">
-        <span class="modal-close" onclick="closeAllModals()">&times;</span>
-        <h2 id="editModalTitle">Edit</h2>
-        <label id="editModalLabel" for="editModalInput"></label>
-        <input type="text" id="editModalInput" />
-        <button class="btn-project" onclick="saveEdit()">Save</button>
-      </div>
-    </div>
-
-    <div id="deleteModal" class="modal">
-      <div class="modal-content">
-        <span class="modal-close" onclick="closeAllModals()">&times;</span>
-        <h2>Delete Project</h2>
-        <p>Are you sure you want to delete this project?</p>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-          <button class="btn-project" onclick="closeAllModals()">Cancel</button>
-          <button class="btn-project btn-confirm-delete" onclick="confirmDelete()">Yes, Delete</button>
+        <div class="project-actions">
+          <!-- "Open" can redirect somewhere if needed -->
+          <a href="#" class="btn-project">Open</a>
+          <button type="button" class="btn-project" onclick="openEditModal({{ project.id }}, 'rename')">
+            Rename
+          </button>
+          <button type="button" class="btn-project" onclick="openEditModal({{ project.id }}, 'description')">
+            Edit Description
+          </button>
+          <button type="button" class="btn-project" onclick="openDeleteModal({{ project.id }})">
+            Delete
+          </button>
         </div>
       </div>
+      {% endfor %}
     </div>
 
-    <script>
+    <!-- Extra block (example) -->
+    <div class="extra-block">
+      <h2>Why Manage Projects Here?</h2>
+      <p>
+        Our project management tool helps you stay organized, collaborate with teammates,
+        and track progress seamlessly. Empower your workflow with a clear overview of tasks,
+        deadlines, and responsibilities.
+      </p>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="modalOverlay" class="modal-overlay" onclick="closeAllModals()"></div>
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeAllModals()">&times;</span>
+      <h2 id="editModalTitle">Edit</h2>
+      <label id="editModalLabel" for="editModalInput"></label>
+      <input type="text" id="editModalInput" />
+      <button class="btn-project" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeAllModals()">&times;</span>
+      <h2>Delete Project</h2>
+      <p>Are you sure you want to delete this project?</p>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn-project" onclick="closeAllModals()">Cancel</button>
+        <button class="btn-project btn-confirm-delete" onclick="confirmDelete()">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
     let currentProjectId = null;
     let currentMode = null;
 
@@ -342,7 +392,7 @@
       } else {
         bodyData = { description: newValue };
       }
-      fetch(`/todolist/rename_todolist/${currentProjectId}/`, {
+      fetch(`/projects/rename_project/${currentProjectId}/`, {
         method: "POST",
         headers: {
           "X-CSRFToken": "{{ csrf_token }}",
@@ -369,7 +419,7 @@
     }
 
     function confirmDelete() {
-      fetch(`/todolist/delete_todolist/${currentProjectId}/`, {
+      fetch(`/projects/delete_project/${currentProjectId}/`, {
         method: "POST",
         headers: {
           "X-CSRFToken": "{{ csrf_token }}"
@@ -394,7 +444,7 @@
       currentProjectId = null;
       currentMode = null;
     }
-    </script>
+  </script>
 </body>
 </html>
 {% endblock %}

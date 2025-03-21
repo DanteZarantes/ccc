@@ -1,0 +1,43 @@
+<!-- subscription_plans.html -->
+{% extends 'header.html' %}
+
+{% block content %}
+<div style="text-align:center; margin-top: 50px;">
+    <h1>Choose Your Subscription Plan</h1>
+    <p>We offer several options: Free, Business, and Premium.</p>
+
+    <div style="display: flex; justify-content: center; gap: 50px; margin-top: 40px;">
+        <!-- Free Plan -->
+        <div style="border: 1px solid #ccc; padding: 20px; width: 200px;">
+            <h2>Free</h2>
+            <p>Basic features</p>
+            <p>Price: 0 ₽ / month</p>
+            <!-- No button needed for Free, as it's default -->
+        </div>
+
+        <!-- Business Plan -->
+        <div style="border: 1px solid #ccc; padding: 20px; width: 200px;">
+            <h2>Business</h2>
+            <p>Advanced features</p>
+            <p>Price: 499 ₽ / month</p>
+            <!-- Redirect to payment_options for 'business' plan -->
+            <a href="{% url 'payment_options' 'business' %}"
+               style="display:inline-block; padding:10px 20px; background-color:#FF0000; color:#fff; text-decoration:none; border-radius:5px; margin-top:10px;">
+                Choose Business
+            </a>
+        </div>
+
+        <!-- Premium Plan -->
+        <div style="border: 1px solid #ccc; padding: 20px; width: 200px;">
+            <h2>Premium</h2>
+            <p>All features + priority support</p>
+            <p>Price: 999 ₽ / month</p>
+            <!-- Redirect to payment_options for 'premium' plan -->
+            <a href="{% url 'payment_options' 'premium' %}"
+               style="display:inline-block; padding:10px 20px; background-color:#FF0000; color:#fff; text-decoration:none; border-radius:5px; margin-top:10px;">
+                Choose Premium
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <title>To-Do List: {{ todolist.name }}</title>
-  <!-- Подключение D3.js и jQuery -->
+  <!-- Include D3.js and jQuery -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <style>
-    /* Общие стили и сброс */
+    /* General reset and styles */
     * {
       margin: 0;
       padding: 0;
@@ -21,10 +21,9 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden; /* Переполнение скрываем, дерево прокручиваем в контейнере */
+      overflow: hidden; /* Hide overflow; tree container will be scrollable */
     }
-
-    /* Заголовок */
+    /* Heading style */
     h1 {
       margin: 15px 0;
       font-size: 2.3rem;
@@ -33,8 +32,7 @@
       text-align: center;
       z-index: 2;
     }
-
-    /* Форма добавления задачи */
+    /* Task addition form container */
     .form-container {
       background: #4CAF50;
       padding: 10px;
@@ -68,11 +66,10 @@
       background-color: #ff4040;
       transform: scale(1.05);
     }
-
-    /* Контейнер для дерева */
+    /* Tree container styling */
     .tree-container {
       width: 100%;
-      height: calc(100vh - 160px); /* уменьшаем высоту, чтобы форма и заголовок не перекрывались */
+      height: calc(100vh - 160px); /* Adjust height so form and heading are not overlapped */
       background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
       background-size: 400% 400%;
       animation: floatBG 10s ease-in-out infinite;
@@ -80,7 +77,7 @@
       box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
       padding: 10px;
       margin: 10px 0;
-      overflow: auto; /* прокрутка */
+      overflow: auto; /* Scrollable container */
       position: relative;
       z-index: 2;
     }
@@ -89,8 +86,7 @@
       50%  { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
-    /* Кнопки управления задачами */
+    /* Button styles for task management */
     .btn {
       display: inline-block;
       margin: 4px;
@@ -113,8 +109,7 @@
     .btn-delete:hover {
       background: #d50000;
     }
-
-    /* Блок с кнопками у каждого узла */
+    /* Hidden button group for each node */
     .hidden-buttons {
       display: none;
       background: rgba(255,255,255,0.9);
@@ -141,8 +136,7 @@
       background: #d81b60;
       transform: scale(1.1);
     }
-
-    /* Формы добавления сабтаска / редактирования деталей */
+    /* Forms for adding subtask / editing details */
     .subtask-form, .detail-form {
       display: none;
       flex-direction: column;
@@ -172,8 +166,7 @@
     .subtask-form button:hover, .detail-form button:hover {
       background: #2575fc;
     }
-
-    /* Детальное описание задачи */
+    /* Task detail display */
     .detail-display {
       display: none;
       margin-top: 8px;
@@ -186,13 +179,11 @@
       max-width: 220px;
       white-space: pre-wrap;
     }
-
-    /* Линии (links) в D3 */
+    /* D3 links styling */
     .link {
-      stroke: #444;
-      stroke-width: 2.5;
       fill: none;
-      /* Лёгкая анимация прорисовки */
+      stroke-width: 2.5;
+      /* Line drawing animation */
       stroke-dasharray: 1000;
       stroke-dashoffset: 1000;
       animation: drawLink 1s forwards;
@@ -200,15 +191,13 @@
     @keyframes drawLink {
       to { stroke-dashoffset: 0; }
     }
-
-    /* Узлы (node) */
+    /* Node styling */
     .node circle {
-      r: 6; /* чуть меньше */
+      r: 6;
       fill: #ff5722;
       cursor: pointer;
       transition: fill 0.2s;
       pointer-events: all;
-      /* анимация появления */
       opacity: 0;
       animation: fadeInCircle 0.6s forwards;
     }
@@ -227,17 +216,17 @@
   {% include 'header.html' %}
   <h1>To-Do List: {{ todolist.name }}</h1>
 
-  <!-- Форма добавления задачи -->
+  <!-- Form for adding a new task -->
   <div class="form-container">
     <input type="text" id="task-title" placeholder="Enter a new task" required>
     <button id="add-task-btn" class="btn">Add Task</button>
   </div>
 
-  <!-- Контейнер для дерева -->
+  <!-- Container for the tree -->
   <div class="tree-container" id="trees-container"></div>
 
   <script>
-    // Получаем нужные URL'ы из Django
+    // Get necessary URLs from Django
     const todolistId = "{{ todolist.id|default:'' }}";
     const apiUrl = todolistId ? `{% url 'get_tasks_json' %}?todolist_id=${todolistId}` : null;
     const addTaskUrl = todolistId ? `{% url 'todolist_tasks' todolist.id %}` : null;
@@ -245,7 +234,10 @@
     const addSubtaskBaseUrl = `{% url 'add_subtask' 0 %}`.replace('/0', '');
     const addDetailBaseUrl = `{% url 'add_detail' 0 %}`.replace('/0', '');
 
-    // Функция загрузки дерева
+    // *** Добавляем базовый URL для complete_task ***
+    const completeTaskBaseUrl = "{% url 'complete_task' 0 %}".replace('/0', '');
+
+    // Function to load the tree data
     function loadTrees() {
       if (!apiUrl) {
         console.error("API URL is missing!");
@@ -257,7 +249,7 @@
         .catch(err => console.error("Error loading trees:", err));
     }
 
-    // Генерация иерархического номера узла (1, 1.1, 1.1.1, ...)
+    // Function to generate hierarchical numbering (e.g., 1, 1.1, 1.1.1, ...)
     function getHierarchyNumber(d) {
       const path = [];
       const ancestors = d.ancestors().reverse();
@@ -270,7 +262,7 @@
       return path.join('.') || '1';
     }
 
-    // Отрисовка деревьев
+    // Function to render trees with color-coded links based on task completion
     function renderTrees(data) {
       const treesContainer = document.getElementById("trees-container");
       treesContainer.innerHTML = "";
@@ -280,7 +272,7 @@
         treeDiv.className = "tree";
         treeDiv.style.position = "relative";
 
-        // Уменьшенная ширина/высота для более компактного вида
+        // Set SVG dimensions
         const svgWidth = 1800;
         const svgHeight = 900;
 
@@ -291,7 +283,7 @@
 
         const g = svg.append("g").attr("transform", "translate(50,50)");
 
-        // Настройка layout'а
+        // Setup tree layout
         const treeLayout = d3.tree()
           .size([svgHeight - 100, svgWidth - 200])
           .separation((a, b) => (a.parent === b.parent ? 1.5 : 2.5));
@@ -299,7 +291,7 @@
         const root = d3.hierarchy(treeData);
         treeLayout(root);
 
-        // Рисуем связи
+        // Draw links (branches) with color based on task completion
         g.selectAll(".link")
           .data(root.links())
           .enter()
@@ -308,9 +300,11 @@
           .attr("d", d3.linkHorizontal()
             .x(d => d.y)
             .y(d => d.x)
-          );
+          )
+          .attr("stroke", d => d.target.data.is_completed ? "#00FF00" : "#FF0000")
+          .attr("stroke-width", 3);
 
-        // Рисуем узлы
+        // Draw nodes
         const nodes = g.selectAll(".node")
           .data(root.descendants())
           .enter()
@@ -320,7 +314,7 @@
 
         nodes.append("circle");
 
-        // Добавляем текст (через foreignObject)
+        // Add text via foreignObject
         nodes.each(function(d) {
           d3.select(this)
             .append("foreignObject")
@@ -344,11 +338,15 @@
             .style("color", "#333")
             .html(() => {
               const numbering = getHierarchyNumber(d);
-              return numbering + " " + d.data.title;
+              let text = numbering + " " + d.data.title;
+              if (d.data.is_completed) {
+                text += " ✓";
+              }
+              return text;
             });
         });
 
-        // Клик на круг - показываем/скрываем кнопки
+        // On circle click, toggle button group visibility
         nodes.select("circle")
           .attr("r", 6)
           .on("click", function(event, d) {
@@ -362,7 +360,7 @@
             }
           });
 
-        // Добавляем контейнер кнопок для каждого узла
+        // Add a button group for each node
         nodes.each(function(d) {
           const buttonGroup = document.createElement("div");
           buttonGroup.id = `buttons-${d.data.id}`;
@@ -371,8 +369,11 @@
           buttonGroup.style.top = `${d.x + 10}px`;
 
           const detailText = d.data.detail ? d.data.detail : "";
+          const completeLabel = d.data.is_completed ? "Uncomplete" : "Complete";
+
           buttonGroup.innerHTML = `
             <button class="close-manage" onclick="closeButtonGroup(this)">×</button>
+            <button class="btn" onclick="completeTask(${d.data.id})">${completeLabel}</button>
             <button class="btn" onclick="toggleSubtaskForm(this)">Add</button>
             <button class="btn" onclick="toggleDetailForm(this)">Edit Detail</button>
             <button class="btn-delete" onclick="deleteTask(${d.data.id})">Delete</button>
@@ -394,12 +395,12 @@
       });
     }
 
-    // Закрыть блок кнопок
+    // Close the button group
     function closeButtonGroup(buttonElement) {
       buttonElement.parentElement.style.display = "none";
     }
 
-    // Добавление новой задачи
+    // Add new task
     document.getElementById("add-task-btn").addEventListener("click", () => {
       const title = document.getElementById("task-title").value.trim();
       if (title) {
@@ -417,7 +418,7 @@
       }
     });
 
-    // Показ/скрытие формы сабтаска
+    // Toggle subtask form
     function toggleSubtaskForm(buttonElement) {
       const subtaskForm = buttonElement.parentElement.querySelector(".subtask-form");
       if (subtaskForm.style.display === "none" || !subtaskForm.style.display) {
@@ -427,7 +428,7 @@
       }
     }
 
-    // Добавление сабтаска
+    // Submit subtask
     function submitSubtask(buttonElement, parentId) {
       const subtaskForm = buttonElement.closest(".subtask-form");
       const subtaskTitleInput = subtaskForm.querySelector(".subtask-title-input");
@@ -454,7 +455,7 @@
       }
     }
 
-    // Показ/скрытие формы деталей
+    // Toggle detail form
     function toggleDetailForm(buttonElement) {
       const detailForm = buttonElement.parentElement.querySelector(".detail-form");
       if (detailForm.style.display === "none" || !detailForm.style.display) {
@@ -464,7 +465,7 @@
       }
     }
 
-    // Сохранение деталей
+    // Submit detail
     function submitDetail(buttonElement, taskId) {
       const detailForm = buttonElement.closest(".detail-form");
       const detailTextarea = detailForm.querySelector(".detail-textarea");
@@ -488,7 +489,7 @@
       .catch(error => console.error("Error:", error));
     }
 
-    // Показ/скрытие деталей
+    // Toggle detail display
     function toggleDetailDisplay(buttonElement) {
       const detailDisplay = buttonElement.parentElement.querySelector(".detail-display");
       if (detailDisplay.style.display === "none" || !detailDisplay.style.display) {
@@ -500,7 +501,7 @@
       }
     }
 
-    // Удаление задачи
+    // Delete task
     function deleteTask(taskId) {
       fetch(`${deleteTaskBaseUrl}${taskId}/`, {
         method: "POST",
@@ -512,7 +513,36 @@
       .catch(err => console.error("Error deleting task:", err));
     }
 
-    // Инициализация дерева, если есть URL
+    // Complete or uncomplete task
+    function completeTask(taskId) {
+      // Вызываем не "/complete_task", а нашу переменную completeTaskBaseUrl
+      fetch(`${completeTaskBaseUrl}${taskId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}"
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(data => {
+            if (data.error) {
+              alert(data.error);
+            } else {
+              alert("Failed to complete/uncomplete the task.");
+            }
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data && data.success) {
+          loadTrees();
+        }
+      })
+      .catch(err => console.error("Error completing/uncompleting task:", err));
+    }
+
+    // Initialize tree if API URL is available
     if (apiUrl) {
       loadTrees();
     }

@@ -2,380 +2,438 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Create To-Do List</title>
-    <style>
-        /* Сброс и общие настройки */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Arial', sans-serif;
-            /* Градиент от белого к розоватому */
-            background: linear-gradient(135deg, #fff, #ffe5e5);
-            /* Теперь весь обычный текст будет тёмно-серым */
-            color: #333;
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
+  <meta charset="UTF-8">
+  <title>Create To-Do List</title>
+  <style>
+    /* Reset and global settings */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #fff, #ffe5e5);
+      color: #333;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
 
-        /* Плавающие круги */
-        .circle {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 0, 0, 0.15);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-            z-index: 1;
-        }
-        .circle:nth-child(1) {
-            top: 10%;
-            left: 20%;
-        }
-        .circle:nth-child(2) {
-            top: 60%;
-            left: 60%;
-        }
-        @keyframes float {
-            0%   { transform: translateY(0px); }
-            50%  { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
+    /* Floating circles */
+    .circle {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: rgba(255, 0, 0, 0.15);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+      z-index: 1;
+    }
+    .circle:nth-child(1) {
+      top: 10%;
+      left: 20%;
+    }
+    .circle:nth-child(2) {
+      top: 60%;
+      left: 60%;
+    }
+    @keyframes float {
+      0%   { transform: translateY(0px); }
+      50%  { transform: translateY(-20px); }
+      100% { transform: translateY(0px); }
+    }
 
-        /* Волна снизу */
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 150px;
-            background: #FF0000;
-            clip-path: ellipse(70% 100% at 50% 100%);
-            z-index: 1;
-        }
+    /* Red wave at the bottom */
+    .wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      background: #FF0000;
+      clip-path: ellipse(70% 100% at 50% 100%);
+      z-index: 1;
+    }
 
-        .content-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 80px 20px 40px;
-            text-align: center;
-            position: relative;
-            z-index: 2; /* Поверх кругов и волны */
-        }
+    /* Main container */
+    .content-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 20px 40px;
+      text-align: center;
+      position: relative;
+      z-index: 2; /* Above circles and wave */
+    }
 
-        /* Заголовок страницы */
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-            color: #FF0000; /* Красный заголовок */
-            animation: fadeIn 1s ease forwards;
-            opacity: 0;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
+    /* Page title */
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      color: #FF0000;
+      animation: fadeIn 1s ease forwards;
+      opacity: 0;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-        /* Форма создания списка */
-        form {
-            margin: 2rem auto;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 100%;
-        }
-        form input[type="text"] {
-            padding: 15px;
-            font-size: 1rem;
-            border: none;
-            border-radius: 10px;
-            width: 70%;
-            margin-right: 10px;
-            outline: none;
-            color: #333; /* Тёмный текст */
-        }
-        form input[type="text"]::placeholder {
-            color: #666;
-        }
-        form input[type="text"]:focus {
-            box-shadow: 0 0 6px rgba(255, 0, 0, 0.3);
-        }
-        form button {
-            padding: 15px 30px;
-            font-size: 1rem;
-            color: #fff;
-            background-color: #FF0000;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        form button:hover {
-            background-color: #cc0000;
-            transform: scale(1.05);
-        }
+    /* Create form */
+    form {
+      margin: 2rem auto;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 100%;
+    }
+    form input[type="text"] {
+      padding: 15px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      width: 70%;
+      margin-right: 10px;
+      outline: none;
+      color: #333;
+    }
+    form input[type="text"]::placeholder {
+      color: #666;
+    }
+    form input[type="text"]:focus {
+      box-shadow: 0 0 6px rgba(255, 0, 0, 0.3);
+    }
+    form button {
+      padding: 15px 30px;
+      font-size: 1rem;
+      color: #fff;
+      background-color: #FF0000;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    form button:hover {
+      background-color: #cc0000;
+      transform: scale(1.05);
+    }
 
-        /* Контейнер для списка To-Do */
-        .todolist-container {
-            margin-top: 2rem;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-            text-align: center;
-        }
-        .todolist-container h2 {
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            color: #FF0000;
-        }
+    /* Search bar */
+    .search-bar {
+      margin: 2rem auto 0;
+      max-width: 400px;
+      position: relative;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      outline: none;
+      box-shadow: 0 0 6px rgba(255, 0, 0, 0.1);
+    }
+    .search-bar input::placeholder {
+      color: #666;
+    }
 
-        /* Обёртка под каждый To-Do список */
-        .todolist-wrapper {
-            margin-bottom: 30px;
-        }
+    /* Container for to-do lists */
+    .todolist-container {
+      margin-top: 2rem;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .todolist-container h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: #FF0000;
+      text-align: center;
+    }
 
-        /* Ссылка-карточка списка */
-        .todolist {
-            display: block;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(5px);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            position: relative;
-            transition: transform 0.3s;
-            text-align: left;
-            text-decoration: none;
-            color: #333; /* Основной текст внутри карточки теперь тёмный */
-        }
-        .todolist:hover {
-            transform: translateY(-5px);
-        }
-        .todolist h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            color: #FF0000; /* Название списка красное */
-        }
-        .todolist span {
-            font-size: 0.9rem;
-            color: #555; /* Дата создания – более тёмный серый */
-        }
+    /* Responsive grid for to-do list cards */
+    .todolist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
 
-        /* Кнопки Rename / Delete */
-        .action-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 10px;
-            margin-bottom: 30px;
-        }
-        .rename-button, .delete-button {
-            padding: 10px 25px;
-            font-size: 1rem;
-            color: #fff;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .rename-button {
-            background-color: #FFA500;
-        }
-        .rename-button:hover {
-            background-color: #cc8400;
-        }
-        .delete-button {
-            background-color: #ff5252;
-        }
-        .delete-button:hover {
-            background-color: #d50000;
-        }
+    /* Card wrapper */
+    .todolist-wrapper {
+      position: relative;
+    }
 
-        /* Поле для переименования */
-        .rename-input {
-            display: none;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .rename-input input {
-            padding: 10px;
-            border: none;
-            border-radius: 10px;
-            margin-right: 10px;
-            font-size: 1rem;
-            width: 60%;
-            color: #333;
-        }
-        .rename-input input:focus {
-            box-shadow: 0 0 6px rgba(255, 0, 0, 0.3);
-        }
-        .rename-input button {
-            padding: 10px 20px;
-            background-color: #FF0000;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .rename-input button:hover {
-            background-color: #cc0000;
-        }
+    /* To-Do list card */
+    .todolist-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(5px);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+      color: #333;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 200px; /* Fixed height for uniform cards */
+    }
+    .todolist-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+    }
+    .todolist-card h3 {
+      margin-bottom: 8px;
+      font-size: 1.4rem;
+      color: #FF0000;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    .todolist-card span {
+      font-size: 0.9rem;
+      color: #555;
+    }
 
-        /* Дополнительный блок «Tips» */
-        .tips-block {
-            margin-top: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
-            padding: 20px;
-            border-radius: 15px;
-            max-width: 700px;
-            margin: 40px auto 0;
-            color: #333; /* Текст внутри подсказок теперь тёмный */
-        }
-        .tips-block h3 {
-            margin-bottom: 10px;
-            color: #FF0000; /* Заголовок блока – красный */
-        }
-        .tips-block ul {
-            list-style: none;
-            padding: 0;
-            text-align: left;
-        }
-        .tips-block li {
-            margin-bottom: 8px;
-        }
-    </style>
+    /* Action buttons container */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+    .rename-button, .delete-button {
+      padding: 8px 20px;
+      font-size: 0.9rem;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .rename-button {
+      background-color: #FFA500;
+    }
+    .rename-button:hover {
+      background-color: #cc8400;
+    }
+    .delete-button {
+      background-color: #ff5252;
+    }
+    .delete-button:hover {
+      background-color: #d50000;
+    }
+
+    /* Rename input form */
+    .rename-input {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .rename-input input {
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      margin-right: 10px;
+      font-size: 1rem;
+      width: 60%;
+      color: #333;
+    }
+    .rename-input input:focus {
+      box-shadow: 0 0 6px rgba(255, 0, 0, 0.3);
+    }
+    .rename-input button {
+      padding: 10px 20px;
+      background-color: #FF0000;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .rename-input button:hover {
+      background-color: #cc0000;
+    }
+
+    /* Tips block */
+    .tips-block {
+      margin-top: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 700px;
+      margin: 40px auto 0;
+      color: #333;
+    }
+    .tips-block h3 {
+      margin-bottom: 10px;
+      color: #FF0000;
+    }
+    .tips-block ul {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+    .tips-block li {
+      margin-bottom: 8px;
+    }
+  </style>
 </head>
 <body>
-    {% include 'header.html' %}
+  {% include 'header.html' %}
 
-    <!-- Плавающие круги -->
-    <div class="circle"></div>
-    <div class="circle"></div>
+  <!-- Floating circles -->
+  <div class="circle"></div>
+  <div class="circle"></div>
 
-    <!-- Красная волна снизу -->
-    <div class="wave"></div>
+  <!-- Red wave at the bottom -->
+  <div class="wave"></div>
 
-    <div class="content-container">
-        <h1>Create a New To-Do List</h1>
+  <div class="content-container">
+    <h1>Create a New To-Do List</h1>
 
-        <form method="POST">
-            {% csrf_token %}
-            <input type="text" name="todolist_name" placeholder="Enter To-Do List Name" required>
-            <button type="submit">Create</button>
-        </form>
+    <!-- Create form -->
+    <form method="POST">
+      {% csrf_token %}
+      <input type="text" name="todolist_name" placeholder="Enter To-Do List Name" required>
+      <button type="submit">Create</button>
+    </form>
 
-        <div class="todolist-container">
-            <h2>Your To-Do Lists</h2>
-            {% for todolist in todolists %}
-                <div class="todolist-wrapper" id="todolist-wrapper-{{ todolist.id }}">
-                    <a href="{% url 'todolist_tasks' todolist.id %}" class="todolist" id="todolist-{{ todolist.id }}">
-                        <h2>{{ todolist.name }}</h2>
-                        <span>Created at: {{ todolist.created_at }}</span>
-                    </a>
-                    <div class="action-buttons">
-                        <button class="rename-button" onclick="toggleRenameInput(event, {{ todolist.id }})">
-                            Rename
-                        </button>
-                        <button class="delete-button" onclick="deleteTodolist(event, {{ todolist.id }})">
-                            Delete
-                        </button>
-                    </div>
-                    <div class="rename-input" id="rename-input-{{ todolist.id }}">
-                        <input type="text" placeholder="Enter new name" id="rename-text-{{ todolist.id }}">
-                        <button onclick="renameTodolist(event, {{ todolist.id }})">Save</button>
-                    </div>
-                </div>
-            {% empty %}
-                <p>You don't have any To-Do Lists yet. Start by creating one!</p>
-            {% endfor %}
-        </div>
-
-        <!-- Дополнительный блок подсказок (Tips) -->
-        <div class="tips-block">
-            <h3>Tips for Effective To-Do Lists</h3>
-            <ul>
-                <li>✔ Break large tasks into smaller, manageable steps.</li>
-                <li>✔ Prioritize tasks to focus on what’s most important first.</li>
-                <li>✔ Set realistic deadlines and remind yourself periodically.</li>
-                <li>✔ Celebrate small wins to stay motivated.</li>
-                <li>✔ Regularly review and update your lists for maximum efficiency.</li>
-            </ul>
-        </div>
+    <!-- Search bar for filtering to-do lists by name -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search your To-Do Lists...">
     </div>
 
-    <script>
-        function deleteTodolist(event, todolistId) {
-            event.preventDefault();
-            fetch(`/todolist/delete_todolist/${todolistId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    document.getElementById(`todolist-wrapper-${todolistId}`).remove();
-                } else {
-                    console.error('Failed to delete To-Do List on the server.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
+    <!-- To-Do Lists Container -->
+    <div class="todolist-container">
+      <h2>Your To-Do Lists</h2>
+      <div class="todolist-grid" id="todolistGrid">
+        {% for todolist in todolists %}
+          <div class="todolist-wrapper" id="todolist-wrapper-{{ todolist.id }}">
+            <a href="{% url 'todolist_tasks' todolist.id %}" class="todolist-card" id="todolist-{{ todolist.id }}">
+              <h3>{{ todolist.name }}</h3>
+              <span>Created at: {{ todolist.created_at }}</span>
+              <!-- Action Buttons inside the card or below it?
+                   Here we keep them inside for a uniform height -->
+              <div class="action-buttons">
+                <button class="rename-button" onclick="toggleRenameInput(event, {{ todolist.id }})">
+                  Rename
+                </button>
+                <button class="delete-button" onclick="deleteTodolist(event, {{ todolist.id }})">
+                  Delete
+                </button>
+              </div>
+            </a>
+            <!-- Hidden rename input below the card -->
+            <div class="rename-input" id="rename-input-{{ todolist.id }}">
+              <input type="text" placeholder="Enter new name" id="rename-text-{{ todolist.id }}">
+              <button onclick="renameTodolist(event, {{ todolist.id }})">Save</button>
+            </div>
+          </div>
+        {% empty %}
+          <p>You don't have any To-Do Lists yet. Start by creating one!</p>
+        {% endfor %}
+      </div>
+    </div>
 
-        function toggleRenameInput(event, todolistId) {
-            event.preventDefault();
-            const renameInput = document.getElementById(`rename-input-${todolistId}`);
-            if (renameInput) {
-                renameInput.style.display =
-                    (renameInput.style.display === 'none' || !renameInput.style.display)
-                    ? 'block'
-                    : 'none';
-            }
-        }
+    <!-- Tips block -->
+    <div class="tips-block">
+      <h3>Tips for Effective To-Do Lists</h3>
+      <ul>
+        <li>✔ Break large tasks into smaller, manageable steps.</li>
+        <li>✔ Prioritize tasks to focus on what’s most important first.</li>
+        <li>✔ Set realistic deadlines and remind yourself periodically.</li>
+        <li>✔ Celebrate small wins to stay motivated.</li>
+        <li>✔ Regularly review and update your lists for maximum efficiency.</li>
+      </ul>
+    </div>
+  </div>
 
-        function renameTodolist(event, todolistId) {
-            event.preventDefault();
-            const newNameInput = document.getElementById(`rename-text-${todolistId}`);
-            if (newNameInput) {
-                const newName = newNameInput.value.trim();
-                if (newName) {
-                    fetch(`/todolist/rename_todolist/${todolistId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ name: newName })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            document.querySelector(`#todolist-${todolistId} h2`).textContent = newName;
-                            toggleRenameInput(event, todolistId);
-                        } else {
-                            console.error('Failed to rename To-Do List:', data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-                }
-            }
+  <script>
+    function deleteTodolist(event, todolistId) {
+      event.preventDefault();
+      fetch(`/todolist/delete_todolist/${todolistId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/json'
         }
-    </script>
+      })
+      .then(response => {
+        if (response.ok) {
+          document.getElementById(`todolist-wrapper-${todolistId}`).remove();
+        } else {
+          console.error('Failed to delete To-Do List on the server.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
+    function toggleRenameInput(event, todolistId) {
+      event.preventDefault();
+      const renameInput = document.getElementById(`rename-input-${todolistId}`);
+      if (renameInput) {
+        renameInput.style.display =
+          (renameInput.style.display === 'none' || !renameInput.style.display)
+          ? 'block'
+          : 'none';
+      }
+    }
+
+    function renameTodolist(event, todolistId) {
+      event.preventDefault();
+      const newNameInput = document.getElementById(`rename-text-${todolistId}`);
+      if (newNameInput) {
+        const newName = newNameInput.value.trim();
+        if (newName) {
+          fetch(`/todolist/rename_todolist/${todolistId}/`, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name: newName })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              document.querySelector(`#todolist-${todolistId} h3`).textContent = newName;
+              toggleRenameInput(event, todolistId);
+            } else {
+              console.error('Failed to rename To-Do List:', data.message);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+        }
+      }
+    }
+
+    // Client-side search
+    const searchInput = document.getElementById('searchInput');
+    const todolistGrid = document.getElementById('todolistGrid');
+
+    if (searchInput && todolistGrid) {
+      searchInput.addEventListener('input', () => {
+        const filter = searchInput.value.toLowerCase();
+        const wrappers = todolistGrid.querySelectorAll('.todolist-wrapper');
+        wrappers.forEach(wrapper => {
+          const title = wrapper.querySelector('h3');
+          if (title && title.textContent.toLowerCase().includes(filter)) {
+            wrapper.style.display = '';
+          } else {
+            wrapper.style.display = 'none';
+          }
+        });
+      });
+    }
+  </script>
 </body>
 </html>

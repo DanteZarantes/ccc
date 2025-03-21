@@ -1,0 +1,9 @@
+{% extends 'header.html' %}
+
+{% block content %}
+<div style="margin-top: 50px; text-align: center;">
+    <h1>Payment Successful</h1>
+    <p>Your subscription plan <strong>{{ plan|capfirst }}</strong> is now active!</p>
+    <a href="{% url 'create_todo' %}" style="color: #FF0000; text-decoration: none;">Go to Dashboard</a>
+</div>
+{% endblock %}
