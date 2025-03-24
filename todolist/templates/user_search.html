@@ -1,0 +1,34 @@
+{% include 'header.html' %}
+
+<div style="padding: 40px; position: relative; z-index: 2;">
+  <h1 style="color: #FF0000; margin-bottom: 20px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">
+    User Search
+  </h1>
+  <form method="get" action="{% url 'user_search' %}" style="margin-bottom: 20px;">
+    <input type="text"
+           name="q"
+           placeholder="Enter username..."
+           value="{{ query }}"
+           style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 200px;">
+    <button type="submit"
+            style="padding: 10px 20px; background: #FF0000; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: background 0.3s;">
+      Search
+    </button>
+  </form>
+
+  <ul style="list-style: none; padding-left: 0;">
+    {% for u in users_found %}
+      <li style="margin-bottom: 10px;">
+        <a href="{% url 'chat_view' u.username %}"
+           style="color: #FF0000; font-weight: bold; text-decoration: none; transition: color 0.3s;">
+          {{ u.username }}
+        </a>
+      </li>
+    {% empty %}
+      <li>No users found.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+</body>
+</html>

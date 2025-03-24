@@ -56,3 +56,15 @@ class ProfileForm(forms.ModelForm):
         self.fields['avatar'].widget.attrs.update({
             'class': 'form-control-file'
         })
+
+# Новая форма для отправки сообщений (чата)
+class MessageForm(forms.Form):
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'Type your message...',
+            'class': 'form-control'
+        }),
+        label="",
+        required=True
+    )

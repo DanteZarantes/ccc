@@ -96,4 +96,11 @@ urlpatterns = [
 
     # NEW: route for completing a task only if all subtasks are done
     path('complete_task/<int:task_id>/', views.complete_task, name='complete_task'),
+
+    # ===============================
+    # NEW: routes for User Search and Chat (Direct Messaging)
+    # ===============================
+    path('user_search/', views.user_search, name='user_search'),
+    path('dm/<str:username>/', views.chat_view, name='chat_view'),
+    path('dms/', views.chat_list, name='chat_list'),
 ]

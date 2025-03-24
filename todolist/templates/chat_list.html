@@ -1,0 +1,23 @@
+<!-- templates/chat_list.html -->
+{% include 'header.html' %}
+
+<div style="padding: 40px; position: relative; z-index: 2;">
+  <h1 style="color: #FF0000; margin-bottom: 20px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">
+    My Chats
+  </h1>
+  <ul style="list-style: none; padding-left: 0;">
+    {% for u in chat_users %}
+      <li style="margin-bottom: 10px;">
+        <a href="{% url 'chat_view' u.username %}"
+           style="color: #FF0000; font-weight: bold; text-decoration: none; transition: color 0.3s;">
+          {{ u.username }}
+        </a>
+      </li>
+    {% empty %}
+      <li>No active conversations.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+</body>
+</html>

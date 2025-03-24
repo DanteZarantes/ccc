@@ -1,43 +1,278 @@
-<!-- subscription_plans.html -->
-{% extends 'header.html' %}
+{% include 'header.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Choose Your Subscription Plan</title>
+  <style>
+    /* Сброс базовых отступов */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
 
-{% block content %}
-<div style="text-align:center; margin-top: 50px;">
-    <h1>Choose Your Subscription Plan</h1>
-    <p>We offer several options: Free, Business, and Premium.</p>
+    body {
+      background-color: #fff;
+      overflow-x: hidden; /* Чтобы не было горизонтального скролла */
+      position: relative;
+    }
 
-    <div style="display: flex; justify-content: center; gap: 50px; margin-top: 40px;">
-        <!-- Free Plan -->
-        <div style="border: 1px solid #ccc; padding: 20px; width: 200px;">
-            <h2>Free</h2>
-            <p>Basic features</p>
-            <p>Price: 0 ₽ / month</p>
-            <!-- No button needed for Free, as it's default -->
-        </div>
+    /********************************************************************
+      Шапка (header) + Навигация
+    ********************************************************************/
+    header {
+      position: relative;
+      z-index: 2; /* Хедер будет поверх верхней волны */
+    }
 
-        <!-- Business Plan -->
-        <div style="border: 1px solid #ccc; padding: 20px; width: 200px;">
-            <h2>Business</h2>
-            <p>Advanced features</p>
-            <p>Price: 499 ₽ / month</p>
-            <!-- Redirect to payment_options for 'business' plan -->
-            <a href="{% url 'payment_options' 'business' %}"
-               style="display:inline-block; padding:10px 20px; background-color:#FF0000; color:#fff; text-decoration:none; border-radius:5px; margin-top:10px;">
-                Choose Business
-            </a>
-        </div>
+    .navbar {
+      background-color: #FF0000; /* Красная полоса */
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      justify-content: space-between;
+    }
 
-        <!-- Premium Plan -->
-        <div style="border: 1px solid #ccc; padding: 20px; width: 200px;">
-            <h2>Premium</h2>
-            <p>All features + priority support</p>
-            <p>Price: 999 ₽ / month</p>
-            <!-- Redirect to payment_options for 'premium' plan -->
-            <a href="{% url 'payment_options' 'premium' %}"
-               style="display:inline-block; padding:10px 20px; background-color:#FF0000; color:#fff; text-decoration:none; border-radius:5px; margin-top:10px;">
-                Choose Premium
-            </a>
-        </div>
+    .navbar .icons-left,
+    .navbar .icons-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .navbar .icon {
+      width: 30px;
+      height: 30px;
+      background-color: #fff;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /********************************************************************
+      Верхняя волна (top-wave)
+    ********************************************************************/
+    .top-wave {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      background-color: #FF0000;
+      z-index: 1; /* Волна за хедером */
+      clip-path: ellipse(70% 100% at 50% 100%);
+    }
+
+    /********************************************************************
+      Заголовок (title-container)
+    ********************************************************************/
+    .title-container {
+      text-align: center;
+      margin: 40px 0 20px 0;
+    }
+
+    .title-container h1 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .title-container p {
+      font-size: 1rem;
+      color: #555;
+    }
+
+    /********************************************************************
+      Фоновые полупрозрачные круги
+    ********************************************************************/
+    .circle {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background-color: rgba(255, 0, 0, 0.1);
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .circle1 {
+      top: 200px;
+      left: 10%;
+    }
+
+    .circle2 {
+      top: 300px;
+      right: 15%;
+    }
+
+    .circle3 {
+      top: 500px;
+      left: 40%;
+    }
+
+    /********************************************************************
+      Контейнер с карточками планов
+    ********************************************************************/
+    .plans-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap; /* Перенос на новую строку на узких экранах */
+      margin: 20px 0 80px 0;
+      position: relative;
+      z-index: 2; /* Чтобы карточки были поверх кругов */
+    }
+
+    .plan-card {
+      background: #fff;
+      width: 280px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      padding: 30px 20px;
+      position: relative;
+    }
+
+    .plan-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: #FF0000;
+    }
+
+    .plan-card .price {
+      font-size: 1.2rem;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .plan-card .features {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      text-align: left;
+      margin-bottom: 20px;
+      color: #555;
+    }
+
+    .plan-card .features li {
+      margin-bottom: 5px;
+    }
+
+    .plan-card button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #FF0000;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .plan-card button:hover {
+      background-color: #cc0000;
+    }
+
+    /********************************************************************
+      Нижняя волна (bottom-wave)
+    ********************************************************************/
+    .bottom-wave {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 200px;
+      background-color: #FF0000;
+      z-index: 1;
+      clip-path: ellipse(70% 100% at 50% 0%);
+    }
+
+    /********************************************************************
+      Адаптивность
+    ********************************************************************/
+    @media (max-width: 768px) {
+      .plans-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Хедер -->
+  <header>
+    <div class="navbar">
+      <div class="icons-left">
+        <!-- Пример иконок -->
+        <div class="icon"></div>
+        <div class="icon"></div>
+        <div class="icon"></div>
+        <div class="icon"></div>
+      </div>
+      <div class="icons-right">
+        <!-- Пример иконок -->
+        <div class="icon"></div>
+        <div class="icon"></div>
+      </div>
     </div>
-</div>
-{% endblock %}
+  </header>
+
+  <!-- Верхняя волна -->
+  <div class="top-wave"></div>
+
+  <!-- Заголовок -->
+  <div class="title-container">
+    <h1>Choose Your Subscription Plan</h1>
+    <p>We also provide Free, Business, and Premium plans.</p>
+  </div>
+
+  <!-- Прозрачные круги на фоне -->
+  <div class="circle circle1"></div>
+  <div class="circle circle2"></div>
+  <div class="circle circle3"></div>
+
+  <!-- Карточки планов -->
+  <div class="plans-container">
+
+    <!-- Free Plan -->
+    <div class="plan-card">
+      <h2>Free</h2>
+      <p class="price">Current status / month</p>
+      <ul class="features">
+        <li>Base features</li>
+        <li>Basic support</li>
+      </ul>
+      <button>Choose Free</button>
+    </div>
+
+    <!-- Business Plan -->
+    <div class="plan-card">
+      <h2>Business</h2>
+      <p class="price">50 $ / month</p>
+      <ul class="features">
+        <li>Advanced features</li>
+        <li>Priority support</li>
+      </ul>
+      <button>Choose Business</button>
+    </div>
+
+    <!-- Premium Plan -->
+    <div class="plan-card">
+      <h2>Premium</h2>
+      <p class="price">100 $ / month</p>
+      <ul class="features">
+        <li>All features unlocked</li>
+        <li>24/7 VIP support</li>
+      </ul>
+      <button>Choose Premium</button>
+    </div>
+  </div>
+
+  <!-- Нижняя волна -->
+  <div class="bottom-wave"></div>
+
+</body>
+</html>

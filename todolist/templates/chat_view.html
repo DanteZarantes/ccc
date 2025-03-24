@@ -1,0 +1,98 @@
+<!-- templates/chat_view.html -->
+{% include 'header.html' %}
+
+<style>
+.chat-container {
+  position: relative;
+  z-index: 2;
+  padding: 40px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.message {
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 8px;
+  width: fit-content;
+  max-width: 80%;
+  animation: fadeIn 0.4s ease forwards;
+}
+.sent {
+  margin-left: auto;
+  background-color: #ffe5e5;
+  text-align: right;
+}
+.received {
+  margin-right: auto;
+  background-color: #ffffff;
+  text-align: left;
+}
+.timestamp {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Message form styling */
+.chat-form {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+.chat-form textarea {
+  flex: 1;
+  resize: none;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.chat-form button {
+  padding: 10px 20px;
+  background: #FF0000;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.chat-form button:hover {
+  background: #cc0000;
+}
+</style>
+
+<div class="chat-container">
+  <h1 style="color: #FF0000; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); margin-bottom: 20px;">
+    Chat with {{ other_user.username }}
+  </h1>
+  <div class="chat-messages">
+    {% for msg in messages %}
+      {% if msg.sender == request.user %}
+        <div class="message sent">
+          <p>{{ msg.content }}</p>
+          <span class="timestamp">{{ msg.timestamp|date:"H:i" }}</span>
+        </div>
+      {% else %}
+        <div class="message received">
+          <p>{{ msg.content }}</p>
+          <span class="timestamp">{{ msg.timestamp|date:"H:i" }}</span>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <form method="post" class="chat-form">
+    {% csrf_token %}
+    <textarea name="content" rows="2" placeholder="Type your message..."></textarea>
+    <button type="submit">Send</button>
+  </form>
+</div>
+
+</body>
+</html>

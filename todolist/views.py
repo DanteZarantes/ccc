@@ -5,7 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.http import JsonResponse
-from .models import Task, ToDoList, Project, Subscription, Payment  # Added Project model
+from django.db.models import Q
+from .models import Task, ToDoList, Project, Subscription, Payment, Message  # добавлена модель Message
 from .tokens import account_activation_token
 from .forms import CustomUserCreationForm, ProfileForm
 from django.views.decorators.csrf import csrf_exempt
@@ -787,3 +788,57 @@ def business_only_view(request):
     Example of a view only accessible to business/premium users.
     """
     return render(request, 'business_only.html', {})
+
+
+# ===============================
+# New Views for User Search and Chat
+# ===============================
+
+@login_required
+def user_search(request):
+    """
+    Allows users to search for other users by username.
+    """
+    query = request.GET.get('q', '')
+    users_found = []
+    if query:
+        users_found = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
+    return render(request, 'user_search.html', {'users_found': users_found, 'query': query})
+
+
+@login_required
+def chat_view(request, username):
+    """
+    Displays the chat (direct messaging) between the current user and the user with the given username.
+    """
+    other_user = get_object_or_404(User, username=username)
+    if other_user == request.user:
+        return redirect('user_search')
+    messages = Message.objects.filter(
+        Q(sender=request.user, recipient=other_user) |
+        Q(sender=other_user, recipient=request.user)
+    ).order_by('timestamp')
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        if content:
+            Message.objects.create(
+                sender=request.user,
+                recipient=other_user,
+                content=content
+            )
+        return redirect('chat_view', username=other_user.username)
+    return render(request, 'chat_view.html', {'messages': messages, 'other_user': other_user})
+
+
+@login_required
+def chat_list(request):
+    """
+    Displays a list of users with whom the current user has had conversations.
+    """
+    sent_to_ids = request.user.sent_messages.values_list('recipient_id', flat=True)
+    received_from_ids = request.user.received_messages.values_list('sender_id', flat=True)
+    user_ids = set(sent_to_ids).union(set(received_from_ids))
+    if request.user.id in user_ids:
+        user_ids.remove(request.user.id)
+    chat_users = User.objects.filter(id__in=user_ids)
+    return render(request, 'chat_list.html', {'chat_users': chat_users})

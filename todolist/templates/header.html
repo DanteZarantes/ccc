@@ -1,3 +1,4 @@
+<!-- templates/header.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,9 +13,11 @@
         body {
             font-family: Arial, sans-serif;
             overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
         }
 
-        /* Themes: light and dark */
+        /* Light and dark themes */
         .light {
             background: linear-gradient(135deg, #fff0f0, #ffffff);
             color: #333;
@@ -24,13 +27,61 @@
             color: #ddd;
         }
 
+        /* Floating circles (for decorative animation) */
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: float 6s ease-in-out infinite;
+            z-index: 1;
+        }
+        .circle:nth-child(1) {
+            width: 350px;
+            height: 350px;
+            top: 10%;
+            left: 10%;
+            background: #ff0000;
+        }
+        .circle:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            top: 60%;
+            left: 70%;
+            background: #ff0000;
+        }
+        @keyframes float {
+            0%   { transform: translateY(0); }
+            50%  { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* Wave at the bottom */
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            background: #FF0000;
+            clip-path: ellipse(70% 100% at 50% 100%);
+            z-index: 1;
+        }
+
+        /* Decorative red bar at top (optional) */
+        .decor-bar {
+            height: 5px;
+            background-color: #FF0000;
+            z-index: 2;
+            position: relative;
+        }
+
         /* Top navigation bar */
         nav {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            background-color: #2196F3; /* Blue top bar */
+            background-color: #FF0000;
             padding: 10px 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             display: flex;
@@ -40,7 +91,7 @@
         }
         /* Active navigation item */
         .active {
-            background-color: #0d47a1 !important;
+            background-color: #cc0000 !important;
             border: 2px solid #fff;
         }
         .left-buttons {
@@ -58,13 +109,16 @@
             color: #fff;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
+
+        /* Icon buttons now have a white border */
         .icon-button {
-            background-color: #1976D2;
+            background-color: #ff0000;
             padding: 10px 15px;
             border-radius: 4px;
+            border: 2px solid #fff; /* White border added */
         }
         .icon-button:hover {
-            background-color: #0d47a1;
+            background-color: #cc0000;
             transform: scale(1.05);
         }
         .icon-button svg {
@@ -83,10 +137,13 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             margin-left: 10px;
+            /* Optional: white border for login button */
+            /* border: 2px solid #fff; */
         }
         .login-button {
             background-color: #FF0000;
             color: #fff;
+            border: 2px solid #fff; /* White border */
         }
         .login-button:hover {
             background-color: #cc0000;
@@ -95,7 +152,7 @@
         .register-button {
             background-color: #fff;
             color: #FF0000;
-            border: 2px solid #FF0000;
+            border: 2px solid #FF0000; /* Keep red border for contrast */
         }
         .register-button:hover {
             background-color: #ffe6e6;
@@ -148,7 +205,7 @@
             fill: #333;
         }
 
-        /* Sidebar */
+        /* Sidebar with improved design */
         .sidebar {
             position: fixed;
             top: 0;
@@ -156,7 +213,8 @@
             height: 100%;
             width: 0;
             overflow-x: hidden;
-            background: rgba(17, 17, 17, 0.8);
+            /* Subtle gradient for better style */
+            background: linear-gradient(to bottom, rgba(30,30,30,0.9), rgba(0,0,0,0.9));
             backdrop-filter: blur(5px);
             transition: width 0.4s;
             z-index: 999;
@@ -179,34 +237,140 @@
             color: #FF0000;
             transform: scale(1.1);
         }
+
+        /* Sidebar links with white border for each "button" */
         .sidebar a {
             display: block;
-            padding: 15px 25px;
+            margin: 10px;
+            padding: 12px 18px;
             text-decoration: none;
             font-size: 18px;
-            color: #ccc;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            color: #fff;
+            border: 1px solid #fff; /* White border */
+            border-radius: 6px;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
         }
         .sidebar a:hover {
-            background-color: rgba(255, 0, 0, 0.2);
-            color: #fff;
+            background-color: rgba(255,255,255,0.2);
+            transform: scale(1.02);
         }
 
-        /* Main content */
+        /* Main content (container for pages) */
         .main-content {
-            margin-top: 80px;
+            margin-top: 80px; /* because nav is fixed */
             padding: 20px;
+            position: relative;
+            z-index: 2;
         }
 
-        /* Decorative red bar */
-        .decor-bar {
-            height: 5px;
+        /* ============================= */
+        /* Floating Chat Button and Panel */
+        /* ============================= */
+
+        .chat-float-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
             background-color: #FF0000;
+            border-radius: 50%;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            z-index: 2000;
+            border: 2px solid #fff; /* White border for chat button */
+        }
+        .chat-float-button:hover {
+            background-color: #cc0000;
+            transform: scale(1.05);
+        }
+        .chat-float-button svg {
+            width: 28px;
+            height: 28px;
+            fill: #fff;
+        }
+
+        .chat-panel {
+            position: fixed;
+            bottom: 100px; /* slightly above the float button */
+            right: 30px;
+            width: 300px;
+            max-height: 400px;
+            background: #fff;
+            border: 2px solid #FF0000;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            display: none; /* hidden by default */
+            flex-direction: column;
+            z-index: 2001;
+            animation: fadeIn 0.3s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .chat-panel-header {
+            background-color: #FF0000;
+            color: #fff;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chat-panel-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        .chat-panel-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 10px;
+            transition: color 0.3s ease;
+        }
+        .chat-panel-close:hover {
+            color: #ccc;
+        }
+        .chat-panel-body {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .chat-panel-body a {
+            display: inline-block;
+            padding: 10px;
+            background: #ffe5e5;
+            color: #FF0000;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background 0.3s ease, transform 0.2s ease;
+            border: 1px solid #fff; /* White border for links inside chat panel */
+        }
+        .chat-panel-body a:hover {
+            background: #ffcccc;
+            transform: scale(1.02);
         }
     </style>
 </head>
 <body class="{% if request.session.theme %}{{ request.session.theme }}{% else %}light{% endif %}">
-    <!-- Decorative red bar -->
+    <!-- Floating circles for decorative animation -->
+    <div class="circle"></div>
+    <div class="circle"></div>
+
+    <!-- Wave at the bottom -->
+    <div class="wave"></div>
+
+    <!-- Decorative top bar (thin red line) -->
     <div class="decor-bar"></div>
 
     <!-- Top navigation bar -->
@@ -252,7 +416,7 @@
                     </svg>
                 </button>
 
-                <!-- NEW BUTTON: Subscription with coin icon -->
+                <!-- Subscription Plans -->
                 <a href="{% url 'subscription_plans' %}"
                    class="icon-button {% if request.resolver_match.url_name == 'subscription_plans' or request.resolver_match.url_name == 'upgrade_account_view' %}active{% endif %}"
                    aria-label="Subscription Plans">
@@ -269,6 +433,7 @@
                     </svg>
                 </a>
 
+                <!-- Settings -->
                 <a href="{% url 'settings_view' %}"
                    class="icon-button {% if request.resolver_match.url_name == 'settings_view' %}active{% endif %}"
                    aria-label="Settings">
@@ -281,17 +446,16 @@
 
         <div class="profile-menu">
             {% if user.is_authenticated %}
-                <!-- AVATAR DROPDOWN -->
+                <!-- Avatar dropdown -->
                 <div class="avatar-dropdown" onclick="toggleAvatarDropdown()">
                     {% if user.avatar %}
                         <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-img">
                     {% else %}
-                        <!-- Fallback avatar if user has no avatar -->
                         <img src="https://via.placeholder.com/40" alt="Avatar" class="avatar-img">
                     {% endif %}
                     <div class="avatar-dropdown-menu" id="avatarDropdownMenu">
                         <a href="{% url 'profile_edit' %}">
-                            <!-- User Icon -->
+                            <!-- User icon -->
                             <svg viewBox="0 0 448 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M224 256A128 128 0 1 0 96 128a128 128 0 0 0 128 128zm89.6
                                 32.4-37.4-12.5-12.5-37.4C286.6 230.6 288 226.4 288 224a64 64 0 1 0-128
@@ -301,7 +465,7 @@
                             Profile
                         </a>
                         <a href="{% url 'logout' %}">
-                            <!-- Logout Icon -->
+                            <!-- Logout icon -->
                             <svg viewBox="0 0 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M497 273l-160 160c-9.4 9.4-24.6
                                 9.4-33.9 0l-22.6-22.6c-9.5-9.5-9.3-25
@@ -346,11 +510,44 @@
         <a href="{% url 'kanban_view' %}">Kanban Board</a>
         <a href="{% url 'task_filter_view' %}">Task Filter</a>
         <a href="{% url 'chat_page' %}">AI Assistant</a>
+        <!-- You can also add direct links to user_search or chat_list if desired -->
+        <a href="{% url 'user_search' %}">User Search</a>
+        <a href="{% url 'chat_list' %}">My Chats</a>
     </div>
 
+    <!-- Main content container -->
     <div class="main-content">
         {% block content %}{% endblock %}
     </div>
+
+    {% if user.is_authenticated %}
+    <!-- Floating Chat Button -->
+    <div class="chat-float-button" onclick="toggleChatPanel()" title="Open Chat">
+        <!-- Chat icon -->
+        <svg viewBox="0 0 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M256 32C114.6 32 0 125.1 0 240c0 49.6 24.4 95.3 64.9
+            131.4C60.2 425.1 38.5 471.6 38.1 472.5c-2.5 6.1 3.3 12.2
+            10.3 10.6c0.6-0.1 52.1-11.7 99.5-35.5c29.5 9.2 61.5 14.3
+            94.1 14.3c141.4 0 256-93.1 256-208C512 125.1 397.4 32 256
+            32zM256 336c-32.7 0-64.2-5.2-93.3-15.1l-8.7-2.9-7.7 4.3c-26.3
+            14.8-56 24.2-83 29.8c8.4-14.1 17-31.6 19.7-40.6l3.6-11.2-8.3-7.3C55.3
+            266.6 32 235.6 32 208c0-79.4 85.9-144 192-144s192 64.6 192 144S362.1
+            336 256 336z"/>
+        </svg>
+    </div>
+
+    <!-- Chat Panel -->
+    <div id="chat-panel" class="chat-panel">
+        <div class="chat-panel-header">
+            <h2>My Chats</h2>
+            <button class="chat-panel-close" onclick="toggleChatPanel()">×</button>
+        </div>
+        <div class="chat-panel-body">
+            <a href="{% url 'chat_list' %}">Open Chat List</a>
+            <a href="{% url 'user_search' %}">Search Users</a>
+        </div>
+    </div>
+    {% endif %}
 
     <script>
         function goBack() {
@@ -360,14 +557,22 @@
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('open');
         }
-
         function toggleAvatarDropdown() {
             const menu = document.getElementById('avatarDropdownMenu');
-            // Simple toggle: hide if open, show if closed
             if (menu.style.display === 'block') {
                 menu.style.display = 'none';
             } else {
                 menu.style.display = 'block';
+            }
+        }
+
+        // Show/hide the floating chat panel
+        function toggleChatPanel() {
+            const panel = document.getElementById('chat-panel');
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                panel.style.display = 'flex'; // show panel
+            } else {
+                panel.style.display = 'none'; // hide panel
             }
         }
     </script>
