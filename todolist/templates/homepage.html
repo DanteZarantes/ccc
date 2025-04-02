@@ -24,7 +24,7 @@
             height: 100vh;
             overflow: hidden;
             position: relative;
-            /* Фон-градиент от белого к очень светло-розовому (или используйте #FF0000 + #fff) */
+            /* Фон-градиент от белого к очень светло-розовому */
             background: linear-gradient(135deg, #ffffff, #ffe5e5);
         }
 
@@ -38,14 +38,18 @@
             padding: 20px;
         }
 
-        /* Заголовок */
+        /* Заголовок — заменяем color на градиент */
         h1 {
             font-size: 3.5rem;
             margin-bottom: 0.5rem;
             animation: fadeIn 2s ease forwards;
             opacity: 0;
-            color: #FF0000; /* Насыщенный красный заголовок */
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            /* Градиент для текста */
+            background: linear-gradient(135deg, #ff5f6d, #ffc371);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* Можно оставить или убрать тень — по вкусу */
+            /* text-shadow: 2px 2px 5px rgba(0,0,0,0.3); */
         }
 
         /* Подзаголовок / описание */
@@ -56,22 +60,23 @@
             opacity: 0;
         }
 
-        /* Кнопка Start */
+        /* Кнопка Start — заменяем background-color на градиент */
         .start-button {
             text-decoration: none;
             padding: 15px 40px;
             font-size: 1.2rem;
             color: white;
-            background-color: #FF0000; /* Насыщенно-красная кнопка */
+            background: linear-gradient(135deg, #ff5f6d, #ffc371);
             border-radius: 25px;
             transition: all 0.3s ease;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 2;
-            animation: pulse 2s infinite; /* Добавляем анимацию пульса */
+            animation: pulse 2s infinite; /* Анимация пульса */
         }
+        /* Ховер-эффект: используем другой (или тот же) градиент, можно чуть изменить направление */
         .start-button:hover {
-            background-color: #cc0000;
+            background: linear-gradient(135deg, #ffc371, #ff5f6d);
             transform: scale(1.05) rotate(1deg);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
@@ -105,10 +110,13 @@
             transform: translateY(-10px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
         }
+        /* Заголовки блоков — тоже делаем градиентный текст */
         .info-block h3 {
             font-size: 1.5rem;
             margin-bottom: 10px;
-            color: #FF0000; /* Красный заголовок */
+            background: linear-gradient(135deg, #ff5f6d, #ffc371);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .info-block p {
             font-size: 1rem;
@@ -123,7 +131,10 @@
         .extra-content h2 {
             font-size: 2rem;
             margin-bottom: 1rem;
-            color: #FF0000;
+            /* Градиентный текст */
+            background: linear-gradient(135deg, #ff5f6d, #ffc371);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             animation: fadeIn 2s ease forwards;
             opacity: 0;
         }
@@ -147,12 +158,12 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        /* Плавающие круги */
+        /* Плавающие круги — делаем полупрозрачный градиент */
         .circle {
             position: absolute;
             width: 400px;
             height: 400px;
-            background: rgba(255, 0, 0, 0.15);
+            background: linear-gradient(135deg, rgba(255, 95, 109, 0.15), rgba(255, 195, 113, 0.15));
             border-radius: 50%;
             animation: float 6s ease-in-out infinite;
             z-index: 1; /* Под контентом */
@@ -166,14 +177,14 @@
             left: 60%;
         }
 
-        /* Волна (wave) внизу экрана */
+        /* Волна (wave) внизу экрана — заменяем фон на градиент */
         .wave {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
             height: 180px;
-            background: #FF0000; /* Ярко-красная волна */
+            background: linear-gradient(135deg, #ff5f6d, #ffc371);
             clip-path: ellipse(70% 100% at 50% 100%);
             z-index: 1;
         }
@@ -239,7 +250,7 @@
         </div>
     </div>
 
-    <!-- Красная волна внизу страницы -->
+    <!-- Градиентная волна внизу страницы -->
     <div class="wave"></div>
 </body>
 </html>

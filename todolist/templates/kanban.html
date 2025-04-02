@@ -5,6 +5,10 @@
   <meta charset="UTF-8">
   <title>Kanban Board</title>
   <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #ff5f6d, #ffc371);
+      --primary-color: #ff5f6d;
+    }
     /* Базовый сброс */
     * {
       margin: 0;
@@ -27,7 +31,7 @@
       left: 10%;
       width: 300px;
       height: 300px;
-      background: rgba(255, 0, 0, 0.15);
+      background: linear-gradient(135deg, rgba(255,95,109,0.15), rgba(255,195,113,0.15));
       border-radius: 50%;
       z-index: 1;
       animation: floatCircle 6s ease-in-out infinite;
@@ -44,7 +48,7 @@
       left: 0;
       width: 100%;
       height: 150px;
-      background: #FF0000;
+      background: var(--primary-gradient);
       clip-path: ellipse(70% 100% at 50% 100%);
       z-index: 1;
     }
@@ -70,7 +74,9 @@
       text-align: center;
       margin-bottom: 15px;
       font-size: 2rem;
-      color: #FF0000;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
     }
     .kanban-intro {
@@ -87,7 +93,8 @@
       color: #333;
     }
     .task-count strong {
-      color: #FF0000;
+      /* Для инлайновых элементов оставляем базовый оттенок градиента */
+      color: var(--primary-color);
     }
     /* Раскладка доски с использованием CSS Grid */
     .board-container {
@@ -113,9 +120,12 @@
       text-align: center;
       margin-bottom: 15px;
       font-size: 1.3rem;
-      color: #FF0000;
-      border-bottom: 2px solid #FF0000;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       padding-bottom: 5px;
+      border-bottom: 2px solid transparent;
+      border-image: var(--primary-gradient) 1;
     }
     .task {
       background: #fff;
@@ -141,14 +151,14 @@
       text-decoration: line-through;
       color: #555;
     }
-    /* Кнопка удаления (опционально) */
+    /* Кнопка удаления */
     .task .delete-btn {
       position: absolute;
       top: 5px;
       right: 5px;
       background: transparent;
       border: none;
-      color: #FF0000;
+      color: var(--primary-color);
       font-weight: bold;
       cursor: pointer;
       display: none;
@@ -168,7 +178,7 @@
   <div class="main-content">
     <h2>Kanban Board</h2>
     <p class="kanban-intro">
-      Drag and drop tasks between columns to update their status. Click on a task for additional options..
+      Drag and drop tasks between columns to update their status. Click on a task for additional options.
     </p>
     <div class="task-count">
       <strong>To-Do:</strong> {{ tasks_todo.count }} &nbsp;|&nbsp;
@@ -225,13 +235,9 @@
       const taskElement = document.getElementById(data);
       const dropColumn = ev.target.closest('.column');
       if (!dropColumn) return;
-
       dropColumn.appendChild(taskElement);
-
-      // Определяем новый статус по id колонки
       const newStatus = dropColumn.id;
       const taskId = data.split('-')[1];
-
       fetch("{% url 'update_task_status' %}", {
         method: 'POST',
         headers: {
@@ -249,8 +255,6 @@
       .catch(error => console.error('Error:', error));
     }
     function deleteTask(taskId) {
-      // Если у вас есть серверный эндпоинт для удаления,
-      // здесь можно отправить AJAX-запрос. Пока просто удаляем элемент.
       const taskElement = document.getElementById('task-' + taskId);
       if (taskElement) {
         taskElement.remove();

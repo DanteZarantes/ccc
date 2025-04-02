@@ -8,11 +8,13 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --primary-color: #ff0000;
+      /* Используем градиент для основных элементов */
+      --primary-color: #ff5f6d; /* базовый цвет (начало градиента) */
+      --primary-gradient: linear-gradient(135deg, #ff5f6d, #ffc371);
       --secondary-color: #333;
       --background-color: #fff;
-      --accent-color: rgba(255, 0, 0, 0.6);
-      --accent-border: rgba(255, 0, 0, 1);
+      --accent-color: rgba(255, 95, 109, 0.6);
+      --accent-border: rgba(255, 195, 113, 1);
       --shadow-color: rgba(0, 0, 0, 0.2);
     }
     /* Reset and Base Styles */
@@ -38,7 +40,7 @@
       left: 10%;
       width: 300px;
       height: 300px;
-      background: rgba(255, 0, 0, 0.15);
+      background: rgba(255, 95, 109, 0.15);
       border-radius: 50%;
       z-index: 1;
       animation: floatCircle 6s ease-in-out infinite;
@@ -55,7 +57,7 @@
       left: 0;
       width: 100%;
       height: 180px;
-      background: var(--primary-color);
+      background: var(--primary-gradient);
       clip-path: ellipse(70% 100% at 50% 100%);
       z-index: 1;
     }
@@ -79,7 +81,10 @@
     }
     h2 {
       font-size: 2.5rem;
-      color: var(--primary-color);
+      /* Градиентный текст для заголовка */
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
       margin-bottom: 20px;
       text-align: center;
@@ -135,7 +140,10 @@
     .stat-card h3 {
       font-size: 1.5rem;
       margin-bottom: 10px;
-      color: var(--primary-color);
+      /* Градиентный текст для статистики */
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .stat-card p {
       font-size: 1.2rem;
@@ -194,7 +202,6 @@
     // Data passed from Django: labels and data_for_chart
     const labels = {{ labels|safe }};
     const dataForChart = {{ data_for_chart|safe }};
-
     const ctx = document.getElementById('tasksChart').getContext('2d');
     new Chart(ctx, {
       type: 'bar',

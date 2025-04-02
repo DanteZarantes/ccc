@@ -5,6 +5,10 @@
   <meta charset="UTF-8">
   <title>Create To-Do List</title>
   <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #ff5f6d, #ffc371);
+      --primary-color: #ff5f6d;
+    }
     /* Reset and global settings */
     * {
       margin: 0;
@@ -19,13 +23,12 @@
       overflow-x: hidden;
       position: relative;
     }
-
     /* Floating circles */
     .circle {
       position: absolute;
       width: 400px;
       height: 400px;
-      background: rgba(255, 0, 0, 0.15);
+      background: rgba(255, 95, 109, 0.15);
       border-radius: 50%;
       animation: float 6s ease-in-out infinite;
       z-index: 1;
@@ -43,19 +46,17 @@
       50%  { transform: translateY(-20px); }
       100% { transform: translateY(0px); }
     }
-
-    /* Red wave at the bottom */
+    /* Gradient wave at the bottom */
     .wave {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
       height: 150px;
-      background: #FF0000;
+      background: var(--primary-gradient);
       clip-path: ellipse(70% 100% at 50% 100%);
       z-index: 1;
     }
-
     /* Main container */
     .content-container {
       max-width: 1200px;
@@ -65,13 +66,15 @@
       position: relative;
       z-index: 2; /* Above circles and wave */
     }
-
     /* Page title */
     h1 {
       font-size: 3rem;
       margin-bottom: 1rem;
       text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-      color: #FF0000;
+      /* Градиентный текст */
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       animation: fadeIn 1s ease forwards;
       opacity: 0;
     }
@@ -79,7 +82,6 @@
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
     /* Create form */
     form {
       margin: 2rem auto;
@@ -105,23 +107,22 @@
       color: #666;
     }
     form input[type="text"]:focus {
-      box-shadow: 0 0 6px rgba(255, 0, 0, 0.3);
+      box-shadow: 0 0 6px rgba(255, 95, 109, 0.3);
     }
     form button {
       padding: 15px 30px;
       font-size: 1rem;
       color: #fff;
-      background-color: #FF0000;
+      background: var(--primary-gradient);
       border: none;
       border-radius: 15px;
       cursor: pointer;
       transition: all 0.3s;
     }
     form button:hover {
-      background-color: #cc0000;
+      background: linear-gradient(135deg, #ffc371, #ff5f6d);
       transform: scale(1.05);
     }
-
     /* Search bar */
     .search-bar {
       margin: 2rem auto 0;
@@ -135,12 +136,11 @@
       border: none;
       border-radius: 10px;
       outline: none;
-      box-shadow: 0 0 6px rgba(255, 0, 0, 0.1);
+      box-shadow: 0 0 6px rgba(255, 95, 109, 0.1);
     }
     .search-bar input::placeholder {
       color: #666;
     }
-
     /* Container for to-do lists */
     .todolist-container {
       margin-top: 2rem;
@@ -151,22 +151,22 @@
     .todolist-container h2 {
       font-size: 2rem;
       margin-bottom: 1.5rem;
-      color: #FF0000;
+      /* Градиентный текст */
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       text-align: center;
     }
-
     /* Responsive grid for to-do list cards */
     .todolist-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
-
     /* Card wrapper */
     .todolist-wrapper {
       position: relative;
     }
-
     /* To-Do list card */
     .todolist-card {
       background: rgba(255, 255, 255, 0.15);
@@ -189,14 +189,16 @@
     .todolist-card h3 {
       margin-bottom: 8px;
       font-size: 1.4rem;
-      color: #FF0000;
+      /* Градиентный текст */
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
     }
     .todolist-card span {
       font-size: 0.9rem;
       color: #555;
     }
-
     /* Action buttons container */
     .action-buttons {
       display: flex;
@@ -225,7 +227,6 @@
     .delete-button:hover {
       background-color: #d50000;
     }
-
     /* Rename input form */
     .rename-input {
       display: none;
@@ -242,11 +243,11 @@
       color: #333;
     }
     .rename-input input:focus {
-      box-shadow: 0 0 6px rgba(255, 0, 0, 0.3);
+      box-shadow: 0 0 6px rgba(255, 95, 109, 0.3);
     }
     .rename-input button {
       padding: 10px 20px;
-      background-color: #FF0000;
+      background: var(--primary-gradient);
       color: white;
       border: none;
       border-radius: 10px;
@@ -255,9 +256,8 @@
       transition: all 0.3s;
     }
     .rename-input button:hover {
-      background-color: #cc0000;
+      background: linear-gradient(135deg, #ffc371, #ff5f6d);
     }
-
     /* Tips block */
     .tips-block {
       margin-top: 40px;
@@ -271,7 +271,10 @@
     }
     .tips-block h3 {
       margin-bottom: 10px;
-      color: #FF0000;
+      /* Градиентный текст */
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .tips-block ul {
       list-style: none;
@@ -290,7 +293,7 @@
   <div class="circle"></div>
   <div class="circle"></div>
 
-  <!-- Red wave at the bottom -->
+  <!-- Gradient wave at the bottom -->
   <div class="wave"></div>
 
   <div class="content-container">
@@ -317,8 +320,7 @@
             <a href="{% url 'todolist_tasks' todolist.id %}" class="todolist-card" id="todolist-{{ todolist.id }}">
               <h3>{{ todolist.name }}</h3>
               <span>Created at: {{ todolist.created_at }}</span>
-              <!-- Action Buttons inside the card or below it?
-                   Here we keep them inside for a uniform height -->
+              <!-- Action Buttons inside the card -->
               <div class="action-buttons">
                 <button class="rename-button" onclick="toggleRenameInput(event, {{ todolist.id }})">
                   Rename

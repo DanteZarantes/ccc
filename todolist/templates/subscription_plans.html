@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>Choose Your Subscription Plan</title>
   <style>
-    /* Сброс базовых отступов */
+    /* Reset basic styles */
     * {
       margin: 0;
       padding: 0;
@@ -15,34 +15,31 @@
 
     body {
       background-color: #fff;
-      overflow-x: hidden; /* Чтобы не было горизонтального скролла */
+      overflow-x: hidden;
       position: relative;
     }
 
     /********************************************************************
-      Шапка (header) + Навигация
+      Header and Navigation
     ********************************************************************/
     header {
       position: relative;
-      z-index: 2; /* Хедер будет поверх верхней волны */
+      z-index: 2;
     }
-
     .navbar {
-      background-color: #FF0000; /* Красная полоса */
+      background: linear-gradient(135deg, #ff5f6d, #ffc371);
       height: 60px;
       display: flex;
       align-items: center;
       padding: 0 20px;
       justify-content: space-between;
     }
-
     .navbar .icons-left,
     .navbar .icons-right {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-
     .navbar .icon {
       width: 30px;
       height: 30px;
@@ -52,7 +49,7 @@
     }
 
     /********************************************************************
-      Верхняя волна (top-wave)
+      Top Wave
     ********************************************************************/
     .top-wave {
       position: absolute;
@@ -60,71 +57,65 @@
       left: 0;
       width: 100%;
       height: 120px;
-      background-color: #FF0000;
-      z-index: 1; /* Волна за хедером */
+      background: linear-gradient(135deg, #ff5f6d, #ffc371);
+      z-index: 1;
       clip-path: ellipse(70% 100% at 50% 100%);
     }
 
     /********************************************************************
-      Заголовок (title-container)
+      Title Container
     ********************************************************************/
     .title-container {
       text-align: center;
-      margin: 40px 0 20px 0;
+      margin: 40px 0 20px;
     }
-
     .title-container h1 {
       font-size: 2rem;
       color: #333;
       margin-bottom: 10px;
     }
-
     .title-container p {
       font-size: 1rem;
       color: #555;
     }
 
     /********************************************************************
-      Фоновые полупрозрачные круги
+      Background Circles
     ********************************************************************/
     .circle {
       position: absolute;
       width: 200px;
       height: 200px;
-      background-color: rgba(255, 0, 0, 0.1);
+      background: rgba(255, 95, 109, 0.1);
       border-radius: 50%;
       z-index: 0;
     }
-
     .circle1 {
       top: 200px;
       left: 10%;
     }
-
     .circle2 {
       top: 300px;
       right: 15%;
     }
-
     .circle3 {
       top: 500px;
       left: 40%;
     }
 
     /********************************************************************
-      Контейнер с карточками планов
+      Plans Container
     ********************************************************************/
     .plans-container {
       display: flex;
       justify-content: center;
       align-items: flex-start;
       gap: 20px;
-      flex-wrap: wrap; /* Перенос на новую строку на узких экранах */
-      margin: 20px 0 80px 0;
+      flex-wrap: wrap;
+      margin: 20px 0 80px;
       position: relative;
-      z-index: 2; /* Чтобы карточки были поверх кругов */
+      z-index: 2;
     }
-
     .plan-card {
       background: #fff;
       width: 280px;
@@ -134,19 +125,18 @@
       padding: 30px 20px;
       position: relative;
     }
-
     .plan-card h2 {
       font-size: 1.5rem;
       margin-bottom: 15px;
-      color: #FF0000;
+      background: linear-gradient(135deg, #ff5f6d, #ffc371);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-
     .plan-card .price {
       font-size: 1.2rem;
       color: #333;
       margin-bottom: 15px;
     }
-
     .plan-card .features {
       list-style: none;
       margin: 0;
@@ -155,28 +145,25 @@
       margin-bottom: 20px;
       color: #555;
     }
-
     .plan-card .features li {
       margin-bottom: 5px;
     }
-
     .plan-card button {
       padding: 12px 20px;
       border: none;
       border-radius: 5px;
-      background-color: #FF0000;
+      background: linear-gradient(135deg, #ff5f6d, #ffc371);
       color: #fff;
       font-size: 1rem;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: background 0.3s;
     }
-
     .plan-card button:hover {
-      background-color: #cc0000;
+      background: linear-gradient(135deg, #ffc371, #ff5f6d);
     }
 
     /********************************************************************
-      Нижняя волна (bottom-wave)
+      Bottom Wave
     ********************************************************************/
     .bottom-wave {
       position: fixed;
@@ -184,13 +171,13 @@
       left: 0;
       width: 100%;
       height: 200px;
-      background-color: #FF0000;
+      background: linear-gradient(135deg, #ff5f6d, #ffc371);
       z-index: 1;
       clip-path: ellipse(70% 100% at 50% 0%);
     }
 
     /********************************************************************
-      Адаптивность
+      Responsive
     ********************************************************************/
     @media (max-width: 768px) {
       .plans-container {
@@ -202,41 +189,38 @@
 </head>
 <body>
 
-  <!-- Хедер -->
+  <!-- Header -->
   <header>
     <div class="navbar">
       <div class="icons-left">
-        <!-- Пример иконок -->
         <div class="icon"></div>
         <div class="icon"></div>
         <div class="icon"></div>
         <div class="icon"></div>
       </div>
       <div class="icons-right">
-        <!-- Пример иконок -->
         <div class="icon"></div>
         <div class="icon"></div>
       </div>
     </div>
   </header>
 
-  <!-- Верхняя волна -->
+  <!-- Top Wave -->
   <div class="top-wave"></div>
 
-  <!-- Заголовок -->
+  <!-- Title -->
   <div class="title-container">
     <h1>Choose Your Subscription Plan</h1>
     <p>We also provide Free, Business, and Premium plans.</p>
   </div>
 
-  <!-- Прозрачные круги на фоне -->
+  <!-- Background Circles -->
   <div class="circle circle1"></div>
   <div class="circle circle2"></div>
   <div class="circle circle3"></div>
 
-  <!-- Карточки планов -->
+  <!-- Plans Cards -->
   <div class="plans-container">
-
     <!-- Free Plan -->
     <div class="plan-card">
       <h2>Free</h2>
@@ -247,7 +231,6 @@
       </ul>
       <button>Choose Free</button>
     </div>
-
     <!-- Business Plan -->
     <div class="plan-card">
       <h2>Business</h2>
@@ -258,7 +241,6 @@
       </ul>
       <button>Choose Business</button>
     </div>
-
     <!-- Premium Plan -->
     <div class="plan-card">
       <h2>Premium</h2>
@@ -271,7 +253,7 @@
     </div>
   </div>
 
-  <!-- Нижняя волна -->
+  <!-- Bottom Wave -->
   <div class="bottom-wave"></div>
 
 </body>

@@ -1,34 +1,63 @@
 {% include 'header.html' %}
 
-<div style="padding: 40px; position: relative; z-index: 2;">
-  <h1 style="color: #FF0000; margin-bottom: 20px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">
-    User Search
-  </h1>
-  <form method="get" action="{% url 'user_search' %}" style="margin-bottom: 20px;">
-    <input type="text"
-           name="q"
-           placeholder="Enter username..."
-           value="{{ query }}"
-           style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 200px;">
-    <button type="submit"
-            style="padding: 10px 20px; background: #FF0000; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: background 0.3s;">
-      Search
-    </button>
-  </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Search</title>
+  <style>
+    /* Градиент для текстового заголовка и кнопок */
+    .gradient-text {
+      background: linear-gradient(135deg, #ff5f6d, #ffc371);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .gradient-button {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #ff5f6d, #ffc371);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .gradient-button:hover {
+      background: linear-gradient(135deg, #ffc371, #ff5f6d);
+    }
+    input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div style="padding: 40px; position: relative; z-index: 2;">
+    <h1 class="gradient-text" style="margin-bottom: 20px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">
+      User Search
+    </h1>
+    <form method="get" action="{% url 'user_search' %}" style="margin-bottom: 20px;">
+      <input type="text"
+             name="q"
+             placeholder="Enter username..."
+             value="{{ query }}">
+      <button type="submit" class="gradient-button">Search</button>
+    </form>
 
-  <ul style="list-style: none; padding-left: 0;">
-    {% for u in users_found %}
-      <li style="margin-bottom: 10px;">
-        <a href="{% url 'chat_view' u.username %}"
-           style="color: #FF0000; font-weight: bold; text-decoration: none; transition: color 0.3s;">
-          {{ u.username }}
-        </a>
-      </li>
-    {% empty %}
-      <li>No users found.</li>
-    {% endfor %}
-  </ul>
-</div>
-
+    <ul style="list-style: none; padding-left: 0;">
+      {% for u in users_found %}
+        <li style="margin-bottom: 10px;">
+          <a href="{% url 'chat_view' u.username %}"
+             class="gradient-text"
+             style="font-weight: bold; text-decoration: none; transition: color 0.3s;">
+            {{ u.username }}
+          </a>
+        </li>
+      {% empty %}
+        <li>No users found.</li>
+      {% endfor %}
+    </ul>
+  </div>
 </body>
 </html>

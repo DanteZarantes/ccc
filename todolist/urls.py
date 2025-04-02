@@ -21,14 +21,8 @@ urlpatterns = [
 
     # Task detail update
     path('add_detail/<int:task_id>/', views.add_detail, name='add_detail'),
-
-    # =======================
-    # To-Do list management
-    # =======================
-    # (Если вы хотите оставить возможность удалять/переименовывать ToDoList, то оставьте строки ниже.
-    #  Если хотите полностью убрать - удалите их совсем или закомментируйте.)
-    # path('delete_todolist/<int:todolist_id>/', views.delete_todolist, name='delete_todolist'),
-    # path('rename_todolist/<int:todolist_id>/', views.rename_todolist, name='rename_todolist'),
+    path('delete_todolist/<int:todolist_id>/', views.delete_todolist, name='delete_todolist'),
+    path('rename_todolist/<int:todolist_id>/', views.rename_todolist, name='rename_todolist'),
 
     # Profile editing
     path('profile/edit/', views.profile_edit, name='profile_edit'),
